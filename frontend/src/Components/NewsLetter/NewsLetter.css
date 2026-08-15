@@ -1,0 +1,75 @@
+.newsletter-b2b {
+  width: 90%;
+  max-width: 1240px;
+  margin: 60px auto;
+  padding: 50px 40px;
+  box-sizing: border-box;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.newsletter-b2b h2 {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.newsletter-b2b p {
+  font-size: 14px;
+  color: #64748b;
+  max-width: 600px;
+  margin: 0;
+}
+
+.newsletter-form {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 540px;
+  margin-top: 10px;
+}
+
+.newsletter-form input {
+  flex: 1;
+  height: 50px;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  outline: none;
+  font-size: 14px;
+}
+
+.newsletter-form input:focus {
+  border-color: #2563eb;
+}
+
+.newsletter-form button {
+  padding: 0 24px;
+  height: 50px;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.newsletter-form button:hover {
+  background: #2563eb;
+}
+
+@media (max-width: 600px) {
+  .newsletter-form {
+    flex-direction: column;
+  }
+}

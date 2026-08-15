@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "name": "Tracksuits",
+    "slug": "tracksuits",
+    "description": "Wholesale Performance Fleece & Polyester Tracksuits",
+    "subcategories": [
+      "Tech Fleece",
+      "Slim Fit",
+      "Team Sets"
+    ],
+    "banner": "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    "id": 2,
+    "name": "Sweatshirts",
+    "slug": "sweatshirts",
+    "description": "Heavyweight 350 GSM Pullovers & Streetwear Hoodies",
+    "subcategories": [
+      "French Terry",
+      "Oversized",
+      "Zip-Up"
+    ],
+    "banner": "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    "id": 3,
+    "name": "Activewear",
+    "slug": "activewear",
+    "description": "Pro Compression Sets & Gym Tops",
+    "subcategories": [
+      "Leggings",
+      "Compression Sets",
+      "Sports Bras"
+    ],
+    "banner": "https://images.unsplash.com/photo-1550026593-f369f98df0af?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    "id": 4,
+    "name": "T-Shirts",
+    "slug": "tshirts",
+    "description": "Team Athletic Jerseys & Sublimation Kits",
+    "subcategories": [
+      "Interlock Mesh",
+      "V-Neck",
+      "Training Jerseys"
+    ],
+    "banner": "https://images.unsplash.com/photo-1553775282-20af80779df7?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    "id": 5,
+    "name": "Trousers",
+    "slug": "trousers",
+    "description": "Wholesale Athletic Joggers & Sweatpants (10% OFF Special)",
+    "subcategories": [
+      "Ribbed Cuffs",
+      "Zipper Pockets",
+      "Tri-Blend"
+    ],
+    "banner": "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    "id": 6,
+    "name": "Outerwear",
+    "slug": "outerwear",
+    "description": "Softshell Jackets & Weatherproof Vests",
+    "subcategories": [
+      "Padded Vests",
+      "Windbreakers",
+      "Softshell"
+    ],
+    "banner": "https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=2070&auto=format&fit=crop"
+  }
+]

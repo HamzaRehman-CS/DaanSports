@@ -1,0 +1,23 @@
+[
+  {
+    "code": "GOCART20",
+    "type": "percent",
+    "discount": 20,
+    "minOrder": 50,
+    "description": "20% Off GoCart Launch Deal"
+  },
+  {
+    "code": "DAAN50",
+    "type": "fixed",
+    "discount": 50,
+    "minOrder": 200,
+    "description": "$50 Off Bulk Wholesale Orders"
+  },
+  {
+    "code": "WELCOME10",
+    "type": "percent",
+    "discount": 10,
+    "minOrder": 0,
+    "description": "10% Welcome Discount"
+  }
+]

@@ -1,0 +1,363 @@
+.gocart-product-details-container {
+  padding: 2.5rem 1.5rem;
+  margin: 0 auto;
+  color: var(--text-silver);
+}
+
+.gocart-pd-hero {
+  display: flex;
+  gap: 3.5rem;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+  }
+}
+
+/* Gallery Dark Styling */
+.gocart-pd-gallery {
+  display: flex;
+  gap: 1.2rem;
+
+  @media (max-width: 640px) {
+    flex-direction: column-reverse;
+  }
+}
+
+.gocart-pd-thumbs {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.gocart-thumb-box {
+  width: 90px;
+  height: 90px;
+  background: var(--bg-dark-card);
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1.5px solid var(--border-dark);
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.gocart-thumb-box:hover,
+.gocart-thumb-box.active-thumb {
+  border-color: #FFFFFF;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.gocart-thumb-box img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+}
+
+.gocart-main-img-box {
+  width: 460px;
+  height: 460px;
+  background: radial-gradient(circle at 50% 50%, #1E2638 0%, #131924 100%);
+  border: 1px solid var(--border-dark);
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: var(--shadow-dark);
+
+  @media (max-width: 640px) {
+    width: 100%;
+    height: 320px;
+  }
+}
+
+.gocart-main-img {
+  max-width: 340px;
+  max-height: 340px;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+}
+
+.gocart-main-img:hover {
+  transform: scale(1.05);
+}
+
+.gocart-moq-chip {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #000000;
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Info Section */
+.gocart-pd-info {
+  flex: 1;
+}
+
+.gocart-pd-category {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--brand-green);
+  letter-spacing: 0.06em;
+  margin-bottom: 0.4rem;
+}
+
+.gocart-pd-title {
+  font-size: 2.3rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.2;
+  margin-bottom: 0.6rem;
+}
+
+.gocart-pd-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: 1.5rem;
+}
+
+.reviews-text {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-left: 0.5rem;
+}
+
+.gocart-pd-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+}
+
+.price-current {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.price-old {
+  font-size: 1.2rem;
+  color: var(--text-dim);
+  text-decoration: line-through;
+}
+
+.unit-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.gocart-savings-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 201, 80, 0.15);
+  color: var(--brand-green);
+  border: 1px solid rgba(0, 201, 80, 0.3);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  margin-bottom: 1.8rem;
+}
+
+.gocart-specs-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+}
+
+.spec-pill {
+  background: var(--bg-dark-card);
+  border: 1px solid var(--border-dark);
+  color: var(--text-silver);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.6rem;
+}
+
+/* Options */
+.gocart-options-group {
+  margin-bottom: 1.5rem;
+}
+
+.gocart-options-group label {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+
+.color-chips-flex,
+.size-chips-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.color-chip-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--bg-dark-card);
+  border: 1.5px solid var(--border-dark);
+  color: var(--text-silver);
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  &:hover,
+  &.selected {
+    border-color: #FFFFFF;
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.12);
+  }
+}
+
+.size-chip-box {
+  width: 46px;
+  height: 46px;
+  border: 1.5px solid var(--border-dark);
+  border-radius: 0.75rem;
+  background: var(--bg-dark-card);
+  color: var(--text-silver);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  &:hover,
+  &.selected {
+    border-color: #FFFFFF;
+    background: #FFFFFF;
+    color: #0A0D14;
+    font-weight: 800;
+  }
+}
+
+.gocart-action-row {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.pd-buy-btn {
+  padding: 1rem 3.2rem;
+  font-size: 1.05rem;
+}
+
+.gocart-divider {
+  border: none;
+  border-top: 1px solid var(--border-dark);
+  margin: 1.8rem 0;
+}
+
+.gocart-trust-list p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+
+/* Tabs Section */
+.gocart-pd-tabs-section {
+  margin-top: 4rem;
+}
+
+.tabs-header {
+  display: flex;
+  border-bottom: 1.5px solid var(--border-dark);
+  gap: 2rem;
+  margin-bottom: 1.8rem;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0.75rem 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.tab-btn.active {
+  color: #FFFFFF;
+}
+
+.tab-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1.5px;
+  left: 0;
+  width: 100%;
+  height: 2.5px;
+  background: #FFFFFF;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.tabs-content {
+  color: var(--text-silver);
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.desc-bullets {
+  margin-top: 1.2rem;
+  padding-left: 1.2rem;
+}
+
+.desc-bullets li {
+  margin-bottom: 0.5rem;
+}
+
+/* Reviews List */
+.tab-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.review-card {
+  display: flex;
+  gap: 1.2rem;
+  background: var(--bg-dark-card);
+  border: 1px solid var(--border-dark);
+  padding: 1.4rem;
+  border-radius: 1.2rem;
+}
+
+.review-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: #0A0D14;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.review-comment {
+  font-style: italic;
+  margin: 0.5rem 0;
+  color: #FFFFFF;
+}
+
+.review-author {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

@@ -1,0 +1,94 @@
+.descriptionbox-b2b {
+  width: 100%;
+  max-width: 1300px;
+  margin: 60px auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+.descriptionbox-navigator {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.descriptionbox-nav-box {
+  padding: 14px 24px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.descriptionbox-nav-box.active, .descriptionbox-nav-box:hover {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.descriptionbox-content {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-top: none;
+  border-radius: 0 0 18px 18px;
+  padding: 30px 40px;
+}
+
+.tab-pane h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+}
+
+.tab-pane p {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.specs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.specs-list li {
+  font-size: 14px;
+  color: #334155;
+  background: #ffffff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.specs-list li strong {
+  color: #2563eb;
+}
+
+.branding-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.brand-capability {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+  color: #475569;
+}
+
+.brand-capability strong {
+  color: #0f172a;
+  display: block;
+  margin-bottom: 4px;
+}

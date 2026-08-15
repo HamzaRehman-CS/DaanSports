@@ -1,0 +1,228 @@
+.gocart-navbar-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg-dark-main);
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.gocart-announcement-bar {
+  background: #000000;
+  color: var(--text-silver);
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.4rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.announcement-content {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.badge-news {
+  background: var(--brand-green);
+  color: #FFFFFF;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.announcement-features {
+  display: flex;
+  gap: 1.5rem;
+  color: var(--text-muted);
+}
+
+/* Main Navbar Glassmorphism */
+.gocart-nav-container {
+  background: rgba(10, 13, 20, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.gocart-nav-main {
+  margin: 0 auto;
+  padding: 0.9rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.gocart-brand-logo {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  letter-spacing: -0.02em;
+}
+
+.logo-brand-accent {
+  color: var(--brand-green);
+}
+
+.logo-dot {
+  color: var(--brand-green);
+  font-size: 1.8rem;
+}
+
+.gocart-logo-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.35rem;
+  margin-left: 0.4rem;
+  text-transform: uppercase;
+}
+
+/* Navigation Links */
+.gocart-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.8rem;
+
+  @media (max-width: 1024px) {
+    display: none;
+  }
+}
+
+.nav-link-item {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-decoration: none;
+  position: relative;
+  padding: 0.4rem 0;
+  transition: all 0.25s ease;
+}
+
+.nav-link-item:hover,
+.nav-link-item.active {
+  color: #FFFFFF;
+}
+
+.nav-link-item.active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--brand-green);
+  border-radius: 2px;
+  box-shadow: 0 0 8px var(--brand-green);
+}
+
+.track-orders {
+  color: var(--brand-green);
+  font-weight: 700;
+}
+
+/* Search Pill */
+.gocart-search-pill {
+  display: flex;
+  align-items: center;
+  background: var(--bg-dark-card);
+  border: 1px solid var(--border-dark);
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  gap: 0.5rem;
+  width: 240px;
+  transition: all 0.25s ease;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.gocart-search-pill:focus-within {
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+  width: 280px;
+}
+
+.gocart-search-pill input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.85rem;
+  color: #FFFFFF;
+  width: 100%;
+}
+
+.gocart-search-pill input::placeholder {
+  color: var(--text-dim);
+}
+
+/* Actions */
+.gocart-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.gocart-cart-widget {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-dark);
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  transition: all 0.25s ease;
+}
+
+.gocart-cart-widget:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.cart-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cart-count-badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: var(--brand-green);
+  color: #FFFFFF;
+  font-size: 0.65rem;
+  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px var(--brand-green);
+}
+
+.cart-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}

@@ -1,0 +1,153 @@
+.gocart-footer-wrapper {
+  background: var(--bg-dark-main);
+  border-top: 1px solid var(--border-dark);
+  margin-top: 5rem;
+  color: var(--text-silver);
+}
+
+/* Specs / Value Props Bar */
+.gocart-specs-bar {
+  background: var(--bg-dark-card);
+  border-bottom: 1px solid var(--border-dark);
+  padding: 2.5rem 1.5rem;
+}
+
+.gocart-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin: 0 auto;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 500px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.spec-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.spec-icon {
+  font-size: 2.2rem;
+}
+
+.spec-item h4 {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 0.2rem;
+}
+
+.spec-item p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Main Footer Content */
+.gocart-footer-main {
+  padding: 4.5rem 1.5rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 3.5rem;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (max-width: 550px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.footer-col h4 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 1.4rem;
+  letter-spacing: 0.02em;
+}
+
+.footer-col ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.footer-col ul li a,
+.footer-col ul li {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.footer-col ul li a:hover {
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.footer-about-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 1.2rem 0 1.6rem 0;
+  max-width: 380px;
+}
+
+.newsletter-box {
+  display: flex;
+  gap: 0.6rem;
+  max-width: 400px;
+}
+
+.newsletter-box input {
+  flex: 1;
+  padding: 0.75rem 1.2rem;
+  border-radius: 9999px;
+  background: var(--bg-dark-card);
+  border: 1px solid var(--border-dark);
+  color: #FFFFFF;
+  outline: none;
+  font-size: 0.85rem;
+}
+
+.contact-line {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+
+/* Footer Bottom Bar */
+.gocart-footer-bottom {
+  background: #000000;
+  color: var(--text-muted);
+  padding: 1.4rem 1.5rem;
+  font-size: 0.82rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.bottom-bar-content {
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    gap: 0.8rem;
+    text-align: center;
+  }
+}
+
+.bottom-links {
+  display: flex;
+  gap: 1.5rem;
+}

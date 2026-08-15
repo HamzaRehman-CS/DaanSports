@@ -1,0 +1,160 @@
+.loginsignup-b2b {
+  width: 100%;
+  min-height: 80vh;
+  background: #f8fafc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  box-sizing: border-box;
+}
+
+.loginsignup-container {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.b2b-auth-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-brand-badge {
+  font-size: 11px;
+  font-weight: 800;
+  color: #00C950;
+  letter-spacing: 1.5px;
+}
+
+.b2b-auth-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.b2b-auth-header p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.auth-method-switcher {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 9999px;
+  gap: 4px;
+}
+
+.method-tab {
+  padding: 8px 12px;
+  border-radius: 9999px;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.method-tab.active {
+  background: #FFFFFF;
+  color: #0F172A;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.clerk-auth-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.clerk-toggle-row {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.clerk-toggle-row span {
+  color: #00C950;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.loginsignup-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.loginsignup-fields input {
+  height: 50px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  outline: none;
+  font-size: 14px;
+  background: #f8fafc;
+}
+
+.loginsignup-fields input:focus {
+  border-color: #00C950;
+  background: #ffffff;
+}
+
+.auth-submit-btn {
+  height: 52px;
+  border-radius: 9999px;
+  background: #0F172A;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+  transition: all 0.2s ease;
+}
+
+.auth-submit-btn:hover {
+  background: #00C950;
+}
+
+.loginsignup-login {
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
+  margin: 0;
+}
+
+.loginsignup-login span {
+  color: #00C950;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.loginsignup-agree {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.loginsignup-agree input {
+  margin-top: 3px;
+}

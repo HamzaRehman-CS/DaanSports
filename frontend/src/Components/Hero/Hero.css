@@ -1,0 +1,246 @@
+.gocart-hero-wrapper {
+  background: var(--bg-dark-main);
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
+  overflow: hidden;
+}
+
+.gocart-hero-section {
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Deck Sliding Card Container */
+.gocart-hero-deck-card {
+  position: relative;
+  background: radial-gradient(circle at 70% 30%, #1E2638 0%, #131924 60%, #0A0D14 100%);
+  border: 1px solid var(--border-dark);
+  border-radius: 1.8rem;
+  padding: 3.5rem 3rem;
+  display: flex;
+  align-items: center;
+  gap: 3.5rem;
+  min-height: 520px;
+  box-shadow: var(--shadow-dark);
+  overflow: hidden;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    padding: 2.5rem 2rem;
+    gap: 2rem;
+  }
+}
+
+.slide-animation-next {
+  animation: slideDeckNext 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.slide-animation-prev {
+  animation: slideDeckPrev 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hero Content Left */
+.hero-text-content {
+  flex: 1.2;
+  z-index: 2;
+}
+
+.hero-top-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+}
+
+.hero-main-heading {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.2rem;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+
+  @media (max-width: 768px) {
+    font-size: 2.2rem;
+  }
+}
+
+.hero-subtext {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 1.8rem;
+  max-width: 580px;
+}
+
+.hero-pricing-line {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 2.2rem;
+  flex-wrap: wrap;
+}
+
+.price-tag-highlight {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-dark);
+  padding: 0.5rem 1.2rem;
+  border-radius: var(--radius-pill);
+}
+
+.turnaround-note {
+  font-size: 0.88rem;
+  color: var(--brand-green);
+  font-weight: 600;
+}
+
+.hero-cta-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-btn-large {
+  padding: 0.9rem 2.2rem;
+  font-size: 1rem;
+}
+
+.hero-value-props-bar {
+  display: flex;
+  gap: 1.8rem;
+  border-top: 1px solid var(--border-dark);
+  padding-top: 1.5rem;
+
+  @media (max-width: 640px) {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+}
+
+.prop-item {
+  font-size: 0.85rem;
+  color: var(--text-silver);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 500;
+}
+
+/* Image Showcase Right */
+.hero-image-showcase {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.image-frame-bg {
+  width: 360px;
+  height: 360px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-dark);
+  border-radius: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+
+  @media (max-width: 640px) {
+    width: 280px;
+    height: 280px;
+  }
+}
+
+.hero-display-img {
+  max-width: 270px;
+  max-height: 270px;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.floating-moq-chip {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: #000000;
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: floatCard 4s infinite ease-in-out;
+}
+
+/* Deck Controls */
+.deck-arrow-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+.deck-arrow-btn:hover {
+  background: #FFFFFF;
+  color: #0A0D14;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.deck-arrow-prev {
+  left: 16px;
+}
+
+.deck-arrow-next {
+  right: 16px;
+}
+
+.deck-dots-container {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.6rem;
+  z-index: 10;
+}
+
+.deck-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.deck-dot.active {
+  width: 28px;
+  border-radius: 12px;
+  background: #FFFFFF;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}

@@ -1,0 +1,32 @@
+{
+  "announcementText": "🏭 DIRECT FACTORY MANUFACTURER — Wholesale Custom Sportswear & Bulk Athletic Wear (MOQ 50-100 Pcs)",
+  "heroSlides": [
+    {
+      "id": 1,
+      "badgeText": "DIRECTORY FACTORY B2B SUPPLIER",
+      "title": "Pro Fleece Tracksuits & Custom Apparel",
+      "subtitle": "Engineered for sports clubs, brands, and global distributors. Minimum order 50 - 100 pcs with full OEM branding.",
+      "bgImage": "http://localhost:4000/images/slide1.jpg",
+      "primaryCtaText": "Explore Tracksuits Catalog ➔",
+      "primaryCtaLink": "/tracksuits"
+    },
+    {
+      "id": 2,
+      "badgeText": "HEAVYWEIGHT STREETWEAR FLEECE",
+      "title": "Bulk 350 GSM Hoodies & Sweatshirts",
+      "subtitle": "High-density screen printing, puff print, and custom woven neck label integrations.",
+      "bgImage": "http://localhost:4000/images/slide2.jpg",
+      "primaryCtaText": "Explore Sweatshirts ➔",
+      "primaryCtaLink": "/sweatshirts"
+    },
+    {
+      "id": 3,
+      "badgeText": "PERFORMANCE TEAMWEAR",
+      "title": "Sublimated Jerseys & Activewear",
+      "subtitle": "4-way stretch compression wear and athletic mesh jerseys for global sports teams.",
+      "bgImage": "http://localhost:4000/images/slide3.jpg",
+      "primaryCtaText": "Explore Activewear ➔",
+      "primaryCtaLink": "/activewear"
+    }
+  ]
+}

@@ -1,9 +1,14 @@
 .admin-dashboard-b2b {
+  box-sizing: border-box;
+  width: 100%;
   padding: 30px;
-  flex: 1;
-  background-color: #0f172a;
-  color: #fff;
-  min-height: 100vh;
+  margin: 0 auto;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #1e293b;
 }
 
 .dashboard-header {
@@ -11,27 +16,27 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 28px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid #e2e8f0;
   padding-bottom: 18px;
 }
 
 .dashboard-header h2 {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
   margin: 0 0 6px 0;
-  color: #fff;
+  color: #0f172a;
 }
 
 .dashboard-header p {
-  color: #94a3b8;
-  font-size: 13px;
+  color: #64748b;
+  font-size: 14px;
   margin: 0;
 }
 
 .dashboard-status-badge {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  color: #10b981;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #059669;
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 12px;
@@ -46,8 +51,8 @@
 }
 
 .metric-card {
-  background-color: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 22px;
   display: flex;
@@ -58,32 +63,34 @@
 
 .metric-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: #2563eb;
 }
 
 .metric-icon {
   font-size: 32px;
-  background: rgba(255, 255, 255, 0.05);
+  background: #ffffff;
   padding: 10px;
   border-radius: 10px;
+  border: 1px solid #e2e8f0;
 }
 
 .metric-content {
   display: flex;
-  flex-col;
+  flex-direction: column;
 }
 
 .metric-label {
   font-size: 12px;
-  color: #94a3b8;
+  color: #64748b;
   text-transform: uppercase;
   font-weight: 600;
   letter-spacing: 0.05em;
+}
 
 .metric-value {
   font-size: 24px;
   font-weight: 800;
-  color: #fff;
+  color: #0f172a;
   margin: 4px 0;
 }
 
@@ -93,8 +100,8 @@
 }
 
 .dashboard-shortcuts-section {
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 32px;
@@ -103,6 +110,7 @@
 .dashboard-shortcuts-section h3 {
   font-size: 18px;
   font-weight: 700;
+  color: #0f172a;
   margin: 0 0 18px 0;
 }
 
@@ -113,21 +121,21 @@
 }
 
 .shortcut-card {
-  background: #0f172a;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
   padding: 16px;
   display: flex;
   align-items: center;
   gap: 14px;
   text-decoration: none;
-  color: #fff;
+  color: #0f172a;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .shortcut-card:hover {
-  background: #141e33;
-  border-color: #ef4444;
+  background: #eff6ff;
+  border-color: #2563eb;
 }
 
 .shortcut-icon {
@@ -142,14 +150,14 @@
 
 .shortcut-card p {
   font-size: 12px;
-  color: #94a3b8;
+  color: #64748b;
   margin: 0;
   line-height: 1.4;
 }
 
 .dashboard-recent-orders {
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 24px;
 }
@@ -162,7 +170,7 @@
 }
 
 .view-all-link {
-  color: #ef4444;
+  color: #2563eb;
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -181,18 +189,19 @@
   padding: 12px 14px;
   text-align: left;
   font-size: 13px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .orders-mini-table th {
-  color: #94a3b8;
+  color: #64748b;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  background: #f8fafc;
 }
 
 .text-red {
-  color: #ef4444;
+  color: #dc2626;
 }
 
 .block-sub {
@@ -207,23 +216,23 @@
   font-size: 11px;
   font-weight: 600;
   display: inline-block;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: #f1f5f9;
+  color: #334155;
 }
 
 .status-tag.pending, .status-tag.pending-review {
-  background: rgba(245, 158, 11, 0.2);
-  color: #f59e0b;
+  background: #fef3c7;
+  color: #d97706;
 }
 
 .status-tag.shipped, .status-tag.delivered {
-  background: rgba(16, 185, 129, 0.2);
-  color: #10b981;
+  background: #d1fae5;
+  color: #059669;
 }
 
 .dashboard-loading, .empty-state-box {
   padding: 40px;
   text-align: center;
-  color: #94a3b8;
+  color: #64748b;
   font-size: 14px;
 }

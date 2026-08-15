@@ -15,17 +15,19 @@ const Admin = () => {
   return (
     <div className='admin'>
       <Sidebar/>
-      <Routes>
-        <Route path='/' element={<Dashboard/>}/>
-        <Route path='/dashboard' element={<Dashboard/>}/>
-        <Route path='/add-product' element={<AddProduct/>}/>
-        <Route path='/list-product' element={<ProductList/>}/>
-        <Route path='/categories' element={<CategoryManager/>}/>
-        <Route path='/banners' element={<BannerManager/>}/>
-        <Route path='/orders' element={<OrderManager/>}/>
-        <Route path='/vouchers' element={<VoucherManager/>}/>
-        <Route path='/cms' element={<SiteManager/>}/>
-      </Routes>
+      <main className="admin-main-container">
+        <Routes>
+          <Route path='/' element={<Dashboard/>}/>
+          <Route path='/dashboard' element={<Dashboard/>}/>
+          <Route path='/add-product' element={<AddProduct/>}/>
+          <Route path='/list-product' element={<ProductList/>}/>
+          <Route path='/categories' element={<CategoryManager/>}/>
+          <Route path='/banners' element={<BannerManager/>}/>
+          <Route path='/orders' element={<OrderManager/>}/>
+          <Route path='/vouchers' element={<VoucherManager/>}/>
+          <Route path='/cms' element={<SiteManager/>}/>
+        </Routes>
+      </main>
     </div>
   );
 };

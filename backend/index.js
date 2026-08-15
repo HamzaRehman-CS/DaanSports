@@ -46,17 +46,23 @@ const orderLimiter = rateLimit({
 app.use("/all-products", apiLimiter);
 app.use("/create-order", orderLimiter);
 
-// File Storage Paths
-const uploadDir = path.join(__dirname, 'upload', 'images');
-const dataFilePath = path.join(__dirname, 'upload', 'products.json');
-const ordersFilePath = path.join(__dirname, 'upload', 'orders.json');
-const cmsFilePath = path.join(__dirname, 'upload', 'cms.json');
-const vouchersFilePath = path.join(__dirname, 'upload', 'vouchers.json');
-const categoriesFilePath = path.join(__dirname, 'upload', 'categories.json');
-const bannersFilePath = path.join(__dirname, 'upload', 'banners.json');
+const os = require('os');
+const baseDir = process.env.VERCEL ? os.tmpdir() : path.join(__dirname, 'upload');
 
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+const uploadDir = path.join(baseDir, 'images');
+const dataFilePath = path.join(baseDir, 'products.json');
+const ordersFilePath = path.join(baseDir, 'orders.json');
+const cmsFilePath = path.join(baseDir, 'cms.json');
+const vouchersFilePath = path.join(baseDir, 'vouchers.json');
+const categoriesFilePath = path.join(baseDir, 'categories.json');
+const bannersFilePath = path.join(baseDir, 'banners.json');
+
+try {
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+    }
+} catch (e) {
+    console.warn("Storage directory creation warning:", e.message);
 }
 
 // Default Categories Seed
@@ -247,7 +253,14 @@ const defaultCmsData = {
   ]
 };
 
-// JSON Database Helpers
+// In-Memory Database Stores (Guarantees zero-crash execution on read-only serverless environments)
+let inMemoryProducts = [...defaultSeedProducts];
+let inMemoryCategories = [...defaultCategories];
+let inMemoryBanners = { ...defaultBanners };
+let inMemoryOrders = [];
+let inMemoryCms = { ...defaultCmsData };
+let inMemoryVouchers = [...defaultVouchers];
+
 const getJsonProducts = () => {
     try {
         if (fs.existsSync(dataFilePath)) {
@@ -256,17 +269,17 @@ const getJsonProducts = () => {
             if (Array.isArray(data) && data.length > 0) return data;
         }
     } catch (e) {
-        console.error("JSON read error:", e);
+        console.warn("JSON product read warning:", e.message);
     }
-    fs.writeFileSync(dataFilePath, JSON.stringify(defaultSeedProducts, null, 2), 'utf8');
-    return defaultSeedProducts;
+    return inMemoryProducts;
 };
 
 const saveJsonProducts = (prods) => {
+    inMemoryProducts = prods;
     try {
         fs.writeFileSync(dataFilePath, JSON.stringify(prods, null, 2), 'utf8');
     } catch (e) {
-        console.error("JSON write error:", e);
+        console.warn("JSON product write warning (cached in memory):", e.message);
     }
 };
 
@@ -277,17 +290,17 @@ const getJsonCategories = () => {
             return JSON.parse(raw);
         }
     } catch (e) {
-        console.error("Categories read error:", e);
+        console.warn("Categories read warning:", e.message);
     }
-    fs.writeFileSync(categoriesFilePath, JSON.stringify(defaultCategories, null, 2), 'utf8');
-    return defaultCategories;
+    return inMemoryCategories;
 };
 
 const saveJsonCategories = (cats) => {
+    inMemoryCategories = cats;
     try {
         fs.writeFileSync(categoriesFilePath, JSON.stringify(cats, null, 2), 'utf8');
     } catch (e) {
-        console.error("Categories write error:", e);
+        console.warn("Categories write warning (cached in memory):", e.message);
     }
 };
 
@@ -298,17 +311,17 @@ const getJsonBanners = () => {
             return JSON.parse(raw);
         }
     } catch (e) {
-        console.error("Banners read error:", e);
+        console.warn("Banners read warning:", e.message);
     }
-    fs.writeFileSync(bannersFilePath, JSON.stringify(defaultBanners, null, 2), 'utf8');
-    return defaultBanners;
+    return inMemoryBanners;
 };
 
 const saveJsonBanners = (bannersData) => {
+    inMemoryBanners = bannersData;
     try {
         fs.writeFileSync(bannersFilePath, JSON.stringify(bannersData, null, 2), 'utf8');
     } catch (e) {
-        console.error("Banners write error:", e);
+        console.warn("Banners write warning (cached in memory):", e.message);
     }
 };
 
@@ -319,16 +332,17 @@ const getJsonOrders = () => {
             return JSON.parse(raw);
         }
     } catch (e) {
-        console.error("Orders read error:", e);
+        console.warn("Orders read warning:", e.message);
     }
-    return [];
+    return inMemoryOrders;
 };
 
 const saveJsonOrders = (orders) => {
+    inMemoryOrders = orders;
     try {
         fs.writeFileSync(ordersFilePath, JSON.stringify(orders, null, 2), 'utf8');
     } catch (e) {
-        console.error("Orders write error:", e);
+        console.warn("Orders write warning (cached in memory):", e.message);
     }
 };
 
@@ -339,17 +353,17 @@ const getJsonCms = () => {
             return JSON.parse(raw);
         }
     } catch (e) {
-        console.error("CMS read error:", e);
+        console.warn("CMS read warning:", e.message);
     }
-    fs.writeFileSync(cmsFilePath, JSON.stringify(defaultCmsData, null, 2), 'utf8');
-    return defaultCmsData;
+    return inMemoryCms;
 };
 
 const saveJsonCms = (cmsData) => {
+    inMemoryCms = cmsData;
     try {
         fs.writeFileSync(cmsFilePath, JSON.stringify(cmsData, null, 2), 'utf8');
     } catch (e) {
-        console.error("CMS write error:", e);
+        console.warn("CMS write warning (cached in memory):", e.message);
     }
 };
 
@@ -361,17 +375,17 @@ const getJsonVouchers = () => {
             if (Array.isArray(data)) return data;
         }
     } catch (e) {
-        console.error("Vouchers read error:", e);
+        console.warn("Vouchers read warning:", e.message);
     }
-    fs.writeFileSync(vouchersFilePath, JSON.stringify(defaultVouchers, null, 2), 'utf8');
-    return defaultVouchers;
+    return inMemoryVouchers;
 };
 
 const saveJsonVouchers = (vouchers) => {
+    inMemoryVouchers = vouchers;
     try {
         fs.writeFileSync(vouchersFilePath, JSON.stringify(vouchers, null, 2), 'utf8');
     } catch (e) {
-        console.error("Vouchers write error:", e);
+        console.warn("Vouchers write warning (cached in memory):", e.message);
     }
 };
 
@@ -384,21 +398,22 @@ app.get("/", (req,res) => {
     });
 });
 
-// Image Storage Engine
-const storage = multer.diskStorage({
-    destination: uploadDir,
-    filename: (req,file,cb) => {
-        const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '');
-        return cb(null, `${file.fieldname}_${Date.now()}_${sanitizedName}`);
-    }
-});
-const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
+// Image Storage Engine (Memory Storage for Serverless Compatibility)
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 app.use('/images', express.static(uploadDir));
 
-app.post("/upload", upload.single('product'), (req,res) => {
-    if (!req.file) return res.status(400).json({ success: 0, error: "No image uploaded" });
-    res.json({ success: 1, image_url: `http://localhost:${port}/images/${req.file.filename}` });
+app.post("/upload", upload.single('product'), (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ success: 0, error: "No image file uploaded" });
+        const mimeType = req.file.mimetype || 'image/png';
+        const base64Url = `data:${mimeType};base64,${req.file.buffer.toString('base64')}`;
+        res.json({ success: 1, image_url: base64Url });
+    } catch (err) {
+        console.error("Upload Route Error:", err);
+        res.status(500).json({ success: 0, error: err.message });
+    }
 });
 
 // Product API Endpoints

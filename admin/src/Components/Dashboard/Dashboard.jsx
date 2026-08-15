@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import { Link } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -11,10 +12,10 @@ const Dashboard = () => {
 
   useEffect(() => {
     Promise.all([
-      fetch("http://localhost:4000/all-products").then(res => res.json()).catch(() => []),
-      fetch("http://localhost:4000/all-orders").then(res => res.json()).catch(() => []),
-      fetch("http://localhost:4000/categories").then(res => res.json()).catch(() => []),
-      fetch("http://localhost:4000/vouchers").then(res => res.json()).catch(() => [])
+      fetch(`${API_URL}/all-products`).then(res => res.json()).catch(() => []),
+      fetch(`${API_URL}/all-orders`).then(res => res.json()).catch(() => []),
+      fetch(`${API_URL}/categories`).then(res => res.json()).catch(() => []),
+      fetch(`${API_URL}/vouchers`).then(res => res.json()).catch(() => [])
     ]).then(([prods, ords, cats, vous]) => {
       if (Array.isArray(prods)) setProducts(prods);
       if (Array.isArray(ords)) setOrders(ords);

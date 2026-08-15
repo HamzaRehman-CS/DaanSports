@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './OrderManager.css';
+import { API_URL } from '../../config';
 
 const OrderManager = () => {
   const [orders, setOrders] = useState([]);
@@ -8,7 +9,7 @@ const OrderManager = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/all-orders");
+      const res = await fetch(`${API_URL}/all-orders`);
       const data = await res.json();
       setOrders(data);
     } catch (err) {
@@ -24,7 +25,7 @@ const OrderManager = () => {
 
   const handleStatusChange = async (orderId, newStatus, currentTracking, currentNotes) => {
     try {
-      const res = await fetch("http://localhost:4000/update-order-status", {
+      const res = await fetch(`${API_URL}/update-order-status`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({

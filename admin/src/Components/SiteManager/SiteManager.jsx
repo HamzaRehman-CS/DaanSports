@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './SiteManager.css'
+import { API_URL } from '../../config';
 
 const SiteManager = () => {
   const [cms, setCms] = useState({
@@ -11,7 +12,7 @@ const SiteManager = () => {
   const fetchCms = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/cms");
+      const res = await fetch(`${API_URL}/cms`);
       const data = await res.json();
       setCms(data);
     } catch (err) {
@@ -40,7 +41,7 @@ const SiteManager = () => {
     try {
       let formData = new FormData();
       formData.append('product', file);
-      let res = await fetch("http://localhost:4000/upload", {
+      let res = await fetch(`${API_URL}/upload`, {
         method: 'POST',
         headers: { Accept: 'application/json' },
         body: formData
@@ -57,7 +58,7 @@ const SiteManager = () => {
 
   const saveCmsChanges = async () => {
     try {
-      const res = await fetch("http://localhost:4000/update-cms", {
+      const res = await fetch(`${API_URL}/update-cms`, {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify(cms)

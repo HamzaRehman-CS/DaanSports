@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './VoucherManager.css';
+import { API_URL } from '../../config';
 
 const VoucherManager = () => {
   const [vouchers, setVouchers] = useState([]);
@@ -11,7 +12,7 @@ const VoucherManager = () => {
 
   const fetchVouchers = async () => {
     try {
-      const res = await fetch("http://localhost:4000/vouchers");
+      const res = await fetch(`${API_URL}/vouchers`);
       const data = await res.json();
       setVouchers(data);
     } catch (err) {
@@ -28,7 +29,7 @@ const VoucherManager = () => {
     if (!code.trim()) return alert("Please enter a voucher code.");
 
     try {
-      const res = await fetch("http://localhost:4000/create-voucher", {
+      const res = await fetch(`${API_URL}/create-voucher`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -55,7 +56,7 @@ const VoucherManager = () => {
     if (!window.confirm(`Delete voucher ${voucherCode}?`)) return;
 
     try {
-      const res = await fetch("http://localhost:4000/delete-voucher", {
+      const res = await fetch(`${API_URL}/delete-voucher`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({ code: voucherCode })

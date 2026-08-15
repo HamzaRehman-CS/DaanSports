@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './AddProduct.css';
 import upload_area from '../../assets/upload_area.svg';
+import { API_URL } from '../../config';
 
 const AddProduct = () => {
   const [primaryImage, setPrimaryImage] = useState(null);
@@ -24,7 +25,7 @@ const AddProduct = () => {
   });
 
   useEffect(() => {
-    fetch("http://localhost:4000/categories")
+    fetch(`${API_URL}/categories`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
@@ -62,7 +63,7 @@ const AddProduct = () => {
       let primaryFormData = new FormData();
       primaryFormData.append('product', primaryImage);
 
-      let uploadRes = await fetch("http://localhost:4000/upload", {
+      let uploadRes = await fetch(`${API_URL}/upload`, {
         method: 'POST',
         headers: { Accept: 'application/json' },
         body: primaryFormData
@@ -100,7 +101,7 @@ const AddProduct = () => {
         images: allImageUrls
       };
 
-      let saveRes = await fetch("http://localhost:4000/add-product", {
+      let saveRes = await fetch(`${API_URL}/add-product`, {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './BannerManager.css';
+import { API_URL } from '../../config';
 
 const BannerManager = () => {
   const [categories, setCategories] = useState([]);
@@ -33,8 +34,8 @@ const BannerManager = () => {
     setLoading(true);
     try {
       const [bRes, cRes] = await Promise.all([
-        fetch("http://localhost:4000/promotional-banners"),
-        fetch("http://localhost:4000/categories")
+        fetch(`${API_URL}/promotional-banners`),
+        fetch(`${API_URL}/categories`)
       ]);
       const bData = await bRes.json();
       const cData = await cRes.json();
@@ -60,7 +61,7 @@ const BannerManager = () => {
   const handleSaveBanners = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:4000/update-promotional-banners", {
+      const res = await fetch(`${API_URL}/update-promotional-banners`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify(banners)

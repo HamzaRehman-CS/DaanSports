@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './ProductList.css';
 import cross_icon from '../../assets/cross_icon.png';
+import { API_URL } from '../../config';
 
 const ProductList = () => {
   const [allProducts, setAllProducts] = useState([]);
@@ -16,11 +17,11 @@ const ProductList = () => {
   const fetchAllProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/all-products");
+      const res = await fetch(`${API_URL}/all-products`);
       const data = await res.json();
       setAllProducts(Array.isArray(data) ? data : []);
 
-      const catRes = await fetch("http://localhost:4000/categories");
+      const catRes = await fetch(`${API_URL}/categories`);
       const catData = await catRes.json();
       if (Array.isArray(catData)) setCategories(catData);
     } catch (err) {
@@ -39,7 +40,7 @@ const ProductList = () => {
       return;
     }
     try {
-      await fetch("http://localhost:4000/remove-product", {
+      await fetch(`${API_URL}/remove-product`, {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: id, name: name })
@@ -81,7 +82,7 @@ const ProductList = () => {
         sizes: editFormData.sizes.split(',').map(s => s.trim()).filter(Boolean)
       };
 
-      const res = await fetch("http://localhost:4000/edit-product", {
+      const res = await fetch(`${API_URL}/edit-product`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify(payload)

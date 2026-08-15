@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './CategoryManager.css';
+import { API_URL } from '../../config';
 
 const CategoryManager = () => {
   const [categories, setCategories] = useState([]);
@@ -24,7 +25,7 @@ const CategoryManager = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/categories");
+      const res = await fetch(`${API_URL}/categories`);
       const data = await res.json();
       setCategories(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -43,7 +44,7 @@ const CategoryManager = () => {
     if (!formData.name.trim()) return;
 
     try {
-      const res = await fetch("http://localhost:4000/add-category", {
+      const res = await fetch(`${API_URL}/add-category`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify(formData)
@@ -76,7 +77,7 @@ const CategoryManager = () => {
   const handleSaveEditCategory = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:4000/edit-category", {
+      const res = await fetch(`${API_URL}/edit-category`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify(editFormData)
@@ -98,7 +99,7 @@ const CategoryManager = () => {
     if (!window.confirm(`Are you sure you want to delete category "${name}"?`)) return;
 
     try {
-      const res = await fetch("http://localhost:4000/delete-category", {
+      const res = await fetch(`${API_URL}/delete-category`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({ id })

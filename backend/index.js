@@ -286,6 +286,90 @@ const defaultSeedProducts = [
     images: [
       "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=800&q=80"
     ]
+  },
+  {
+    id: 7,
+    name: "Pro Dry-Fit Pique Golf & Team Polo Shirt",
+    category: "Polo Shirts",
+    new_price: 13.50,
+    old_price: 26.00,
+    moq: 50,
+    description: "Premium breathable pique knit polo with anti-curl ribbed collar and 3-button placket. Engineered for corporate teamwear, golf clubs, and custom chest logo embroidery.",
+    material: "65% Combed Cotton / 35% Poly Pique",
+    gsm: "220 GSM Performance Knit",
+    stitching: "Reinforced Shoulder & Collar Seams",
+    customization: "High-Density Chest Embroidery & Custom Buttons",
+    leadTime: "8 - 12 Business Days",
+    colors: ["Black", "Charcoal Gray", "Navy", "White"],
+    sizes: ["S", "M", "L", "XL", "2XL", "3XL"],
+    stock: 4000,
+    image: "https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?auto=format&fit=crop&w=800&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    id: 8,
+    name: "Heavyweight 350 GSM Streetwear Pullover Hoodie",
+    category: "Hoodies",
+    new_price: 19.50,
+    old_price: 38.00,
+    moq: 50,
+    description: "Heavyweight 350 GSM French Terry cotton hoodie with kangaroo pocket and double-layer hood. Premium streetwear boxy cut ready for custom puff print and embroidery.",
+    material: "100% French Terry Cotton",
+    gsm: "350 GSM Heavyweight",
+    stitching: "Twin-Needle Coverstitch",
+    customization: "Puff Print, Screen Print, Custom Neck Tape",
+    leadTime: "10 - 14 Business Days",
+    colors: ["Jet Black", "Sand Beige", "Slate Gray"],
+    sizes: ["S", "M", "L", "XL", "2XL"],
+    stock: 3500,
+    image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    id: 9,
+    name: "Elite Athletic Windbreaker & Weatherproof Track Jacket",
+    category: "Jackets",
+    new_price: 27.80,
+    old_price: 55.00,
+    moq: 50,
+    description: "High-density wind-resistant ripstop shell with breathable mesh lining. Waterproof zip closures and elastic cuffs for all-weather athletic training.",
+    material: "100% Ripstop Nylon Shell / Poly Mesh",
+    gsm: "240 GSM Weatherproof",
+    stitching: "Taped Waterproof Seams",
+    customization: "Reflective Prints, Custom Pull Tabs, Rubber Logos",
+    leadTime: "12 - 16 Business Days",
+    colors: ["Black / Silver", "Navy / White", "Olive"],
+    sizes: ["M", "L", "XL", "2XL"],
+    stock: 2800,
+    image: "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    id: 10,
+    name: "Pro Athlete Structured 6-Panel Cap & Gym Duffle Set",
+    category: "Accessories",
+    new_price: 8.90,
+    old_price: 18.00,
+    moq: 50,
+    description: "Custom 6-panel athletic cap with moisture-wicking sweatband and laser-perforated ventilation. Includes heavy-duty water-resistant gym gear bag with shoe compartment.",
+    material: "Performance Poly-Spandex & 600D Cordura",
+    gsm: "Heavy-Duty Sports Weave",
+    stitching: "Bar-tack Reinforced Stress Points",
+    customization: "3D Raised Embroidery, Rubber Badges, Custom Buckles",
+    leadTime: "7 - 10 Business Days",
+    colors: ["Matte Black", "Graphite Gray", "White"],
+    sizes: ["One Size Fits All"],
+    stock: 8000,
+    image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=800&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=800&q=80"
+    ]
   }
 ];
 

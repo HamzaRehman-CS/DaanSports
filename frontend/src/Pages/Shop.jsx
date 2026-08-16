@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom';
 import CategoryBoxShowcase from '../Components/CategoryBoxShowcase/CategoryBoxShowcase';
 import FeatureTrustBar from '../Components/FeatureTrustBar/FeatureTrustBar';
 import HeroCarousel from '../Components/HeroCarousel/HeroCarousel';
-import Item from '../Components/Item/Item';
 import BentoBanners from '../Components/BentoBanners/BentoBanners';
+import CatalogExplorer from '../Components/CatalogExplorer/CatalogExplorer';
+import Item from '../Components/Item/Item';
 import SEO from '../Components/SEO/SEO';
 import { ShopContext } from '../Context/ShopContext';
 import { useAnimeReveal } from '../Components/AnimeScroll/AnimeScroll';
@@ -35,8 +36,6 @@ const Shop = () => {
       .catch(err => console.error("Promotional banners fetch error:", err));
   }, []);
 
-  const topSellersList = (all_product || []).slice(0, 4);
-
   const promoCategory1Name = promotionalBanners?.promoSection1?.category || 'Trousers';
   const promoCategory2Name = promotionalBanners?.promoSection2?.category || 'Sweatshirts';
 
@@ -62,9 +61,7 @@ const Shop = () => {
       <HeroCarousel />
 
       {/* 2. Our Categories: Box-Type Categories Showcase (3-4 on Laptop, 3 on Mobile) */}
-      <div className="anime-reveal">
-        <CategoryBoxShowcase initialCategories={categories} />
-      </div>
+      <CategoryBoxShowcase initialCategories={categories} />
 
       {/* 3. Feature Trust Bar (Free Shipping, Premium Quality, Easy Returns, 24/7 Support) */}
       <FeatureTrustBar />
@@ -74,34 +71,12 @@ const Shop = () => {
         <BentoBanners banners={promotionalBanners} />
       </div>
 
-      {/* 3. Top Sellers Section */}
-      <section className="py-16 bg-[#0a0a0a]">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-3 border-b border-white/10 pb-5">
-          <div>
-            <span className="text-[11px] font-black text-[#dc2626] uppercase tracking-widest flex items-center gap-1.5 mb-1">
-              <Flame size={14} className="text-[#dc2626]" />
-              HIGH-VOLUME B2B DEMAND
-            </span>
-            <h2 className="text-3xl md:text-4xl font-display font-black italic uppercase text-white tracking-tight">
-              Top Sellers & Flagship Models
-            </h2>
-          </div>
-          <Link to="/tracksuits" className="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white flex items-center gap-1">
-            View All Catalog <ArrowRight size={13} className="text-[#dc2626]" />
-          </Link>
-        </div>
-
-        {/* Top Sellers Product Grid */}
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {topSellersList.map(p => (
-              <div key={p.id} className="anime-reveal">
-                <Item {...p} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* 5. Interactive Wholesale Catalog Explorer (Upper 9 Category Filter + Sizes + Complete Sorting Engine) */}
+      <CatalogExplorer 
+        products={all_product} 
+        title="Wholesale Catalog & Factory Inventory" 
+        subtitle="Select from our 9 specialized apparel categories, filter by size, and sort by unit price, MOQ, or fabric GSM weight."
+      />
 
 
       {/* 3. Edge-to-Edge Stretched Category Banner 1 */}

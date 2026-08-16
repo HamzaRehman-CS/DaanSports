@@ -51,13 +51,17 @@ const BentoBanners = ({ banners }) => {
   };
 
   const getLink = (category) => {
-    const cat = (category || "").toLowerCase();
+    const cat = (category || "").toLowerCase().trim();
     if (cat.includes("tracksuit")) return "/tracksuits";
-    if (cat.includes("sweatshirt") || cat.includes("hoodie")) return "/sweatshirts";
-    if (cat.includes("trouser") || cat.includes("jogger")) return "/trousers";
-    if (cat.includes("jacket") || cat.includes("outerwear")) return "/outerwear";
-    if (cat.includes("t-shirt") || cat.includes("shirt")) return "/t-shirts";
-    return "/tracksuits";
+    if (cat.includes("polo")) return "/polo-shirts";
+    if (cat.includes("hoodie")) return "/hoodies";
+    if (cat.includes("sweatshirt")) return "/sweatshirts";
+    if (cat.includes("trouser") || cat.includes("jogger") || cat.includes("pant")) return "/trousers";
+    if (cat.includes("jacket") || cat.includes("outerwear")) return "/jackets";
+    if (cat.includes("activewear") || cat.includes("compression")) return "/activewear";
+    if (cat.includes("accessor")) return "/accessories";
+    if (cat.includes("t-shirt") || cat.includes("tshirt") || cat.includes("tee") || cat.includes("shirt")) return "/tshirts";
+    return `/category/${cat.replace(/\s+/g, '-')}`;
   };
 
   return (

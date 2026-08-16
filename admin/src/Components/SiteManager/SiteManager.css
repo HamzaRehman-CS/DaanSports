@@ -18,6 +18,7 @@
   margin-bottom: 24px;
   border-bottom: 1px solid #e2e8f0;
   padding-bottom: 16px;
+  gap: 16px;
 }
 
 .site-manager-header h2 {
@@ -33,25 +34,26 @@
   margin: 0;
 }
 
-.save-cms-top-btn {
+.save-cms-top-btn, .save-cms-bottom-btn {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: #ffffff;
   border: none;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.save-cms-top-btn:hover {
+.save-cms-top-btn:hover, .save-cms-bottom-btn:hover {
   background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
   transform: translateY(-1px);
 }
 
-.cms-card-section {
+.cms-section-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -59,47 +61,186 @@
   margin-bottom: 24px;
 }
 
-.cms-card-section h3 {
+.cms-section-card h3 {
   font-size: 18px;
   font-weight: 700;
   color: #0f172a;
+  margin: 0 0 8px 0;
+}
+
+.section-note {
+  font-size: 13px;
+  color: #64748b;
   margin: 0 0 16px 0;
 }
 
-.cms-input-group {
+.section-title-row {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 16px;
 }
 
-.cms-input-group label {
+.add-slide-btn {
+  background-color: #0f172a;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-slide-btn:hover {
+  background-color: #2563eb;
+}
+
+.slides-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.slide-editor-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.slide-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.slide-card-header h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.delete-slide-btn {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-slide-btn:hover {
+  background: #fee2e2;
+}
+
+.slide-inputs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 768px) {
+  .slide-inputs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-field.full-width {
+  grid-column: 1 / -1;
+}
+
+.input-field label {
   font-size: 13px;
   font-weight: 600;
   color: #334155;
 }
 
-.cms-input-group input,
-.cms-input-group textarea {
+.input-field input,
+.input-field textarea {
   box-sizing: border-box;
   width: 100%;
-  height: 44px;
-  padding: 0 14px;
-  border-radius: 8px;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 6px;
   border: 1.5px solid #cbd5e1;
   background: #ffffff;
   font-size: 14px;
   color: #0f172a;
   outline: none;
+  font-family: inherit;
 }
 
-.cms-input-group textarea {
+.input-field textarea {
   height: auto;
-  min-height: 80px;
-  padding: 12px 14px;
+  min-height: 60px;
+  padding: 8px 12px;
 }
 
-.cms-input-group input:focus,
-.cms-input-group textarea:focus {
+.input-field input:focus,
+.input-field textarea:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.upload-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.file-upload-btn-custom {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  height: 42px;
+  background-color: #0f172a;
+  color: #ffffff;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.file-upload-btn-custom:hover {
+  background-color: #2563eb;
+}
+
+/* Image Dimension Guideline Notice */
+.image-spec-guide-badge {
+  display: inline-block;
+  margin-top: 4px;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.image-spec-guide-badge strong {
+  font-weight: 700;
+  color: #1d4ed8;
 }

@@ -297,6 +297,9 @@ const AddProduct = () => {
               <span>{primaryImage ? primaryImage.name : "Click to Upload Main Cover"}</span>
             </label>
             <input onChange={primaryImageHandler} type="file" id='primary-file-input' hidden accept="image/*" />
+            <div className="image-spec-guide-badge" style={{ marginTop: '8px' }}>
+              📐 <strong>Recommended Size:</strong> 800 × 800 px (1:1 Square) or 800 × 1000 px (4:5 Crop) | Max 5MB | WebP, JPG, PNG
+            </div>
           </div>
         </div>
 

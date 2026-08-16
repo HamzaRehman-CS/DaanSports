@@ -1,6 +1,8 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { ArrowRight, CheckCircle, Globe, ShieldCheck, Zap, Factory, Package, Medal, Star, Flame, Percent, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import CategoryBoxShowcase from '../Components/CategoryBoxShowcase/CategoryBoxShowcase';
+import FeatureTrustBar from '../Components/FeatureTrustBar/FeatureTrustBar';
 import HeroCarousel from '../Components/HeroCarousel/HeroCarousel';
 import Item from '../Components/Item/Item';
 import BentoBanners from '../Components/BentoBanners/BentoBanners';
@@ -35,7 +37,6 @@ const Shop = () => {
 
   const topSellersList = (all_product || []).slice(0, 4);
 
-  
   const promoCategory1Name = promotionalBanners?.promoSection1?.category || 'Trousers';
   const promoCategory2Name = promotionalBanners?.promoSection2?.category || 'Sweatshirts';
 
@@ -57,10 +58,18 @@ const Shop = () => {
         keywords="wholesale sportswear, bulk tracksuits, custom athletic apparel, OEM clothing manufacturer, heavyweight fleece hoodies, gym activewear supplier, private label sports apparel, B2B sportswear export"
       />
       
-      {/* 1. Hero Carousel */}
+      {/* 1. Hero Carousel (Shifting Animation Banner) */}
       <HeroCarousel />
 
-      {/* 2. Bento-Style Promotional & OEM Banners Showcase */}
+      {/* 2. Our Categories: Box-Type Categories Showcase (3-4 on Laptop, 3 on Mobile) */}
+      <div className="anime-reveal">
+        <CategoryBoxShowcase initialCategories={categories} />
+      </div>
+
+      {/* 3. Feature Trust Bar (Free Shipping, Premium Quality, Easy Returns, 24/7 Support) */}
+      <FeatureTrustBar />
+
+      {/* 4. Bento-Style Promotional & OEM Banners Showcase */}
       <div className="anime-reveal">
         <BentoBanners banners={promotionalBanners} />
       </div>

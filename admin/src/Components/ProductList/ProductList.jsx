@@ -355,13 +355,37 @@ const ProductList = () => {
               </div>
 
               <div>
-                <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>Product Image URL</label>
-                <input
-                  type="text"
-                  value={editFormData.image}
-                  onChange={(e) => setEditFormData({ ...editFormData, image: e.target.value })}
-                  style={{ width: '100%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
-                />
+                <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>Product Image</label>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    value={editFormData.image}
+                    onChange={(e) => setEditFormData({ ...editFormData, image: e.target.value })}
+                    style={{ flex: 1, background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
+                  />
+                  <label style={{ background: '#27272a', color: '#fff', padding: '8px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    📷 Upload
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={async (e) => {
+                        if (!e.target.files?.[0]) return;
+                        const form = new FormData();
+                        form.append('product', e.target.files[0]);
+                        const res = await fetch(`${API_URL}/upload`, { method: 'POST', body: form });
+                        const data = await res.json();
+                        if (data.success) {
+                          setEditFormData(prev => ({ ...prev, image: data.image_url }));
+                          alert("Product image uploaded!");
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                <div style={{ marginTop: '6px', fontSize: '11px', color: '#93c5fd', background: 'rgba(37,99,235,0.15)', border: '1px solid rgba(59,130,246,0.3)', padding: '4px 8px', borderRadius: '4px' }}>
+                  📐 <strong>Recommended Size:</strong> 800 × 800 px (1:1 Square) or 800 × 1000 px (4:5 Crop) | Max 5MB | WebP, JPG, PNG
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>

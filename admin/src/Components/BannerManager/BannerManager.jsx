@@ -4,6 +4,7 @@ import { API_URL } from '../../config';
 
 const BannerManager = () => {
   const [categories, setCategories] = useState([]);
+  const [uploadingSection, setUploadingSection] = useState(null);
   const [banners, setBanners] = useState({
     tallVertical: {
       category: 'Tracksuits',
@@ -48,7 +49,7 @@ const BannerManager = () => {
   });
 
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('bento'); // 'bento' or 'preview'
+  const [activeTab, setActiveTab] = useState('bento');
 
   const fetchBannersAndCategories = async () => {
     setLoading(true);
@@ -81,6 +82,31 @@ const BannerManager = () => {
   useEffect(() => {
     fetchBannersAndCategories();
   }, []);
+
+  const handleFileUpload = async (sectionKey, file) => {
+    if (!file) return;
+    setUploadingSection(sectionKey);
+    try {
+      const form = new FormData();
+      form.append('product', file);
+      const res = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: form
+      });
+      const data = await res.json();
+      if (data.success) {
+        updateBannerSection(sectionKey, 'bgImage', data.image_url);
+        alert(`📷 Banner image for "${sectionKey}" uploaded successfully!`);
+      } else {
+        alert("Upload error: " + (data.error || "Failed to upload"));
+      }
+    } catch (err) {
+      alert("Upload error: " + err.message);
+    } finally {
+      setUploadingSection(null);
+    }
+  };
 
   const handleSaveBanners = async (e) => {
     e.preventDefault();
@@ -259,12 +285,27 @@ const BannerManager = () => {
                   />
                 </div>
                 <div className="full-width">
-                  <label>Background Image URL</label>
-                  <input
-                    type="text"
-                    value={banners.tallVertical?.bgImage || ''}
-                    onChange={(e) => updateBannerSection('tallVertical', 'bgImage', e.target.value)}
-                  />
+                  <label>Background Image</label>
+                  <div className="upload-input-group">
+                    <input
+                      type="text"
+                      value={banners.tallVertical?.bgImage || ''}
+                      onChange={(e) => updateBannerSection('tallVertical', 'bgImage', e.target.value)}
+                    />
+                    <label className="file-upload-btn-custom">
+                      {uploadingSection === 'tallVertical' ? "..." : "📷 Upload"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={(e) => handleFileUpload('tallVertical', e.target.files[0])}
+                      />
+                    </label>
+                  </div>
+                  {/* IMAGE DIMENSION GUIDELINE NOTICE */}
+                  <div className="image-spec-guide-badge">
+                    📐 <strong>Recommended Size:</strong> 800 × 1200 px (2:3 Portrait Ratio) | Max 5MB | WebP, JPG, PNG
+                  </div>
                 </div>
               </div>
             </div>
@@ -299,6 +340,14 @@ const BannerManager = () => {
                   />
                 </div>
                 <div>
+                  <label>Badge Text</label>
+                  <input
+                    type="text"
+                    value={banners.wideFeature?.badge || ''}
+                    onChange={(e) => updateBannerSection('wideFeature', 'badge', e.target.value)}
+                  />
+                </div>
+                <div>
                   <label>CTA Link Text</label>
                   <input
                     type="text"
@@ -315,19 +364,34 @@ const BannerManager = () => {
                   />
                 </div>
                 <div className="full-width">
-                  <label>Background Image URL</label>
-                  <input
-                    type="text"
-                    value={banners.wideFeature?.bgImage || ''}
-                    onChange={(e) => updateBannerSection('wideFeature', 'bgImage', e.target.value)}
-                  />
+                  <label>Background Image</label>
+                  <div className="upload-input-group">
+                    <input
+                      type="text"
+                      value={banners.wideFeature?.bgImage || ''}
+                      onChange={(e) => updateBannerSection('wideFeature', 'bgImage', e.target.value)}
+                    />
+                    <label className="file-upload-btn-custom">
+                      {uploadingSection === 'wideFeature' ? "..." : "📷 Upload"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={(e) => handleFileUpload('wideFeature', e.target.files[0])}
+                      />
+                    </label>
+                  </div>
+                  {/* IMAGE DIMENSION GUIDELINE NOTICE */}
+                  <div className="image-spec-guide-badge">
+                    📐 <strong>Recommended Size:</strong> 1600 × 800 px (2:1 Widescreen Ratio) | Max 5MB | WebP, JPG, PNG
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Tile 3 & 4 Editors */}
+            {/* Tile 3 Editor: Compact A */}
             <div className="banner-card">
-              <h3>⚡ 3. Compact Tile A (Trousers / Joggers)</h3>
+              <h3>🏷️ 3. Compact Spotlight A (Column 2 Bottom-Left)</h3>
               <div className="banner-inputs-grid">
                 <div>
                   <label>Title</label>
@@ -338,26 +402,67 @@ const BannerManager = () => {
                   />
                 </div>
                 <div>
-                  <label>Discount Tag</label>
+                  <label>Category Target</label>
+                  <select
+                    value={banners.compactA?.category || ''}
+                    onChange={(e) => updateBannerSection('compactA', 'category', e.target.value)}
+                  >
+                    {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label>Discount Badge</label>
                   <input
                     type="text"
                     value={banners.compactA?.discountText || ''}
                     onChange={(e) => updateBannerSection('compactA', 'discountText', e.target.value)}
                   />
                 </div>
-                <div className="full-width">
-                  <label>Background Image URL</label>
+                <div>
+                  <label>CTA Text</label>
                   <input
                     type="text"
-                    value={banners.compactA?.bgImage || ''}
-                    onChange={(e) => updateBannerSection('compactA', 'bgImage', e.target.value)}
+                    value={banners.compactA?.ctaText || ''}
+                    onChange={(e) => updateBannerSection('compactA', 'ctaText', e.target.value)}
                   />
+                </div>
+                <div className="full-width">
+                  <label>Subtitle</label>
+                  <input
+                    type="text"
+                    value={banners.compactA?.subtitle || ''}
+                    onChange={(e) => updateBannerSection('compactA', 'subtitle', e.target.value)}
+                  />
+                </div>
+                <div className="full-width">
+                  <label>Background Image</label>
+                  <div className="upload-input-group">
+                    <input
+                      type="text"
+                      value={banners.compactA?.bgImage || ''}
+                      onChange={(e) => updateBannerSection('compactA', 'bgImage', e.target.value)}
+                    />
+                    <label className="file-upload-btn-custom">
+                      {uploadingSection === 'compactA' ? "..." : "📷 Upload"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={(e) => handleFileUpload('compactA', e.target.files[0])}
+                      />
+                    </label>
+                  </div>
+                  {/* IMAGE DIMENSION GUIDELINE NOTICE */}
+                  <div className="image-spec-guide-badge">
+                    📐 <strong>Recommended Size:</strong> 800 × 600 px (4:3 Aspect Ratio) | Max 5MB | WebP, JPG, PNG
+                  </div>
                 </div>
               </div>
             </div>
 
+            {/* Tile 4 Editor: Compact B */}
             <div className="banner-card">
-              <h3>⚡ 4. Compact Tile B (Activewear / Compression)</h3>
+              <h3>⚡ 4. Compact Spotlight B (Column 2 Bottom-Right)</h3>
               <div className="banner-inputs-grid">
                 <div>
                   <label>Title</label>
@@ -368,30 +473,70 @@ const BannerManager = () => {
                   />
                 </div>
                 <div>
-                  <label>Spec / Highlight Tag</label>
+                  <label>Category Target</label>
+                  <select
+                    value={banners.compactB?.category || ''}
+                    onChange={(e) => updateBannerSection('compactB', 'category', e.target.value)}
+                  >
+                    {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label>Spec Badge</label>
                   <input
                     type="text"
                     value={banners.compactB?.discountText || ''}
                     onChange={(e) => updateBannerSection('compactB', 'discountText', e.target.value)}
                   />
                 </div>
-                <div className="full-width">
-                  <label>Background Image URL</label>
+                <div>
+                  <label>CTA Text</label>
                   <input
                     type="text"
-                    value={banners.compactB?.bgImage || ''}
-                    onChange={(e) => updateBannerSection('compactB', 'bgImage', e.target.value)}
+                    value={banners.compactB?.ctaText || ''}
+                    onChange={(e) => updateBannerSection('compactB', 'ctaText', e.target.value)}
                   />
+                </div>
+                <div className="full-width">
+                  <label>Subtitle</label>
+                  <input
+                    type="text"
+                    value={banners.compactB?.subtitle || ''}
+                    onChange={(e) => updateBannerSection('compactB', 'subtitle', e.target.value)}
+                  />
+                </div>
+                <div className="full-width">
+                  <label>Background Image</label>
+                  <div className="upload-input-group">
+                    <input
+                      type="text"
+                      value={banners.compactB?.bgImage || ''}
+                      onChange={(e) => updateBannerSection('compactB', 'bgImage', e.target.value)}
+                    />
+                    <label className="file-upload-btn-custom">
+                      {uploadingSection === 'compactB' ? "..." : "📷 Upload"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={(e) => handleFileUpload('compactB', e.target.files[0])}
+                      />
+                    </label>
+                  </div>
+                  {/* IMAGE DIMENSION GUIDELINE NOTICE */}
+                  <div className="image-spec-guide-badge">
+                    📐 <strong>Recommended Size:</strong> 800 × 600 px (4:3 Aspect Ratio) | Max 5MB | WebP, JPG, PNG
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Tile 5 Editor: OEM Strip */}
-            <div className="banner-card full-width-card">
+            <div className="banner-card full-width">
               <h3>🏭 5. Direct Factory OEM / ODM Innovation Strip</h3>
               <div className="banner-inputs-grid">
                 <div>
-                  <label>Title</label>
+                  <label>Strip Title</label>
                   <input
                     type="text"
                     value={banners.oemStrip?.title || ''}
@@ -399,15 +544,23 @@ const BannerManager = () => {
                   />
                 </div>
                 <div>
-                  <label>Badge Text</label>
+                  <label>Certification Badge</label>
                   <input
                     type="text"
                     value={banners.oemStrip?.badge || ''}
                     onChange={(e) => updateBannerSection('oemStrip', 'badge', e.target.value)}
                   />
                 </div>
+                <div>
+                  <label>CTA Button Text</label>
+                  <input
+                    type="text"
+                    value={banners.oemStrip?.ctaText || ''}
+                    onChange={(e) => updateBannerSection('oemStrip', 'ctaText', e.target.value)}
+                  />
+                </div>
                 <div className="full-width">
-                  <label>Subtitle / Factory Capabilities</label>
+                  <label>Subtitle / Capabilities Summary</label>
                   <textarea
                     rows={2}
                     value={banners.oemStrip?.subtitle || ''}
@@ -415,23 +568,39 @@ const BannerManager = () => {
                   />
                 </div>
                 <div className="full-width">
-                  <label>Background Image URL</label>
-                  <input
-                    type="text"
-                    value={banners.oemStrip?.bgImage || ''}
-                    onChange={(e) => updateBannerSection('oemStrip', 'bgImage', e.target.value)}
-                  />
+                  <label>Panoramic Background Image</label>
+                  <div className="upload-input-group">
+                    <input
+                      type="text"
+                      value={banners.oemStrip?.bgImage || ''}
+                      onChange={(e) => updateBannerSection('oemStrip', 'bgImage', e.target.value)}
+                    />
+                    <label className="file-upload-btn-custom">
+                      {uploadingSection === 'oemStrip' ? "..." : "📷 Upload"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={(e) => handleFileUpload('oemStrip', e.target.files[0])}
+                      />
+                    </label>
+                  </div>
+                  {/* IMAGE DIMENSION GUIDELINE NOTICE */}
+                  <div className="image-spec-guide-badge">
+                    📐 <strong>Recommended Size:</strong> 1920 × 600 px (16:5 Panoramic Ratio) | Max 5MB | WebP, JPG, PNG
+                  </div>
                 </div>
               </div>
             </div>
 
           </div>
 
-          <div className="save-all-banners-bar">
+          <div className="save-actions-bar">
             <button type="submit" className="save-banners-btn">
-              💾 Save All Bento Banners to Database
+              💾 Save & Publish Bento Banners Live
             </button>
           </div>
+
         </form>
       )}
     </div>

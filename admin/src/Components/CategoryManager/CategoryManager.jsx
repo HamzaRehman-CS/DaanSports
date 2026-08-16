@@ -6,6 +6,7 @@ const CategoryManager = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingCatId, setEditingCatId] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -38,6 +39,35 @@ const CategoryManager = () => {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  const handleFileUpload = async (file, isEdit = false) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append('product', file);
+      const res = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: form
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (isEdit) {
+          setEditFormData(prev => ({ ...prev, banner: data.image_url }));
+        } else {
+          setFormData(prev => ({ ...prev, banner: data.image_url }));
+        }
+        alert("📷 Category image uploaded successfully!");
+      } else {
+        alert("Upload error: " + (data.error || "Failed to upload"));
+      }
+    } catch (err) {
+      alert("Upload error: " + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleAddCategory = async (e) => {
     e.preventDefault();
@@ -118,8 +148,8 @@ const CategoryManager = () => {
     <div className="category-manager-b2b">
       <div className="category-manager-header">
         <div>
-          <h2>Category & Banner Manager</h2>
-          <p>Create, edit, or remove product categories and upload full-width banners for the main website.</p>
+          <h2>Category & Showcase Box Manager</h2>
+          <p>Manage the 9 "Our Categories" box banners displayed on the storefront. Upload custom images or update links.</p>
         </div>
         <div className="cat-count-badge">
           Total Categories: <span>{categories.length}</span>
@@ -128,7 +158,7 @@ const CategoryManager = () => {
 
       {/* Add New Category Form */}
       <div className="add-cat-card">
-        <h3>➕ Add New Category & Stretched Banner</h3>
+        <h3>➕ Add New Category Box</h3>
         <form onSubmit={handleAddCategory} className="add-cat-form">
           <div className="form-row-2">
             <div>
@@ -136,20 +166,35 @@ const CategoryManager = () => {
               <input
                 type="text"
                 required
-                placeholder="e.g., Trousers, Jackets, Compression"
+                placeholder="e.g., T-Shirts, Polo Shirts, Hoodies"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
             </div>
             <div>
-              <label>Full-Width Banner Image URL *</label>
-              <input
-                type="text"
-                required
-                placeholder="https://images.unsplash.com/..."
-                value={formData.banner}
-                onChange={(e) => setFormData({ ...formData, banner: e.target.value })}
-              />
+              <label>Category Box Image URL *</label>
+              <div className="upload-input-group">
+                <input
+                  type="text"
+                  required
+                  placeholder="https://images.unsplash.com/... or upload image"
+                  value={formData.banner}
+                  onChange={(e) => setFormData({ ...formData, banner: e.target.value })}
+                />
+                <label className="file-upload-btn-custom">
+                  {uploading ? "Uploading..." : "📷 Upload"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(e) => handleFileUpload(e.target.files[0], false)}
+                  />
+                </label>
+              </div>
+              {/* IMAGE DIMENSION GUIDELINE NOTICE */}
+              <div className="image-spec-guide-badge">
+                📐 <strong>Recommended Size:</strong> 600 × 750 px (4:5 Portrait Ratio) | Max 5MB | WebP, JPG, PNG
+              </div>
             </div>
           </div>
 
@@ -174,14 +219,14 @@ const CategoryManager = () => {
           </div>
 
           <button type="submit" className="submit-cat-btn">
-            Create Category & Add Stretched Banner ➔
+            Create Category & Add Box Showcase ➔
           </button>
         </form>
       </div>
 
       {/* Categories List & Inline Editor */}
       <div className="categories-list-section">
-        <h3>Existing Product Categories</h3>
+        <h3>Existing Product Categories ({categories.length} Categories Active)</h3>
 
         {loading ? (
           <div className="loading-box">Loading Categories...</div>
@@ -194,7 +239,7 @@ const CategoryManager = () => {
                 <div key={cat.id} className="cat-card">
                   <div className="cat-banner-preview">
                     <img src={isEditing ? editFormData.banner : cat.banner} alt={cat.name} />
-                    <span className="cat-slug-badge">{cat.slug}</span>
+                    <span className="cat-slug-badge">/{cat.slug}</span>
                   </div>
 
                   {isEditing ? (
@@ -207,13 +252,29 @@ const CategoryManager = () => {
                         required
                       />
 
-                      <label>Banner Image URL</label>
-                      <input
-                        type="text"
-                        value={editFormData.banner}
-                        onChange={(e) => setEditFormData({ ...editFormData, banner: e.target.value })}
-                        required
-                      />
+                      <label>Category Box Image URL</label>
+                      <div className="upload-input-group">
+                        <input
+                          type="text"
+                          value={editFormData.banner}
+                          onChange={(e) => setEditFormData({ ...editFormData, banner: e.target.value })}
+                          required
+                        />
+                        <label className="file-upload-btn-custom">
+                          {uploading ? "..." : "📷 Upload"}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            onChange={(e) => handleFileUpload(e.target.files[0], true)}
+                          />
+                        </label>
+                      </div>
+
+                      {/* IMAGE DIMENSION GUIDELINE NOTICE */}
+                      <div className="image-spec-guide-badge">
+                        📐 <strong>Recommended Size:</strong> 600 × 750 px (4:5 Portrait Ratio) | Max 5MB | WebP, JPG, PNG
+                      </div>
 
                       <label>Description</label>
                       <input
@@ -249,12 +310,16 @@ const CategoryManager = () => {
                         )}
                       </div>
 
+                      <div className="image-spec-guide-badge-small">
+                        📐 Box Ratio: 4:5 (600×750 px)
+                      </div>
+
                       <div className="cat-actions-row">
                         <button
                           onClick={() => startEditCategory(cat)}
                           className="edit-cat-btn"
                         >
-                          Edit Category ✏️
+                          Edit Image & Details ✏️
                         </button>
                         <button
                           onClick={() => handleDeleteCategory(cat.id, cat.name)}

@@ -75,8 +75,54 @@ const defaultCategories = [
   { id: 6, name: "Outerwear", slug: "outerwear", description: "Softshell Jackets & Weatherproof Vests", subcategories: ["Padded Vests", "Windbreakers", "Softshell"], banner: "https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=2070&auto=format&fit=crop" }
 ];
 
-// Default Promotional Banners
+// Default Bento & Promotional Banners
 const defaultBanners = {
+  // Bento Grid Banner 1: Tall Vertical Feature
+  tallVertical: {
+    category: "Tracksuits",
+    title: "FLAGSHIP TEAM TRACKSUITS",
+    subtitle: "Custom 330 GSM combed fleece & interlock sets engineered for elite athletics & custom private labels.",
+    badge: "FLAGSHIP SPEC",
+    ctaText: "Explore Tracksuits",
+    bgImage: "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=1200&auto=format&fit=crop"
+  },
+  // Bento Grid Banner 2: Wide Horizontal Box
+  wideFeature: {
+    category: "Sweatshirts",
+    title: "HEAVYWEIGHT 350 GSM HOODIES",
+    subtitle: "100% French Terry pullovers & drop-shoulder streetwear cuts ready for 3D embroidery and puff prints.",
+    discountText: "15% BULK DISCOUNT",
+    badge: "HIGH-DENSITY EMBROIDERY",
+    ctaText: "View Hoodies",
+    bgImage: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1600&auto=format&fit=crop"
+  },
+  // Bento Grid Banner 3: Compact Box A
+  compactA: {
+    category: "Trousers",
+    title: "Tri-Blend Athletic Joggers",
+    subtitle: "Reinforced zipper pockets & ribbed cuffs",
+    discountText: "10% OFF SPECIAL",
+    ctaText: "Shop Joggers",
+    bgImage: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=1000&auto=format&fit=crop"
+  },
+  // Bento Grid Banner 4: Compact Box B
+  compactB: {
+    category: "Activewear",
+    title: "Pro Compression & Active Sets",
+    subtitle: "Sweat-wicking 4-way performance stretch",
+    discountText: "PRO SPEC",
+    ctaText: "Shop Activewear",
+    bgImage: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1000&auto=format&fit=crop"
+  },
+  // Bento Grid Banner 5: Direct Factory Innovation Strip
+  oemStrip: {
+    title: "DIRECT OEM / ODM PRIVATE LABEL MANUFACTURING",
+    subtitle: "Full custom labeling, silicone tags, custom GSM weaving, and express airway cargo delivery worldwide.",
+    badge: "ISO 9001 CERTIFIED",
+    ctaText: "Request Tech-Pack Quote",
+    bgImage: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=2000&auto=format&fit=crop"
+  },
+  // Legacy compatibility fallbacks
   topSellers: {
     title: "TOP SELLERS — FLAGSHIP EDITION",
     subtitle: "Handpicked Performance Gear & High-Volume Custom Apparel",
@@ -100,6 +146,7 @@ const defaultBanners = {
     discountPercent: 15
   }
 };
+
 
 // Initial Default Vouchers
 const defaultVouchers = [
@@ -244,14 +291,52 @@ const defaultCmsData = {
   heroSlides: [
     {
       id: 1,
+      badgeText: "PREMIUM MANUFACTURER",
       tag: "Premium Manufacturer",
       title: "ENGINEERED<br />FOR <span class='text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-800'>EXCELLENCE</span>",
+      subtitle: "Custom Manufacturing • Private Label • Global Export Solutions. The trusted partner for global sportswear and activewear brands.",
       description: "Custom Manufacturing • Private Label • Global Export Solutions. The trusted partner for global sportswear and activewear brands.",
-      bgImage: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=70&w=1200&auto=format&fit=crop",
-      productImg: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=70&w=600&auto=format&fit=crop"
+      specBadge: "330 GSM FLEECE",
+      productName: "Pro Tech Fleece Tracksuit",
+      priceText: "From $24.50 /pc",
+      bgImage: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=1600&auto=format&fit=crop",
+      productImg: "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=1000&auto=format&fit=crop",
+      primaryCtaText: "Explore Collections",
+      primaryCtaLink: "/tracksuits"
+    },
+    {
+      id: 2,
+      badgeText: "STREETWEAR & HOODIES",
+      tag: "Pro Activewear & Hoodies",
+      title: "ELEVATE<br />YOUR <span class='text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-800'>BRAND</span>",
+      subtitle: "Heavyweight 350 GSM French Terry pullovers, custom drop-shoulder streetwear fits, and high-density 3D embroidery.",
+      description: "Heavyweight 350 GSM French Terry pullovers, custom drop-shoulder streetwear fits, and high-density 3D embroidery.",
+      specBadge: "350 GSM FRENCH TERRY",
+      productName: "Heavyweight Boxy Hoodie",
+      priceText: "From $18.90 /pc",
+      bgImage: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1600&auto=format&fit=crop",
+      productImg: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1000&auto=format&fit=crop",
+      primaryCtaText: "View Hoodies",
+      primaryCtaLink: "/sweatshirts"
+    },
+    {
+      id: 3,
+      badgeText: "GLOBAL EXPORT SOLUTIONS",
+      tag: "Global Export Solutions",
+      title: "WORLDWIDE<br /><span class='text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-800'>DISTRIBUTION</span>",
+      subtitle: "Full ISO 9001 certified QC assurance, OEM private label silicone tagging, and worldwide door-to-door express cargo.",
+      description: "Full ISO 9001 certified QC assurance, OEM private label silicone tagging, and worldwide door-to-door express cargo.",
+      specBadge: "ISO 9001 CERTIFIED",
+      productName: "Performance Compression Set",
+      priceText: "From $16.50 /pc",
+      bgImage: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1600&auto=format&fit=crop",
+      productImg: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1000&auto=format&fit=crop",
+      primaryCtaText: "Custom Orders",
+      primaryCtaLink: "/custom-orders"
     }
   ]
 };
+
 
 // In-Memory Database Stores (Guarantees zero-crash execution on read-only serverless environments)
 let inMemoryProducts = [...defaultSeedProducts];
@@ -308,13 +393,15 @@ const getJsonBanners = () => {
     try {
         if (fs.existsSync(bannersFilePath)) {
             const raw = fs.readFileSync(bannersFilePath, 'utf8');
-            return JSON.parse(raw);
+            const parsed = JSON.parse(raw);
+            return { ...defaultBanners, ...parsed };
         }
     } catch (e) {
         console.warn("Banners read warning:", e.message);
     }
-    return inMemoryBanners;
+    return { ...defaultBanners, ...(inMemoryBanners || {}) };
 };
+
 
 const saveJsonBanners = (bannersData) => {
     inMemoryBanners = bannersData;
@@ -350,13 +437,23 @@ const getJsonCms = () => {
     try {
         if (fs.existsSync(cmsFilePath)) {
             const raw = fs.readFileSync(cmsFilePath, 'utf8');
-            return JSON.parse(raw);
+            const parsed = JSON.parse(raw);
+            return {
+                ...defaultCmsData,
+                ...parsed,
+                heroSlides: (parsed.heroSlides && parsed.heroSlides.length >= 3) ? parsed.heroSlides : defaultCmsData.heroSlides
+            };
         }
     } catch (e) {
         console.warn("CMS read warning:", e.message);
     }
-    return inMemoryCms;
+    return {
+        ...defaultCmsData,
+        ...(inMemoryCms || {}),
+        heroSlides: (inMemoryCms && inMemoryCms.heroSlides && inMemoryCms.heroSlides.length >= 3) ? inMemoryCms.heroSlides : defaultCmsData.heroSlides
+    };
 };
+
 
 const saveJsonCms = (cmsData) => {
     inMemoryCms = cmsData;

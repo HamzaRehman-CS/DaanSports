@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { SignIn, SignUp } from '@clerk/clerk-react';
 import { Lock, Mail, Building, UserCheck } from 'lucide-react';
+import SEO from '../Components/SEO/SEO';
+import { API_URL } from '../config';
 
 const LoginSignup = () => {
   const [authMethod, setAuthMethod] = useState('clerk'); // 'clerk' or 'email'
@@ -20,7 +22,7 @@ const LoginSignup = () => {
     setErrorMsg('');
     try {
       let responseData;
-      await fetch('http://localhost:4000/login', {
+      await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -44,13 +46,14 @@ const LoginSignup = () => {
     setErrorMsg('');
     try {
       let responseData;
-      await fetch('http://localhost:4000/signup', {
+      await fetch(`${API_URL}/signup`, {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       })
       .then(res => res.json())
       .then(data => responseData = data);
+
 
       if (responseData.success) {
         localStorage.setItem('auth-token', responseData.token);
@@ -66,7 +69,12 @@ const LoginSignup = () => {
 
   return (
     <div className="pt-28 pb-24 bg-[#0a0a0a] min-h-screen text-white flex items-center justify-center px-4">
+      <SEO 
+        title="B2B Wholesale Portal Login & Registration"
+        description="Sign in or register for direct access to DAAN Sports wholesale ordering desk, quotation builder, and customer order tracking."
+      />
       <div className="bg-[#18181b] border border-white/10 rounded-xl p-8 md:p-12 w-full max-w-lg shadow-2xl space-y-6">
+
         
         {/* Header */}
         <div className="text-center space-y-2">

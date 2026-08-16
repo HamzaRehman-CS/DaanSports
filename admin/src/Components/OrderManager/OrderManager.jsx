@@ -48,7 +48,7 @@ const OrderManager = () => {
   const handleCancelOrder = async (orderId) => {
     if (!window.confirm(`Are you sure you want to CANCEL order ${orderId}?`)) return;
     try {
-      const res = await fetch("http://localhost:4000/cancel-order", {
+      const res = await fetch(`${API_URL}/cancel-order`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({ orderId })
@@ -66,7 +66,7 @@ const OrderManager = () => {
   const handleDeleteOrder = async (orderId) => {
     if (!window.confirm(`⚠️ PERMANENT DELETE: Are you sure you want to delete order ${orderId} log to clear memory?`)) return;
     try {
-      const res = await fetch("http://localhost:4000/delete-order", {
+      const res = await fetch(`${API_URL}/delete-order`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({ orderId })
@@ -83,7 +83,7 @@ const OrderManager = () => {
 
   const handleTrackingUpdate = async (orderId, currentStatus, newTracking, currentNotes) => {
     try {
-      const res = await fetch("http://localhost:4000/update-order-status", {
+      const res = await fetch(`${API_URL}/update-order-status`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({

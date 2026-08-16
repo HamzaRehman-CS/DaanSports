@@ -2,7 +2,9 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useLocation, useParams, Link } from 'react-router-dom';
 import { ShopContext } from '../Context/ShopContext';
 import Item from '../Components/Item/Item';
+import SEO from '../Components/SEO/SEO';
 import { ArrowLeft, Tag, Layers } from 'lucide-react';
+import { API_URL } from '../config';
 
 const ShopCategory = (props) => {
   const { all_product } = useContext(ShopContext);
@@ -19,7 +21,7 @@ const ShopCategory = (props) => {
   const targetCategoryRaw = props.category || categoryId || '';
 
   useEffect(() => {
-    fetch("http://localhost:4000/categories")
+    fetch(`${API_URL}/categories`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -33,6 +35,7 @@ const ShopCategory = (props) => {
       })
       .catch(err => console.error("Error fetching categories:", err));
   }, [targetCategoryRaw]);
+
 
   const filteredProducts = (all_product || []).filter(item => {
     let matchesCategory = true;
@@ -72,6 +75,16 @@ const ShopCategory = (props) => {
 
   return (
     <div className="pt-28 pb-24 bg-[#0a0a0a] min-h-screen text-white px-4 md:px-8">
+      <SEO 
+        title={`${categoryTitle} — Wholesale & Bulk Sportswear`}
+        description={categorySubtitle}
+        keywords={`wholesale ${categoryTitle}, bulk ${categoryTitle}, OEM sports apparel, ${categoryTitle} manufacturer`}
+        ogImage={bgBannerImage}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: categoryTitle, url: `/category/${targetCategoryRaw}` }
+        ]}
+      />
       <div className="max-w-7xl mx-auto">
         
         {/* Navigation Breadcrumb */}
@@ -82,6 +95,7 @@ const ShopCategory = (props) => {
           <span>/</span>
           <span className="text-[#dc2626]">{categoryTitle}</span>
         </div>
+
 
         {/* Stretched Category Header Banner */}
         <div className="bg-[#18181b] border border-white/10 p-8 md:p-14 rounded-2xl mb-10 relative overflow-hidden shadow-2xl min-h-[220px] flex items-center">

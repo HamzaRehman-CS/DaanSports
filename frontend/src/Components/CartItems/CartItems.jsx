@@ -4,6 +4,7 @@ import { useUser } from '@clerk/clerk-react';
 import { Trash2, CreditCard, Tag, ArrowRight, ShieldCheck, FileText, ShoppingBag } from 'lucide-react';
 import CardPaymentModal from '../CardPaymentModal/CardPaymentModal';
 import { useNavigate, Link } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 const CartItems = () => {
   const { user, isSignedIn } = useUser();
@@ -21,13 +22,14 @@ const CartItems = () => {
   const [availableVouchers, setAvailableVouchers] = useState([]);
 
   React.useEffect(() => {
-    fetch("http://localhost:4000/vouchers")
+    fetch(`${API_URL}/vouchers`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setAvailableVouchers(data);
       })
       .catch(err => console.error("Vouchers fetch error:", err));
   }, []);
+
 
   const baseFreight = cartValue > 1000 ? 0 : (cartValue > 0 ? 150 : 0);
   const rawTotal = cartValue + baseFreight;
@@ -49,7 +51,7 @@ const CartItems = () => {
     setVoucherMsg({ type: '', text: '' });
 
     try {
-      const res = await fetch("http://localhost:4000/apply-voucher", {
+      const res = await fetch(`${API_URL}/apply-voucher`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({ code: voucherCodeInput.trim(), subtotal: cartValue })
@@ -92,7 +94,7 @@ const CartItems = () => {
         notes: "Pro-Forma Invoice Requested by Buyer"
       };
 
-      const res = await fetch("http://localhost:4000/create-order", {
+      const res = await fetch(`${API_URL}/create-order`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify(orderPayload)
@@ -138,7 +140,7 @@ const CartItems = () => {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             
-            {/* Items Table Column (8 Cols) */}
+            {/* Items Table Column (8 Cols / 61.8% Golden Split) */}
             <div className="lg:col-span-8 space-y-4">
               
               {activeCartList.map((item) => {
@@ -147,11 +149,14 @@ const CartItems = () => {
 
                 return (
                   <div key={item.id} className="bg-[#18181b] border border-white/10 rounded-xl p-4 md:p-6 flex flex-col sm:flex-row items-center gap-6 shadow-xl">
-                    <img 
-                      src={item.image} 
-                      alt={item.name} 
-                      className="w-24 h-28 object-cover rounded bg-[#0a0a0a] border border-white/10 shrink-0" 
-                    />
+                    <div className="w-28 aspect-[16/9] overflow-hidden rounded bg-[#0a0a0a] border border-white/10 shrink-0">
+                      <img 
+                        src={item.image} 
+                        alt={item.name} 
+                        className="w-full h-full object-cover" 
+                        loading="lazy"
+                      />
+                    </div>
                     
                     <div className="flex-1 text-center sm:text-left">
                       <span className="text-[10px] font-black text-[#dc2626] uppercase tracking-widest block mb-1">

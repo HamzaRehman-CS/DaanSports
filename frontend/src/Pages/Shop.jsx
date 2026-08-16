@@ -3,8 +3,11 @@ import { ArrowRight, CheckCircle, Globe, ShieldCheck, Zap, Factory, Package, Med
 import { Link } from 'react-router-dom';
 import HeroCarousel from '../Components/HeroCarousel/HeroCarousel';
 import Item from '../Components/Item/Item';
+import BentoBanners from '../Components/BentoBanners/BentoBanners';
+import SEO from '../Components/SEO/SEO';
 import { ShopContext } from '../Context/ShopContext';
 import { useAnimeReveal } from '../Components/AnimeScroll/AnimeScroll';
+import { API_URL } from '../config';
 
 const Shop = () => {
   const { all_product } = useContext(ShopContext);
@@ -15,14 +18,14 @@ const Shop = () => {
 
   useEffect(() => {
     // Fetch categories & promotional banners from backend
-    fetch("http://localhost:4000/categories")
+    fetch(`${API_URL}/categories`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setCategories(data);
       })
       .catch(err => console.error("Categories fetch error:", err));
 
-    fetch("http://localhost:4000/promotional-banners")
+    fetch(`${API_URL}/promotional-banners`)
       .then(res => res.json())
       .then(data => {
         if (data) setPromotionalBanners(data);
@@ -31,6 +34,7 @@ const Shop = () => {
   }, []);
 
   const topSellersList = (all_product || []).slice(0, 4);
+
   
   const promoCategory1Name = promotionalBanners?.promoSection1?.category || 'Trousers';
   const promoCategory2Name = promotionalBanners?.promoSection2?.category || 'Sweatshirts';
@@ -47,36 +51,35 @@ const Shop = () => {
 
   return (
     <div className="bg-[#0a0a0a] text-white overflow-hidden selection:bg-[#dc2626] selection:text-white">
+      <SEO 
+        title="DAAN Sports — #1 B2B Wholesale Apparel & Custom OEM Sportswear Manufacturer"
+        description="Direct factory manufacturer of premium wholesale tracksuits, 350 GSM heavyweight fleece hoodies, gym activewear, athletic jerseys, and outerwear. Low MOQ 50 pcs, custom OEM private labeling, and fast worldwide express shipping."
+        keywords="wholesale sportswear, bulk tracksuits, custom athletic apparel, OEM clothing manufacturer, heavyweight fleece hoodies, gym activewear supplier, private label sports apparel, B2B sportswear export"
+      />
       
       {/* 1. Hero Carousel */}
       <HeroCarousel />
 
-      {/* 2. Top Sellers Section */}
-      <section className="py-20 bg-[#0a0a0a]">
-        {/* Full-width Stretched Top Sellers Banner */}
-        <div className="w-full relative h-72 md:h-96 overflow-hidden mb-12 flex items-center justify-center border-y border-white/10 shadow-2xl anime-reveal">
-          <img 
-            src={promotionalBanners?.topSellers?.bgImage || "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=2070&auto=format&fit=crop"} 
-            alt="Top Sellers Banner" 
-            className="absolute inset-0 w-full h-full object-cover brightness-60 hover:scale-105 transition-transform duration-1000" 
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/60 to-[#0a0a0a]"></div>
-          
-          <div className="relative z-10 text-center px-4 max-w-3xl space-y-3">
-            <span className="inline-flex items-center gap-2 bg-[#dc2626] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 transform -skew-x-12">
-              <Flame size={14} className="skew-x-12" />
-              <span className="skew-x-12 inline-block">{promotionalBanners?.topSellers?.badge || "TOP SELLERS"}</span>
+      {/* 2. Bento-Style Promotional & OEM Banners Showcase */}
+      <div className="anime-reveal">
+        <BentoBanners banners={promotionalBanners} />
+      </div>
+
+      {/* 3. Top Sellers Section */}
+      <section className="py-16 bg-[#0a0a0a]">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-3 border-b border-white/10 pb-5">
+          <div>
+            <span className="text-[11px] font-black text-[#dc2626] uppercase tracking-widest flex items-center gap-1.5 mb-1">
+              <Flame size={14} className="text-[#dc2626]" />
+              HIGH-VOLUME B2B DEMAND
             </span>
-            
-            <h2 className="text-4xl md:text-6xl font-serif font-black italic uppercase text-white tracking-tight leading-none">
-              {promotionalBanners?.topSellers?.title || "TOP SELLERS — FLAGSHIP SELECTION"}
+            <h2 className="text-3xl md:text-4xl font-display font-black italic uppercase text-white tracking-tight">
+              Top Sellers & Flagship Models
             </h2>
-            
-            <p className="text-zinc-300 text-sm md:text-base font-medium max-w-xl mx-auto">
-              {promotionalBanners?.topSellers?.subtitle || "Handpicked high-performance apparel engineered for global sports teams & brands."}
-            </p>
           </div>
+          <Link to="/tracksuits" className="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white flex items-center gap-1">
+            View All Catalog <ArrowRight size={13} className="text-[#dc2626]" />
+          </Link>
         </div>
 
         {/* Top Sellers Product Grid */}
@@ -90,6 +93,7 @@ const Shop = () => {
           </div>
         </div>
       </section>
+
 
       {/* 3. Edge-to-Edge Stretched Category Banner 1 */}
       <section className="py-16 bg-[#141416] border-y border-white/10">

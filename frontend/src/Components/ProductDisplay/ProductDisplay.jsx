@@ -43,28 +43,30 @@ const ProductDisplay = (props) => {
         {/* Main Product Hero Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16">
           
-          {/* Gallery Column (5 Cols) */}
+          {/* Gallery Column (5 Cols / 38.2% Golden Split) */}
           <div className="lg:col-span-5 flex flex-col-reverse sm:flex-row gap-4">
             <div className="flex sm:flex-col gap-3 justify-center">
               {imageList.map((img, index) => (
                 <button
                   key={index}
                   onClick={() => setMainImage(img)}
-                  className={`w-16 h-20 bg-[#18181b] border rounded overflow-hidden p-1 transition-all cursor-pointer ${
+                  className={`w-16 sm:w-20 aspect-[16/9] bg-[#18181b] border rounded overflow-hidden p-0.5 transition-all cursor-pointer ${
                     mainImage === img ? 'border-[#dc2626] scale-105 shadow-lg' : 'border-white/10 opacity-70 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt={`Thumb ${index}`} className="w-full h-full object-cover rounded" />
+                  <img src={img} alt={`Thumb ${index}`} className="w-full h-full object-cover rounded" loading="lazy" />
                 </button>
               ))}
             </div>
 
-            <div className="flex-1 bg-[#18181b] border border-white/10 rounded-xl overflow-hidden relative group shadow-2xl h-[420px] sm:h-[500px]">
+            {/* Strict 16:9 Main Image Frame */}
+            <div className="flex-1 bg-[#18181b] border border-white/10 rounded-xl overflow-hidden relative group shadow-2xl aspect-[16/9] w-full flex items-center justify-center">
               <img 
                 src={mainImage} 
-                alt={product.name} 
-                className="w-full h-full object-cover transition-all duration-700" 
+                alt={`${product.name} - DAAN Sports Factory Spec`} 
+                className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105" 
                 referrerPolicy="no-referrer"
+                loading="eager"
               />
               <div className="absolute top-4 left-4 bg-[#dc2626] text-white px-3 py-1 font-black uppercase text-[10px] tracking-widest transform -skew-x-12 shadow-lg">
                 <span className="skew-x-12 inline-block">MOQ: {product.moq || 50} Pcs</span>

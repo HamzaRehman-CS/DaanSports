@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { ArrowRight, ShieldCheck, Factory, Award } from 'lucide-react';
+import SEO from '../Components/SEO/SEO';
 
 const GenericPage = () => {
   const location = useLocation();
@@ -9,7 +10,16 @@ const GenericPage = () => {
 
   return (
     <div className="pt-32 pb-24 min-h-[80vh] flex flex-col items-center justify-center bg-[#0a0a0a] text-white px-4 text-center">
+      <SEO 
+        title={`${pageTitle} — DAAN Sports B2B Manufacturing`}
+        description={`Learn more about DAAN Sports ${pageTitle}. High capacity sportswear manufacturing, OEM private labeling, and ISO certified production.`}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: pageTitle, url: location.pathname }
+        ]}
+      />
       <div className="max-w-3xl bg-[#18181b] border border-white/10 p-10 md:p-16 rounded-xl shadow-2xl space-y-6">
+
         
         <span className="inline-block bg-[#dc2626] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 transform -skew-x-12">
           <span className="skew-x-12 inline-block">DAAN SPORTS B2B APPAREL</span>

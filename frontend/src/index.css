@@ -1,22 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Edu+VIC+WA+NT+Hand+Pre:wght@400..700&family=Space+Grotesk:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Space+Grotesk:wght@300..700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Edu VIC WA NT Hand Pre", cursive;
-  --font-serif: "Space Grotesk", sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display: "Space Grotesk", sans-serif;
-  --font-space: "Space Grotesk", sans-serif;
-  --font-hand: "Edu VIC WA NT Hand Pre", cursive;
+  --font-serif: "Space Grotesk", sans-serif;
+  --font-mono: "Space Grotesk", monospace;
   
-  /* Golden Ratio (60 - 30 - 10) Color System */
-  --color-golden-bg-60: #0a0a0a;         /* 60% Dominant Base */
-  --color-golden-surface-30: #141416;    /* 30% Secondary Surfaces & Cards */
+  /* Golden Ratio (60 - 30 - 10) Color Harmony */
+  --color-golden-bg-60: #0a0a0a;         /* 60% Dominant Background Base */
+  --color-golden-surface-30: #141416;    /* 30% Secondary Card & Section Surfaces */
   --color-golden-surface-elevated: #18181b;
-  --color-golden-accent-10: #dc2626;     /* 10% Vibrant Primary Accent */
-  --color-golden-accent-gold: #f59e0b;   /* 1.618 Complementary Accent */
+  --color-golden-accent-10: #dc2626;     /* 10% High-Energy Primary Brand Accent */
+  --color-golden-accent-gold: #f59e0b;   /* 1.618 Harmonious Secondary Accent */
   
   --animate-marquee: marquee 22s linear infinite;
-  --animate-fade-up: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-fade-up: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @layer utilities {
@@ -27,94 +26,142 @@
 
   .space-grotesk {
     font-family: "Space Grotesk", sans-serif !important;
-    font-optical-sizing: auto;
-    font-style: normal;
   }
 
-  .edu-vic-wa-nt-hand-pre {
-    font-family: "Edu VIC WA NT Hand Pre", cursive !important;
-    font-optical-sizing: auto;
-    font-style: normal;
+  .jakarta-sans {
+    font-family: "Plus Jakarta Sans", sans-serif !important;
+  }
+
+  /* Strict 16:9 Aspect Ratio Container for Zero Image Distortion */
+  .aspect-16-9 {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+  }
+
+  .aspect-16-9 img,
+  .aspect-16-9 video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* Golden Ratio 61.8% / 38.2% Layout Grid */
+  .grid-golden-main {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 1024px) {
+    .grid-golden-main {
+      grid-template-columns: 61.8% 38.2%;
+    }
+    .grid-golden-reverse {
+      grid-template-columns: 38.2% 61.8%;
+    }
+  }
+
+  /* Hardware acceleration for zero lag */
+  .smooth-render {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform, opacity;
   }
 }
 
-/* Golden Ratio (1.618 / Phi) Typography Scale & Hierarchy */
+/* Golden Ratio (1.618 / Phi) Modular Scale, Line Heights & Typography */
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    font-size: 16px; /* Base 1.0rem */
+  }
+
   body {
     background-color: #0a0a0a;
     color: #f4f4f5;
-    font-family: "Edu VIC WA NT Hand Pre", cursive;
+    font-family: "Plus Jakarta Sans", "Inter", sans-serif;
     font-size: 1rem; /* 16px Base */
-    line-height: 1.618; /* Golden ratio line height */
+    line-height: 1.618; /* Golden ratio body line height */
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4, h5, h6, .font-display, .font-serif {
     font-family: "Space Grotesk", sans-serif;
-    font-optical-sizing: auto;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
+    font-weight: 700;
   }
 
-  /* Golden Ratio 1.618 Exponential Font Scale */
+  /* Golden Ratio 1.618 Modular Typography Hierarchy */
   h1, .font-h1 {
     font-family: "Space Grotesk", sans-serif;
-    font-size: clamp(2.618rem, 6vw, 4.236rem); /* ~42px to ~68px (1.618^3) */
+    font-size: clamp(2.2rem, 5vw, 4.236rem); /* 1.618^3 scale */
     line-height: 1.1;
-    font-weight: 700;
+    font-weight: 800;
   }
 
   h2, .font-h2 {
     font-family: "Space Grotesk", sans-serif;
-    font-size: clamp(1.618rem, 4vw, 2.618rem); /* ~26px to ~42px (1.618^2) */
+    font-size: clamp(1.618rem, 3.5vw, 2.618rem); /* 1.618^2 scale */
     line-height: 1.2;
     font-weight: 700;
   }
 
   h3, .font-h3 {
     font-family: "Space Grotesk", sans-serif;
-    font-size: clamp(1.272rem, 2.5vw, 2.06rem); /* ~20px to ~33px (1.618^1.5) */
+    font-size: clamp(1.272rem, 2.2vw, 1.854rem); /* 1.618^1.5 scale */
     line-height: 1.3;
     font-weight: 700;
   }
 
   h4, .font-h4 {
     font-family: "Space Grotesk", sans-serif;
-    font-size: 1.618rem; /* ~26px (1.618^1) */
+    font-size: 1.618rem; /* 1.618^1 scale */
     line-height: 1.4;
     font-weight: 600;
   }
 
   .font-display-hero {
     font-family: "Space Grotesk", sans-serif;
-    font-size: clamp(3.2rem, 8vw, 5.37rem); /* ~86px to 110px */
-    line-height: 0.95;
-    font-weight: 800;
+    font-size: clamp(2.8rem, 7vw, 5.236rem);
+    line-height: 0.98;
+    font-weight: 900;
   }
 
   .text-golden-small {
-    font-size: 0.618rem; /* ~10px (1 / 1.618) */
+    font-size: 0.618rem; /* 1 / 1.618 ≈ 10px */
     letter-spacing: 0.1618em;
   }
 
   p, span, label, input, select, textarea, button, a {
-    font-family: "Edu VIC WA NT Hand Pre", cursive;
+    font-family: "Plus Jakarta Sans", "Inter", sans-serif;
   }
 
+  /* Performance & Zero-Lag animations */
   @keyframes marquee {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
   }
 
   @keyframes fadeUp {
-    0% { transform: translateY(40px); opacity: 0; }
+    0% { transform: translateY(20px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
   }
 }
 
-/* Custom scrollbars */
+/* Responsive 16:9 Image container rules */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Custom golden scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: #0a0a0a;

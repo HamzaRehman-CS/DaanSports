@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, EffectFade, Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
@@ -6,45 +6,79 @@ import 'swiper/css/effect-fade';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Sparkles, ShieldCheck, Factory, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { API_URL } from '../../config';
 
-const defaultSlides = [
+const fallbackSlides = [
   {
     id: 1,
-    bgImage: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=70&w=1200&auto=format&fit=crop",
+    badgeText: "PREMIUM MANUFACTURER",
     tag: "Premium Manufacturer",
     title: "ENGINEERED<br />FOR <span class='text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-800 text-[0.82em] tracking-tight inline-block py-2 leading-normal overflow-visible'>EXCELLENCE</span>",
     description: "Custom Manufacturing • Private Label • Global Export Solutions. The trusted partner for global sportswear and activewear brands.",
-    productImg: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=70&w=600&auto=format&fit=crop"
+    subtitle: "Custom Manufacturing • Private Label • Global Export Solutions. The trusted partner for global sportswear and activewear brands.",
+    specBadge: "330 GSM FLEECE",
+    productName: "Pro Tech Fleece Tracksuit",
+    priceText: "From $24.50 /pc",
+    bgImage: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=1600&auto=format&fit=crop",
+    productImg: "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=1000&auto=format&fit=crop",
+    primaryCtaText: "Explore Collections",
+    primaryCtaLink: "/tracksuits"
   },
   {
     id: 2,
-    bgImage: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=70&w=1200&auto=format&fit=crop",
+    badgeText: "STREETWEAR & HOODIES",
     tag: "Pro Activewear & Hoodies",
     title: "ELEVATE<br />YOUR <span class='text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-800 text-[0.82em] tracking-tight inline-block py-2 leading-normal overflow-visible'>BRAND</span>",
-    description: "Grade A fabrics and flawless stitching. Expand your collection with our high-volume production lines.",
-    productImg: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=70&w=600&auto=format&fit=crop" 
+    description: "Heavyweight 350 GSM French Terry pullovers, custom drop-shoulder streetwear fits, and high-density 3D embroidery.",
+    subtitle: "Heavyweight 350 GSM French Terry pullovers, custom drop-shoulder streetwear fits, and high-density 3D embroidery.",
+    specBadge: "350 GSM FRENCH TERRY",
+    productName: "Heavyweight Boxy Hoodie",
+    priceText: "From $18.90 /pc",
+    bgImage: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1600&auto=format&fit=crop",
+    productImg: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1000&auto=format&fit=crop",
+    primaryCtaText: "View Hoodies",
+    primaryCtaLink: "/sweatshirts"
   },
   {
     id: 3,
-    bgImage: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=70&w=1200&auto=format&fit=crop",
+    badgeText: "GLOBAL EXPORT SOLUTIONS",
     tag: "Global Export Solutions",
     title: "WORLDWIDE<br /><span class='text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-800 text-[0.72em] tracking-tight inline-block py-2 leading-normal overflow-visible'>DISTRIBUTION</span>",
-    description: "Multi-stage quality assurance and worldwide door-to-door delivery. Minimum Order Quantity starting at 50 pcs.",
-    productImg: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=70&w=600&auto=format&fit=crop" 
+    description: "Full ISO 9001 certified QC assurance, OEM private label silicone tagging, and worldwide door-to-door express cargo.",
+    subtitle: "Full ISO 9001 certified QC assurance, OEM private label silicone tagging, and worldwide door-to-door express cargo.",
+    specBadge: "ISO 9001 CERTIFIED",
+    productName: "Performance Compression Set",
+    priceText: "From $16.50 /pc",
+    bgImage: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1600&auto=format&fit=crop",
+    productImg: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1000&auto=format&fit=crop",
+    primaryCtaText: "Custom Orders",
+    primaryCtaLink: "/custom-orders"
   }
 ];
 
-export default function HeroCarousel({ slides = defaultSlides }) {
+export default function HeroCarousel() {
+  const [slides, setSlides] = useState(fallbackSlides);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  useEffect(() => {
+    fetch(`${API_URL}/cms`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && Array.isArray(data.heroSlides) && data.heroSlides.length > 0) {
+          setSlides(data.heroSlides);
+        }
+      })
+      .catch(err => console.error("Error fetching Hero CMS:", err));
+  }, []);
+
   return (
-    <section className="relative h-[100svh] min-h-[720px] md:min-h-[600px] w-full overflow-hidden bg-[#0a0a0a]">
+    <section className="relative min-h-[640px] lg:min-h-[720px] w-full overflow-hidden bg-[#0a0a0a] flex items-center">
       <Swiper
         modules={[Autoplay, EffectFade, Navigation, Pagination]}
         effect="fade"
-        speed={1500}
+        speed={1200}
         autoplay={{ delay: 5000, disableOnInteraction: false }}
         navigation
         pagination={{ clickable: true }}
@@ -53,29 +87,41 @@ export default function HeroCarousel({ slides = defaultSlides }) {
       >
         {slides.map((slide, index) => {
           const isActive = activeIndex === index;
+          const bgImg = slide.bgImage || slide.image || fallbackSlides[index % fallbackSlides.length].bgImage;
+          const prodImg = slide.productImg || slide.bgImage || fallbackSlides[index % fallbackSlides.length].productImg;
+          const badge = slide.badgeText || slide.tag || "PREMIUM MANUFACTURER";
+          const titleHtml = slide.title || "ENGINEERED FOR EXCELLENCE";
+          const desc = slide.subtitle || slide.description || "Custom Manufacturing • Private Label • Global Export Solutions.";
+          const ctaText = slide.primaryCtaText || "Explore Collections";
+          const ctaLink = slide.primaryCtaLink || "/tracksuits";
+          const spec = slide.specBadge || "PRO APPAREL SPEC";
+          const prodName = slide.productName || "Custom OEM Apparel";
+          const price = slide.priceText || "From $24.50 /pc";
 
           return (
-            <SwiperSlide key={slide.id || index} className="relative w-full h-full">
-              <div className="absolute inset-0 z-0">
+            <SwiperSlide key={slide.id || index} className="relative w-full h-full py-20 md:py-24">
+              {/* Background Ambient Glow & Texture */}
+              <div className="absolute inset-0 z-0 overflow-hidden">
                 <img 
-                  src={slide.bgImage || slide.image} 
-                  alt="bg" 
-                  className="w-full h-full object-cover opacity-20"
+                  src={bgImg} 
+                  alt="Background" 
+                  className="w-full h-full object-cover opacity-20 scale-105 filter blur-xs"
                   referrerPolicy="no-referrer"
                   loading="lazy"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-[#0a0a0a]/90" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/75 to-transparent" />
               </div>
 
-              <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent"></div>
-              <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent"></div>
-
-              <div className="relative z-20 h-full max-w-7xl mx-auto px-6 md:px-8 w-full flex flex-col md:flex-row items-center justify-center pt-20 sm:pt-24 md:pt-0">
+              {/* Foreground Grid Container */}
+              <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-8 w-full flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-14 pt-8 md:pt-12">
                 
-                <div className="max-w-3xl transform md:-skew-x-6 w-full md:w-[55%] flex flex-col z-40 mt-0 md:mt-12">
+                {/* Left Column: Headline, Specs & CTAs */}
+                <div className="w-full lg:w-[55%] flex flex-col z-30">
                   <AnimatePresence mode="wait">
                     {isActive && (
                       <motion.div
-                        key={`text-${index}`}
+                        key={`hero-text-${index}`}
                         initial="hidden"
                         animate="visible"
                         exit="hidden"
@@ -84,98 +130,153 @@ export default function HeroCarousel({ slides = defaultSlides }) {
                           visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
                         }}
                       >
+                        {/* Top Badge */}
                         <motion.div 
                           variants={{
-                            hidden: { opacity: 0, x: -50 },
-                            visible: { opacity: 1, x: 0, transition: { duration: 1, ease: "easeOut" } }
+                            hidden: { opacity: 0, y: -20 },
+                            visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
                           }}
-                          className="inline-block bg-[#dc2626] px-2 py-1 md:px-3 md:py-1 mb-3 md:mb-6 transform -skew-x-12 self-start"
+                          className="inline-flex items-center gap-2 bg-[#dc2626] px-3 py-1 mb-4 rounded-sm self-start shadow-lg"
                         >
-                          <span className="text-white text-[9px] sm:text-[10px] md:text-xs font-bold uppercase tracking-widest block skew-x-12">{slide.tag || slide.badgeText || "DAAN SPORTS B2B"}</span>
+                          <Sparkles size={13} className="text-[#f59e0b]" />
+                          <span className="text-white text-[10px] md:text-xs font-black uppercase tracking-widest block">
+                            {badge}
+                          </span>
                         </motion.div>
 
+                        {/* Big Headline */}
                         <motion.h1 
                           variants={{
-                            hidden: { opacity: 0, x: -80 },
-                            visible: { opacity: 1, x: 0, transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } }
+                            hidden: { opacity: 0, x: -50 },
+                            visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
                           }}
-                          className="text-3xl sm:text-4xl md:text-5xl lg:text-[5.2rem] font-display uppercase leading-[1.1] tracking-tight text-white mb-3 md:mb-6 py-2 overflow-visible"
-                          dangerouslySetInnerHTML={{ __html: slide.title }}
+                          className="text-3xl sm:text-5xl lg:text-6xl font-display font-black uppercase leading-[1.08] tracking-tight text-white mb-4 py-1"
+                          dangerouslySetInnerHTML={{ __html: titleHtml }}
                         />
 
+                        {/* Subtitle Description */}
                         <motion.p 
                           variants={{
-                            hidden: { opacity: 0, y: 30 },
-                            visible: { opacity: 1, y: 0, transition: { duration: 1, ease: "easeOut" } }
+                            hidden: { opacity: 0, y: 20 },
+                            visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
                           }}
-                          className="text-xs sm:text-sm md:text-xl text-zinc-300 max-w-xl mb-6 md:mb-10 md:skew-x-6 leading-relaxed"
+                          className="text-sm md:text-base text-zinc-300 max-w-xl mb-8 leading-relaxed font-normal"
                         >
-                          {slide.description || slide.subtitle}
+                          {desc}
                         </motion.p>
 
+                        {/* Action Buttons */}
                         <motion.div 
                           variants={{
                             hidden: { opacity: 0, y: 20 },
-                            visible: { opacity: 1, y: 0, transition: { duration: 1, ease: "easeOut" } }
+                            visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
                           }}
-                          className="flex flex-col sm:flex-row flex-wrap gap-2 md:gap-4 md:skew-x-6 w-full sm:w-auto"
+                          className="flex flex-wrap gap-4 items-center"
                         >
-                          <Link to="/tracksuits" className="bg-white text-[#0a0a0a] px-4 py-3 md:px-8 md:py-4 font-display text-xs md:text-lg uppercase tracking-wider hover:bg-zinc-200 transition-colors duration-300 text-center w-full sm:w-auto font-black italic">
-                            Explore Collections
+                          <Link 
+                            to={ctaLink} 
+                            className="bg-white text-[#0a0a0a] px-7 py-3.5 font-display font-black italic uppercase text-xs md:text-sm tracking-wider hover:bg-[#dc2626] hover:text-white transition-all transform -skew-x-12 shadow-xl inline-flex items-center gap-2"
+                          >
+                            <span className="skew-x-12 inline-block">{ctaText}</span>
+                            <ArrowRight size={16} className="skew-x-12" />
                           </Link>
-                          <Link to="/contact" className="border border-white/30 text-white px-4 py-3 md:px-8 md:py-4 font-display text-xs md:text-lg uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-white/10 transition-colors duration-300 text-center w-full sm:w-auto font-black italic">
-                            Request Quote <ArrowRight size={16} />
+                          
+                          <Link 
+                            to="/custom-orders" 
+                            className="border border-white/25 text-white px-7 py-3.5 font-display font-black italic uppercase text-xs md:text-sm tracking-wider hover:bg-white/10 transition-all transform -skew-x-12 text-center"
+                          >
+                            <span className="skew-x-12 inline-block">Request Tech-Pack</span>
                           </Link>
+                        </motion.div>
+
+                        {/* Inline Trust Badges */}
+                        <motion.div 
+                          variants={{
+                            hidden: { opacity: 0 },
+                            visible: { opacity: 1, transition: { delay: 0.4 } }
+                          }}
+                          className="flex items-center gap-6 mt-8 pt-6 border-t border-white/10 text-zinc-400 text-xs font-semibold uppercase tracking-wider"
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <Factory size={15} className="text-[#dc2626]" />
+                            <span>50K+ Monthly Capacity</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <ShieldCheck size={15} className="text-[#dc2626]" />
+                            <span>MOQ 50 Pcs</span>
+                          </div>
                         </motion.div>
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
 
-                <div className="flex w-full md:w-[45%] justify-center items-center mt-8 sm:mt-12 md:mt-0 perspective-[1000px]">
+                {/* Right Column: Full-Bleed Athletic Showcase Card (NO EMPTY BLACK BOX) */}
+                <div className="w-full lg:w-[45%] flex justify-center items-center">
                   <AnimatePresence mode="wait">
                     {isActive && (
                       <motion.div
-                        key={`img-${index}`}
-                        initial={{ opacity: 0, x: 100, scale: 0.9, rotateY: 15 }}
-                        animate={{ 
-                          opacity: 1, 
-                          x: 0, 
-                          scale: 1,
-                          rotateY: 0,
-                          y: [0, -10, 0]
-                        }}
-                        exit={{ opacity: 0, x: -50, transition: { duration: 0.5 } }}
-                        transition={{ 
-                          opacity: { duration: 1.0, ease: "easeOut", delay: 0.2 },
-                          x: { duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 },
-                          scale: { duration: 1.2, ease: "easeOut", delay: 0.2 },
-                          rotateY: { duration: 1.2, ease: "easeOut", delay: 0.2 },
-                          y: { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1.5 }
-                        }}
-                        className="relative z-30"
-                        style={{ willChange: "transform, opacity" }}
+                        key={`hero-card-${index}`}
+                        initial={{ opacity: 0, scale: 0.92, y: 30 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.4 } }}
+                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                        className="relative w-full max-w-md"
                       >
-                        <div className="relative transform md:-skew-x-6 border border-white/10 bg-[#18181b] shadow-2xl p-2 md:p-3">
-                          <div className="relative overflow-hidden w-[220px] h-[280px] sm:w-[320px] sm:h-[380px] md:w-[350px] md:h-[450px] lg:w-[420px] lg:h-[550px]">
+                        {/* Glowing Border Background */}
+                        <div className="absolute -inset-1.5 bg-gradient-to-r from-[#dc2626]/40 via-red-900/20 to-[#f59e0b]/30 rounded-2xl blur-lg opacity-70 group-hover:opacity-100 transition duration-1000" />
+                        
+                        {/* High-End Apparel Card */}
+                        <div className="relative rounded-2xl overflow-hidden border border-white/15 bg-[#141416] shadow-2xl">
+                          
+                          {/* Image Box - Proportional 16:9 / 4:3 format with no dead space */}
+                          <div className="relative w-full aspect-[4/3] overflow-hidden bg-[#18181b]">
                             <img 
-                              src={slide.productImg || slide.bgImage} 
-                              alt="Featured product" 
-                              className="w-full h-full object-cover transition-all duration-700"
+                              src={prodImg} 
+                              alt={prodName} 
+                              className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700 ease-out"
                               referrerPolicy="no-referrer"
+                              loading="lazy"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
                             
-                            <div className="absolute bottom-6 left-6 skew-x-6">
-                              <span className="text-[10px] text-zinc-400 font-bold tracking-widest uppercase">Featured Edition</span>
-                              <div className="text-white font-display text-2xl tracking-widest uppercase italic font-black">Premium Spec</div>
+                            {/* Gradient Overlay on image */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/20" />
+                            
+                            {/* Top Badge: Spec Chip */}
+                            <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md border border-white/20 px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider text-white flex items-center gap-1.5 shadow-md">
+                              <Award size={12} className="text-[#f59e0b]" />
+                              <span>{spec}</span>
+                            </div>
+
+                            {/* Top Right: MOQ Pill */}
+                            <div className="absolute top-3 right-3 bg-[#dc2626] text-white px-2.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider shadow-md">
+                              MOQ 50 PCS
+                            </div>
+
+                            {/* Integrated Product Footer Bar ON the Image */}
+                            <div className="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-black via-black/90 to-transparent flex items-end justify-between gap-4">
+                              <div>
+                                <span className="text-[10px] font-bold text-[#dc2626] uppercase tracking-widest block mb-0.5">
+                                  FEATURED WHOLESALE DESIGN
+                                </span>
+                                <h3 className="text-lg md:text-xl font-display font-black italic uppercase text-white leading-tight">
+                                  {prodName}
+                                </h3>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <span className="text-xs font-black text-white bg-white/10 backdrop-blur-md px-3 py-1.5 rounded border border-white/15 block">
+                                  {price}
+                                </span>
+                              </div>
                             </div>
                           </div>
+
                         </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
+
               </div>
             </SwiperSlide>
           );
@@ -186,16 +287,32 @@ export default function HeroCarousel({ slides = defaultSlides }) {
         .swiper-button-next, .swiper-button-prev {
           color: white !important;
           transition: 0.3s;
+          width: 44px !important;
+          height: 44px !important;
+          background: rgba(0, 0, 0, 0.5);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 50%;
+        }
+        .swiper-button-next:after, .swiper-button-prev:after {
+          font-size: 16px !important;
+          font-weight: bold;
         }
         .swiper-button-next:hover, .swiper-button-prev:hover {
-          color: #dc2626 !important;
+          color: #fff !important;
+          background: #dc2626 !important;
+          border-color: #dc2626 !important;
         }
         .swiper-pagination-bullet {
           background: white !important;
-          opacity: 0.5;
+          opacity: 0.4;
+          width: 24px !important;
+          height: 4px !important;
+          border-radius: 2px !important;
+          transition: all 0.3s ease;
         }
         .swiper-pagination-bullet-active {
           opacity: 1;
+          width: 36px !important;
           background: #dc2626 !important;
         }
       `}</style>

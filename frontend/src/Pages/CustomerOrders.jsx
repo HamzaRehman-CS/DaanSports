@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { Package, Clock, CheckCircle2, Truck, AlertCircle, Shield, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { API_URL } from '../config';
 
 const CustomerOrders = () => {
   const { user, isLoaded, isSignedIn } = useUser();
@@ -21,7 +22,7 @@ const CustomerOrders = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:4000/user-orders?email=${encodeURIComponent(userEmail)}`);
+      const res = await fetch(`${API_URL}/user-orders?email=${encodeURIComponent(userEmail)}`);
       const data = await res.json();
       setOrders(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -30,6 +31,7 @@ const CustomerOrders = () => {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     if (isLoaded) {

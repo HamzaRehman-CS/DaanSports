@@ -146,6 +146,42 @@ const SiteManager = () => {
                         onChange={(e) => handleSlideChange(idx, 'bgImage', e.target.value)}
                       />
                     </div>
+                    <div className="input-field">
+                      <label>Featured Product Image URL</label>
+                      <input
+                        type="text"
+                        value={slide.productImg || ''}
+                        onChange={(e) => handleSlideChange(idx, 'productImg', e.target.value)}
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div className="input-field">
+                      <label>Featured Product Title</label>
+                      <input
+                        type="text"
+                        value={slide.productName || ''}
+                        onChange={(e) => handleSlideChange(idx, 'productName', e.target.value)}
+                        placeholder="e.g. Pro Tech Fleece Tracksuit"
+                      />
+                    </div>
+                    <div className="input-field">
+                      <label>Spec Tag Badge</label>
+                      <input
+                        type="text"
+                        value={slide.specBadge || ''}
+                        onChange={(e) => handleSlideChange(idx, 'specBadge', e.target.value)}
+                        placeholder="e.g. 330 GSM FLEECE"
+                      />
+                    </div>
+                    <div className="input-field">
+                      <label>Price Display</label>
+                      <input
+                        type="text"
+                        value={slide.priceText || ''}
+                        onChange={(e) => handleSlideChange(idx, 'priceText', e.target.value)}
+                        placeholder="e.g. From $24.50 /pc"
+                      />
+                    </div>
                     <div className="input-field full-width">
                       <label>Main Headline Title</label>
                       <input
@@ -179,6 +215,7 @@ const SiteManager = () => {
                       />
                     </div>
                   </div>
+
                 </div>
               ))}
             </div>

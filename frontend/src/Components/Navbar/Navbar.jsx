@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, ChevronDown, ArrowRight, Grid, X, Menu } from 'lucide-react';
 import { ShopContext } from '../../Context/ShopContext';
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
+import { API_URL } from '../../config';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -28,13 +29,14 @@ const Navbar = () => {
   }, [location]);
 
   useEffect(() => {
-    fetch("http://localhost:4000/categories")
+    fetch(`${API_URL}/categories`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setCategories(data);
       })
       .catch(err => console.error("Categories fetch error:", err));
   }, []);
+
 
   const handleSearch = (e) => {
     e.preventDefault();

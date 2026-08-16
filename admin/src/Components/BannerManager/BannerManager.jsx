@@ -5,30 +5,50 @@ import { API_URL } from '../../config';
 const BannerManager = () => {
   const [categories, setCategories] = useState([]);
   const [banners, setBanners] = useState({
-    topSellers: {
-      title: 'TOP SELLERS — FLAGSHIP EDITION',
-      subtitle: 'Handpicked Performance Gear & High-Volume Custom Apparel',
-      badge: 'BESTSELLER SELECTION',
-      bgImage: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=2070&auto=format&fit=crop'
+    tallVertical: {
+      category: 'Tracksuits',
+      title: 'FLAGSHIP TEAM TRACKSUITS',
+      subtitle: 'Custom 330 GSM combed fleece & interlock sets engineered for elite athletics.',
+      badge: 'FLAGSHIP SPEC',
+      ctaText: 'Explore Tracksuits',
+      bgImage: 'https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=1200&auto=format&fit=crop'
     },
-    promoSection1: {
-      category: 'Trousers',
-      title: 'TROUSERS & JOGGERS — 10% OFF',
-      discountText: 'WHOLESALE BULK SPECIAL OFFER',
-      subtitle: 'Heavyweight 330 GSM combed cotton fleece & tri-blend warm-up joggers',
-      bgImage: 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=2070&auto=format&fit=crop'
-    },
-    promoSection2: {
+    wideFeature: {
       category: 'Sweatshirts',
-      title: 'HEAVYWEIGHT HOODIES COLLECTION',
-      discountText: 'HIGH-DENSITY EMBROIDERY READY',
-      subtitle: '350 GSM French Terry pullovers and drop-shoulder streetwear cuts',
-      bgImage: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=2070&auto=format&fit=crop'
+      title: 'HEAVYWEIGHT 350 GSM HOODIES',
+      subtitle: '100% French Terry pullovers & drop-shoulder streetwear cuts ready for 3D embroidery.',
+      discountText: '15% BULK DISCOUNT',
+      badge: 'HIGH-DENSITY EMBROIDERY',
+      ctaText: 'View Hoodies',
+      bgImage: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1600&auto=format&fit=crop'
     },
-    customBanners: []
+    compactA: {
+      category: 'Trousers',
+      title: 'Tri-Blend Athletic Joggers',
+      subtitle: 'Reinforced zipper pockets & ribbed cuffs',
+      discountText: '10% OFF',
+      ctaText: 'Shop Joggers',
+      bgImage: 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=1000&auto=format&fit=crop'
+    },
+    compactB: {
+      category: 'Activewear',
+      title: 'Pro Compression Sets',
+      subtitle: 'Sweat-wicking 4-way performance stretch',
+      discountText: 'PRO SPEC',
+      ctaText: 'Shop Activewear',
+      bgImage: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1000&auto=format&fit=crop'
+    },
+    oemStrip: {
+      title: 'DIRECT OEM / ODM PRIVATE LABEL MANUFACTURING',
+      subtitle: 'Full custom labeling, silicone tags, custom GSM weaving, and express airway cargo delivery worldwide.',
+      badge: 'ISO 9001 CERTIFIED',
+      ctaText: 'Request Tech-Pack Quote',
+      bgImage: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=2000&auto=format&fit=crop'
+    }
   });
 
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('bento'); // 'bento' or 'preview'
 
   const fetchBannersAndCategories = async () => {
     setLoading(true);
@@ -40,10 +60,14 @@ const BannerManager = () => {
       const bData = await bRes.json();
       const cData = await cRes.json();
 
-      if (bData && bData.topSellers) {
+      if (bData) {
         setBanners({
-          ...bData,
-          customBanners: bData.customBanners || []
+          tallVertical: bData.tallVertical || banners.tallVertical,
+          wideFeature: bData.wideFeature || banners.wideFeature,
+          compactA: bData.compactA || banners.compactA,
+          compactB: bData.compactB || banners.compactB,
+          oemStrip: bData.oemStrip || banners.oemStrip,
+          ...bData
         });
       }
       if (Array.isArray(cData)) setCategories(cData);
@@ -68,7 +92,7 @@ const BannerManager = () => {
       });
       const data = await res.json();
       if (data.success) {
-        alert("🎉 All Promotional & Category Banners Saved Successfully!");
+        alert("🎉 Bento-Style Promotional Banners Saved & Synced Live!");
         fetchBannersAndCategories();
       } else {
         alert("Error saving banners: " + (data.error || "Unknown error"));
@@ -78,317 +102,336 @@ const BannerManager = () => {
     }
   };
 
-  const handleAddCustomBanner = () => {
-    const defaultCatName = categories.length > 0 ? categories[0].name : "Tracksuits";
-    const newB = {
-      id: Date.now(),
-      category: defaultCatName,
-      title: 'NEW PROMOTIONAL COLLECTION',
-      discountText: 'FACTORY DIRECT SPECIAL',
-      subtitle: 'Custom OEM sportswear manufacturing with low MOQ.',
-      bgImage: 'https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=2070&auto=format&fit=crop'
-    };
-    setBanners({
-      ...banners,
-      customBanners: [...(banners.customBanners || []), newB]
-    });
-  };
-
-  const handleRemoveCustomBanner = (id) => {
-    setBanners({
-      ...banners,
-      customBanners: (banners.customBanners || []).filter(b => b.id !== id)
-    });
-  };
-
-  const handleCustomBannerChange = (index, field, value) => {
-    const updated = [...(banners.customBanners || [])];
-    updated[index][field] = value;
-    setBanners({
-      ...banners,
-      customBanners: updated
-    });
+  const updateBannerSection = (sectionKey, field, value) => {
+    setBanners(prev => ({
+      ...prev,
+      [sectionKey]: {
+        ...(prev[sectionKey] || {}),
+        [field]: value
+      }
+    }));
   };
 
   return (
     <div className="banner-manager-b2b">
       <div className="banner-manager-header">
         <div>
-          <h2>Promotional Banners & Stretched Sections</h2>
-          <p>Customize the Top Sellers banner and full-width category discount banners on the main website.</p>
+          <h2>Bento Grid Banner Studio</h2>
+          <p>Configure the modern Bento-style promotional showcase and OEM banners displayed on the storefront.</p>
         </div>
-        <button type="button" onClick={handleAddCustomBanner} className="add-banner-top-btn">
-          ➕ Add Custom Banner
-        </button>
+        <div className="header-actions">
+          <button 
+            type="button" 
+            onClick={() => setActiveTab(activeTab === 'bento' ? 'preview' : 'bento')}
+            className="preview-toggle-btn"
+          >
+            {activeTab === 'bento' ? '👁️ View Live Bento Preview' : '✏️ Back to Editor'}
+          </button>
+        </div>
       </div>
 
       {loading ? (
-        <div className="loading-box">Loading Banners...</div>
+        <div className="loading-box">Loading Bento Grid Data...</div>
       ) : (
         <form onSubmit={handleSaveBanners} className="banner-sections-form">
           
-          {/* Section 1: Top Sellers */}
-          <div className="banner-card">
-            <h3>🔥 1. Top Sellers Main Banner</h3>
-            <div className="banner-inputs-grid">
+          {/* LIVE BENTO GRID PREVIEW COMPONENT */}
+          <div className="bento-live-preview-container">
+            <div className="preview-heading">
+              <span className="live-pill">LIVE BENTO PREVIEW</span>
+              <h4>Storefront Bento Banner Architecture</h4>
+            </div>
+
+            <div className="bento-preview-grid">
+              {/* Tile 1: Tall Vertical */}
+              <div 
+                className="bento-pv-tile bento-pv-tall"
+                style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.4)), url(${banners.tallVertical?.bgImage})` }}
+              >
+                <div className="bento-pv-badge">{banners.tallVertical?.badge || "FLAGSHIP SPEC"}</div>
+                <div className="bento-pv-content">
+                  <h5>{banners.tallVertical?.title}</h5>
+                  <p>{banners.tallVertical?.subtitle}</p>
+                  <span className="bento-pv-btn">{banners.tallVertical?.ctaText || "Explore"}</span>
+                </div>
+              </div>
+
+              {/* Stack Right */}
+              <div className="bento-pv-stack">
+                {/* Tile 2: Wide */}
+                <div 
+                  className="bento-pv-tile bento-pv-wide"
+                  style={{ backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.9), rgba(0,0,0,0.4)), url(${banners.wideFeature?.bgImage})` }}
+                >
+                  <div className="bento-pv-tag">{banners.wideFeature?.discountText || "15% BULK DISCOUNT"}</div>
+                  <div className="bento-pv-content">
+                    <h5>{banners.wideFeature?.title}</h5>
+                    <p>{banners.wideFeature?.subtitle}</p>
+                    <span className="bento-pv-link">{banners.wideFeature?.ctaText || "View Collection"} →</span>
+                  </div>
+                </div>
+
+                {/* Dual Compact Cards */}
+                <div className="bento-pv-compact-row">
+                  <div 
+                    className="bento-pv-tile bento-pv-compact"
+                    style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.4)), url(${banners.compactA?.bgImage})` }}
+                  >
+                    <div className="bento-pv-pill">{banners.compactA?.discountText || "10% OFF"}</div>
+                    <div className="bento-pv-content">
+                      <h6>{banners.compactA?.title}</h6>
+                    </div>
+                  </div>
+
+                  <div 
+                    className="bento-pv-tile bento-pv-compact"
+                    style={{ backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.4)), url(${banners.compactB?.bgImage})` }}
+                  >
+                    <div className="bento-pv-pill">{banners.compactB?.discountText || "PRO SPEC"}</div>
+                    <div className="bento-pv-content">
+                      <h6>{banners.compactB?.title}</h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tile 5: OEM Strip Preview */}
+            <div 
+              className="bento-pv-strip"
+              style={{ backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.95), rgba(0,0,0,0.6)), url(${banners.oemStrip?.bgImage})` }}
+            >
               <div>
-                <label>Title</label>
-                <input
-                  type="text"
-                  value={banners.topSellers?.title || ''}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    topSellers: { ...banners.topSellers, title: e.target.value }
-                  })}
-                />
+                <span className="bento-pv-badge">{banners.oemStrip?.badge || "ISO 9001 CERTIFIED"}</span>
+                <h5>{banners.oemStrip?.title}</h5>
+                <p>{banners.oemStrip?.subtitle}</p>
               </div>
-              <div>
-                <label>Badge Tag</label>
-                <input
-                  type="text"
-                  value={banners.topSellers?.badge || ''}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    topSellers: { ...banners.topSellers, badge: e.target.value }
-                  })}
-                />
-              </div>
-              <div className="full-width">
-                <label>Subtitle / Description</label>
-                <input
-                  type="text"
-                  value={banners.topSellers?.subtitle || ''}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    topSellers: { ...banners.topSellers, subtitle: e.target.value }
-                  })}
-                />
-              </div>
-              <div className="full-width">
-                <label>Full-Width Stretched Background Image URL</label>
-                <input
-                  type="text"
-                  value={banners.topSellers?.bgImage || ''}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    topSellers: { ...banners.topSellers, bgImage: e.target.value }
-                  })}
-                />
-              </div>
+              <span className="bento-pv-btn">{banners.oemStrip?.ctaText || "Request Quote"}</span>
             </div>
           </div>
 
-          {/* Section 2: Trousers Promo Banner */}
-          <div className="banner-card">
-            <h3>👖 2. Category Promo Banner 1</h3>
-            <div className="banner-inputs-grid">
-              <div>
-                <label>Target Category</label>
-                <select
-                  value={banners.promoSection1?.category || 'Trousers'}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    promoSection1: { ...banners.promoSection1, category: e.target.value }
-                  })}
-                  className="banner-cat-select"
-                >
-                  {categories.map(c => (
-                    <option key={c.id} value={c.name}>{c.name}</option>
-                  ))}
-                  <option value="Trousers">Trousers</option>
-                  <option value="Tracksuits">Tracksuits</option>
-                  <option value="Sweatshirts">Sweatshirts</option>
-                  <option value="Activewear">Activewear</option>
-                </select>
-              </div>
-              <div>
-                <label>Discount Ribbon Text</label>
-                <input
-                  type="text"
-                  value={banners.promoSection1?.discountText || ''}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    promoSection1: { ...banners.promoSection1, discountText: e.target.value }
-                  })}
-                />
-              </div>
-              <div className="full-width">
-                <label>Section Title</label>
-                <input
-                  type="text"
-                  value={banners.promoSection1?.title || ''}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    promoSection1: { ...banners.promoSection1, title: e.target.value }
-                  })}
-                />
-              </div>
-              <div className="full-width">
-                <label>Subtitle</label>
-                <input
-                  type="text"
-                  value={banners.promoSection1?.subtitle || ''}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    promoSection1: { ...banners.promoSection1, subtitle: e.target.value }
-                  })}
-                />
-              </div>
-              <div className="full-width">
-                <label>Full-Width Stretched Background Image URL</label>
-                <input
-                  type="text"
-                  value={banners.promoSection1?.bgImage || ''}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    promoSection1: { ...banners.promoSection1, bgImage: e.target.value }
-                  })}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Section 3: Hoodies Promo Banner */}
-          <div className="banner-card">
-            <h3>🧥 3. Category Promo Banner 2</h3>
-            <div className="banner-inputs-grid">
-              <div>
-                <label>Target Category</label>
-                <select
-                  value={banners.promoSection2?.category || 'Sweatshirts'}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    promoSection2: { ...banners.promoSection2, category: e.target.value }
-                  })}
-                  className="banner-cat-select"
-                >
-                  {categories.map(c => (
-                    <option key={c.id} value={c.name}>{c.name}</option>
-                  ))}
-                  <option value="Sweatshirts">Sweatshirts</option>
-                  <option value="Tracksuits">Tracksuits</option>
-                  <option value="Activewear">Activewear</option>
-                  <option value="Trousers">Trousers</option>
-                </select>
-              </div>
-              <div>
-                <label>Discount Ribbon Text</label>
-                <input
-                  type="text"
-                  value={banners.promoSection2?.discountText || ''}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    promoSection2: { ...banners.promoSection2, discountText: e.target.value }
-                  })}
-                />
-              </div>
-              <div className="full-width">
-                <label>Section Title</label>
-                <input
-                  type="text"
-                  value={banners.promoSection2?.title || ''}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    promoSection2: { ...banners.promoSection2, title: e.target.value }
-                  })}
-                />
-              </div>
-              <div className="full-width">
-                <label>Subtitle</label>
-                <input
-                  type="text"
-                  value={banners.promoSection2?.subtitle || ''}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    promoSection2: { ...banners.promoSection2, subtitle: e.target.value }
-                  })}
-                />
-              </div>
-              <div className="full-width">
-                <label>Full-Width Stretched Background Image URL</label>
-                <input
-                  type="text"
-                  value={banners.promoSection2?.bgImage || ''}
-                  onChange={(e) => setBanners({
-                    ...banners,
-                    promoSection2: { ...banners.promoSection2, bgImage: e.target.value }
-                  })}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Section 4: Dynamic Custom Banners */}
-          {(banners.customBanners || []).map((cb, idx) => (
-            <div key={cb.id || idx} className="banner-card custom-banner-card">
-              <div className="banner-card-header-row">
-                <h3>🏷️ Custom Stretched Banner #{idx + 1}</h3>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveCustomBanner(cb.id)}
-                  className="remove-banner-btn"
-                >
-                  Delete Banner 🗑️
-                </button>
-              </div>
+          {/* EDITORS FOR ALL BENTO TILES */}
+          <div className="bento-editors-grid">
+            
+            {/* Tile 1 Editor */}
+            <div className="banner-card">
+              <h3>📐 1. Vertical Tall Feature Tile (Column 1)</h3>
               <div className="banner-inputs-grid">
                 <div>
-                  <label>Target Category</label>
+                  <label>Title</label>
+                  <input
+                    type="text"
+                    value={banners.tallVertical?.title || ''}
+                    onChange={(e) => updateBannerSection('tallVertical', 'title', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label>Category Target</label>
                   <select
-                    value={cb.category || ''}
-                    onChange={(e) => handleCustomBannerChange(idx, 'category', e.target.value)}
-                    className="banner-cat-select"
+                    value={banners.tallVertical?.category || ''}
+                    onChange={(e) => updateBannerSection('tallVertical', 'category', e.target.value)}
                   >
-                    {categories.map(c => (
-                      <option key={c.id} value={c.name}>{c.name}</option>
-                    ))}
-                    <option value="Tracksuits">Tracksuits</option>
-                    <option value="Sweatshirts">Sweatshirts</option>
-                    <option value="Activewear">Activewear</option>
-                    <option value="T-Shirts">T-Shirts</option>
-                    <option value="Trousers">Trousers</option>
-                    <option value="Outerwear">Outerwear</option>
+                    {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label>Ribbon / Tag Text</label>
+                  <label>Badge Text</label>
                   <input
                     type="text"
-                    value={cb.discountText || ''}
-                    onChange={(e) => handleCustomBannerChange(idx, 'discountText', e.target.value)}
+                    value={banners.tallVertical?.badge || ''}
+                    onChange={(e) => updateBannerSection('tallVertical', 'badge', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label>CTA Button Text</label>
+                  <input
+                    type="text"
+                    value={banners.tallVertical?.ctaText || ''}
+                    onChange={(e) => updateBannerSection('tallVertical', 'ctaText', e.target.value)}
                   />
                 </div>
                 <div className="full-width">
-                  <label>Section Title</label>
+                  <label>Subtitle / Feature Specs</label>
+                  <textarea
+                    rows={2}
+                    value={banners.tallVertical?.subtitle || ''}
+                    onChange={(e) => updateBannerSection('tallVertical', 'subtitle', e.target.value)}
+                  />
+                </div>
+                <div className="full-width">
+                  <label>Background Image URL</label>
                   <input
                     type="text"
-                    value={cb.title || ''}
-                    onChange={(e) => handleCustomBannerChange(idx, 'title', e.target.value)}
+                    value={banners.tallVertical?.bgImage || ''}
+                    onChange={(e) => updateBannerSection('tallVertical', 'bgImage', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Tile 2 Editor */}
+            <div className="banner-card">
+              <h3>📦 2. Wide Horizontal Feature Tile (Column 2 Top)</h3>
+              <div className="banner-inputs-grid">
+                <div>
+                  <label>Title</label>
+                  <input
+                    type="text"
+                    value={banners.wideFeature?.title || ''}
+                    onChange={(e) => updateBannerSection('wideFeature', 'title', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label>Category Target</label>
+                  <select
+                    value={banners.wideFeature?.category || ''}
+                    onChange={(e) => updateBannerSection('wideFeature', 'category', e.target.value)}
+                  >
+                    {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label>Discount / Highlight Tag</label>
+                  <input
+                    type="text"
+                    value={banners.wideFeature?.discountText || ''}
+                    onChange={(e) => updateBannerSection('wideFeature', 'discountText', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label>CTA Link Text</label>
+                  <input
+                    type="text"
+                    value={banners.wideFeature?.ctaText || ''}
+                    onChange={(e) => updateBannerSection('wideFeature', 'ctaText', e.target.value)}
                   />
                 </div>
                 <div className="full-width">
                   <label>Subtitle / Description</label>
-                  <input
-                    type="text"
-                    value={cb.subtitle || ''}
-                    onChange={(e) => handleCustomBannerChange(idx, 'subtitle', e.target.value)}
+                  <textarea
+                    rows={2}
+                    value={banners.wideFeature?.subtitle || ''}
+                    onChange={(e) => updateBannerSection('wideFeature', 'subtitle', e.target.value)}
                   />
                 </div>
                 <div className="full-width">
-                  <label>Full-Width Background Image URL</label>
+                  <label>Background Image URL</label>
                   <input
                     type="text"
-                    value={cb.bgImage || ''}
-                    onChange={(e) => handleCustomBannerChange(idx, 'bgImage', e.target.value)}
+                    value={banners.wideFeature?.bgImage || ''}
+                    onChange={(e) => updateBannerSection('wideFeature', 'bgImage', e.target.value)}
                   />
                 </div>
               </div>
             </div>
-          ))}
 
-          <button type="submit" className="save-all-banners-btn">
-            Save All Banners & Update Homepage ➔
-          </button>
+            {/* Tile 3 & 4 Editors */}
+            <div className="banner-card">
+              <h3>⚡ 3. Compact Tile A (Trousers / Joggers)</h3>
+              <div className="banner-inputs-grid">
+                <div>
+                  <label>Title</label>
+                  <input
+                    type="text"
+                    value={banners.compactA?.title || ''}
+                    onChange={(e) => updateBannerSection('compactA', 'title', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label>Discount Tag</label>
+                  <input
+                    type="text"
+                    value={banners.compactA?.discountText || ''}
+                    onChange={(e) => updateBannerSection('compactA', 'discountText', e.target.value)}
+                  />
+                </div>
+                <div className="full-width">
+                  <label>Background Image URL</label>
+                  <input
+                    type="text"
+                    value={banners.compactA?.bgImage || ''}
+                    onChange={(e) => updateBannerSection('compactA', 'bgImage', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="banner-card">
+              <h3>⚡ 4. Compact Tile B (Activewear / Compression)</h3>
+              <div className="banner-inputs-grid">
+                <div>
+                  <label>Title</label>
+                  <input
+                    type="text"
+                    value={banners.compactB?.title || ''}
+                    onChange={(e) => updateBannerSection('compactB', 'title', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label>Spec / Highlight Tag</label>
+                  <input
+                    type="text"
+                    value={banners.compactB?.discountText || ''}
+                    onChange={(e) => updateBannerSection('compactB', 'discountText', e.target.value)}
+                  />
+                </div>
+                <div className="full-width">
+                  <label>Background Image URL</label>
+                  <input
+                    type="text"
+                    value={banners.compactB?.bgImage || ''}
+                    onChange={(e) => updateBannerSection('compactB', 'bgImage', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Tile 5 Editor: OEM Strip */}
+            <div className="banner-card full-width-card">
+              <h3>🏭 5. Direct Factory OEM / ODM Innovation Strip</h3>
+              <div className="banner-inputs-grid">
+                <div>
+                  <label>Title</label>
+                  <input
+                    type="text"
+                    value={banners.oemStrip?.title || ''}
+                    onChange={(e) => updateBannerSection('oemStrip', 'title', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label>Badge Text</label>
+                  <input
+                    type="text"
+                    value={banners.oemStrip?.badge || ''}
+                    onChange={(e) => updateBannerSection('oemStrip', 'badge', e.target.value)}
+                  />
+                </div>
+                <div className="full-width">
+                  <label>Subtitle / Factory Capabilities</label>
+                  <textarea
+                    rows={2}
+                    value={banners.oemStrip?.subtitle || ''}
+                    onChange={(e) => updateBannerSection('oemStrip', 'subtitle', e.target.value)}
+                  />
+                </div>
+                <div className="full-width">
+                  <label>Background Image URL</label>
+                  <input
+                    type="text"
+                    value={banners.oemStrip?.bgImage || ''}
+                    onChange={(e) => updateBannerSection('oemStrip', 'bgImage', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="save-all-banners-bar">
+            <button type="submit" className="save-banners-btn">
+              💾 Save All Bento Banners to Database
+            </button>
+          </div>
         </form>
       )}
     </div>

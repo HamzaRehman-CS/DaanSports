@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, CreditCard, Lock, CheckCircle, ShieldAlert, Tag, Sparkles } from 'lucide-react';
+import { API_URL } from '../../config';
+
 
 const CardPaymentModal = ({
   isOpen,
@@ -69,7 +71,7 @@ const CardPaymentModal = ({
     setVoucherMsg({ type: '', text: '' });
 
     try {
-      const res = await fetch("http://localhost:4000/apply-voucher", {
+      const res = await fetch(`${API_URL}/apply-voucher`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({ code: voucherCodeInput.trim(), subtotal: cartValue || baseSubtotal })
@@ -87,6 +89,7 @@ const CardPaymentModal = ({
       setVoucherMsg({ type: 'error', text: err.message });
     }
   };
+
 
   const handleSubmitPayment = async (e) => {
     e.preventDefault();
@@ -124,7 +127,7 @@ const CardPaymentModal = ({
         notes: notes || "Direct Card Authorized Wholesale Order"
       };
 
-      const res = await fetch("http://localhost:4000/create-order", {
+      const res = await fetch(`${API_URL}/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderPayload)

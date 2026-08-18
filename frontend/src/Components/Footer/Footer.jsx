@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram, Linkedin, Facebook, Mail, Phone, MapPin } from 'lucide-react';
+import DsLogo from '../Navbar/DsLogo';
 
 const Footer = () => {
   return (
@@ -13,17 +14,7 @@ const Footer = () => {
         {/* Brand Overview */}
         <div className="lg:col-span-2">
           <Link to="/" className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-white text-[#0a0a0a] font-display text-3xl font-black italic flex items-center justify-center transform -skew-x-12">
-              DS
-            </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-display text-4xl font-black italic tracking-wider uppercase text-white leading-none">
-                DAAN
-              </span>
-              <span className="font-sans text-xs font-bold tracking-widest uppercase text-zinc-400 leading-none">
-                Sports
-              </span>
-            </div>
+            <DsLogo className="h-10 w-auto" />
           </Link>
           <p className="text-zinc-400 text-sm leading-relaxed max-w-sm mb-6">
             Premium sportswear and activewear manufacturer. Specializing in high-quality OEM/ODM services for global brands since 2012. Quality, speed, and precision in every stitch.

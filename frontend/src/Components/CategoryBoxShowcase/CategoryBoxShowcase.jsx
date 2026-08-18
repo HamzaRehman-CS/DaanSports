@@ -108,20 +108,24 @@ export default function CategoryBoxShowcase({ initialCategories }) {
             spaceBetween={12}
             breakpoints={{
               320: {
-                slidesPerView: 3, // Mobile: 3 boxes visible
+                slidesPerView: 2,
                 spaceBetween: 8,
               },
-              640: {
-                slidesPerView: 3, // Tablet: 3 boxes
-                spaceBetween: 14,
+              480: {
+                slidesPerView: 3,
+                spaceBetween: 10,
+              },
+              768: {
+                slidesPerView: 4,
+                spaceBetween: 12,
               },
               1024: {
-                slidesPerView: 4, // Laptop / Desktop: 4 boxes
-                spaceBetween: 18,
+                slidesPerView: 6,
+                spaceBetween: 14,
               },
               1440: {
-                slidesPerView: 4, // Large Desktop: 4 boxes
-                spaceBetween: 22,
+                slidesPerView: 6,
+                spaceBetween: 16,
               }
             }}
             className="category-boxes-swiper"

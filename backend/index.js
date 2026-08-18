@@ -374,52 +374,52 @@ const defaultSeedProducts = [
 ];
 
 const defaultCmsData = {
-  announcementText: "🏭 DIRECT FACTORY MANUFACTURER — Wholesale Custom Sportswear & Bulk Athletic Wear (MOQ 50-100 Pcs)",
+  announcementText: "FREE SHIPPING ON ORDERS OVER $99 | LIMITED TIME ONLY!",
   heroSlides: [
     {
       id: 1,
-      badgeText: "PREMIUM MANUFACTURER",
-      tag: "Premium Manufacturer",
-      title: "ENGINEERED<br />FOR <span class='text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-800'>EXCELLENCE</span>",
-      subtitle: "Custom Manufacturing • Private Label • Global Export Solutions. The trusted partner for global sportswear and activewear brands.",
-      description: "Custom Manufacturing • Private Label • Global Export Solutions. The trusted partner for global sportswear and activewear brands.",
-      specBadge: "330 GSM FLEECE",
-      productName: "Pro Tech Fleece Tracksuit",
-      priceText: "From $24.50 /pc",
-      bgImage: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=1600&auto=format&fit=crop",
-      productImg: "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=1000&auto=format&fit=crop",
-      primaryCtaText: "Explore Collections",
-      primaryCtaLink: "/tracksuits"
+      titleLine1: "DRESS SHARP",
+      titleLine2: "LIVE STRONG",
+      title: "DRESS SHARP\nLIVE STRONG",
+      subtitle: "Premium quality apparel for every move you make.",
+      description: "Premium quality apparel for every move you make.",
+      ctaText: "SHOP NOW",
+      ctaLink: "/category/all",
+      rightTagTop: "NEW COLLECTION",
+      rightTagTopVal: "2026",
+      rightTagBottom: "UP TO",
+      rightTagBottomVal: "30% OFF",
+      bgImage: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=85&w=2000&auto=format&fit=crop"
     },
     {
       id: 2,
-      badgeText: "STREETWEAR & HOODIES",
-      tag: "Pro Activewear & Hoodies",
-      title: "ELEVATE<br />YOUR <span class='text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-800'>BRAND</span>",
-      subtitle: "Heavyweight 350 GSM French Terry pullovers, custom drop-shoulder streetwear fits, and high-density 3D embroidery.",
-      description: "Heavyweight 350 GSM French Terry pullovers, custom drop-shoulder streetwear fits, and high-density 3D embroidery.",
-      specBadge: "350 GSM FRENCH TERRY",
-      productName: "Heavyweight Boxy Hoodie",
-      priceText: "From $18.90 /pc",
-      bgImage: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1600&auto=format&fit=crop",
-      productImg: "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1000&auto=format&fit=crop",
-      primaryCtaText: "View Hoodies",
-      primaryCtaLink: "/sweatshirts"
+      titleLine1: "ENGINEERED FOR",
+      titleLine2: "PERFORMANCE",
+      title: "ENGINEERED FOR\nPERFORMANCE",
+      subtitle: "Heavyweight 350 GSM French Terry pullovers & custom athletic apparel.",
+      description: "Heavyweight 350 GSM French Terry pullovers & custom athletic apparel.",
+      ctaText: "EXPLORE HOODIES",
+      ctaLink: "/category/hoodies",
+      rightTagTop: "HEAVYWEIGHT FLEECE",
+      rightTagTopVal: "350 GSM",
+      rightTagBottom: "BULK WHOLESALE",
+      rightTagBottomVal: "SPECIALS",
+      bgImage: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=85&w=2000&auto=format&fit=crop"
     },
     {
       id: 3,
-      badgeText: "GLOBAL EXPORT SOLUTIONS",
-      tag: "Global Export Solutions",
-      title: "WORLDWIDE<br /><span class='text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-800'>DISTRIBUTION</span>",
-      subtitle: "Full ISO 9001 certified QC assurance, OEM private label silicone tagging, and worldwide door-to-door express cargo.",
-      description: "Full ISO 9001 certified QC assurance, OEM private label silicone tagging, and worldwide door-to-door express cargo.",
-      specBadge: "ISO 9001 CERTIFIED",
-      productName: "Performance Compression Set",
-      priceText: "From $16.50 /pc",
-      bgImage: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1600&auto=format&fit=crop",
-      productImg: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1000&auto=format&fit=crop",
-      primaryCtaText: "Custom Orders",
-      primaryCtaLink: "/custom-orders"
+      titleLine1: "DIRECT FACTORY",
+      titleLine2: "MANUFACTURING",
+      title: "DIRECT FACTORY\nMANUFACTURING",
+      subtitle: "Custom private labeling, silicone tags, and worldwide express door-to-door cargo.",
+      description: "Custom private labeling, silicone tags, and worldwide express door-to-door cargo.",
+      ctaText: "VIEW TRACKSUITS",
+      ctaLink: "/category/tracksuits",
+      rightTagTop: "LOW MOQ",
+      rightTagTopVal: "50 PCS",
+      rightTagBottom: "EXPORT READY",
+      rightTagBottomVal: "ISO 9001",
+      bgImage: "https://images.unsplash.com/photo-1542652694-40abf526446e?q=85&w=2000&auto=format&fit=crop"
     }
   ]
 };
@@ -528,7 +528,7 @@ const getJsonCms = () => {
             return {
                 ...defaultCmsData,
                 ...parsed,
-                heroSlides: (parsed.heroSlides && parsed.heroSlides.length >= 3) ? parsed.heroSlides : defaultCmsData.heroSlides
+                heroSlides: (parsed.heroSlides && parsed.heroSlides.length > 0) ? parsed.heroSlides : defaultCmsData.heroSlides
             };
         }
     } catch (e) {
@@ -537,7 +537,7 @@ const getJsonCms = () => {
     return {
         ...defaultCmsData,
         ...(inMemoryCms || {}),
-        heroSlides: (inMemoryCms && inMemoryCms.heroSlides && inMemoryCms.heroSlides.length >= 3) ? inMemoryCms.heroSlides : defaultCmsData.heroSlides
+        heroSlides: (inMemoryCms && inMemoryCms.heroSlides && inMemoryCms.heroSlides.length > 0) ? inMemoryCms.heroSlides : defaultCmsData.heroSlides
     };
 };
 

@@ -1,13 +1,13 @@
 import React from 'react'
 import './Navbar.css'
+import DsLogo from './DsLogo'
 
 const Navbar = () => {
   return (
     <div className='admin-navbar'>
       <div className="admin-nav-brand">
-        <div className="brand-logo-badge">DAAN</div>
+        <DsLogo className="h-7 w-auto" />
         <div className="brand-text">
-          <h1>DAAN SPORTS</h1>
           <span>B2B WHOLESALE ADMIN PORTAL</span>
         </div>
       </div>
@@ -20,3 +20,4 @@ const Navbar = () => {
 }
 
 export default Navbar
+

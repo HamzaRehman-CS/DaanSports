@@ -8,16 +8,20 @@ const SiteManager = () => {
     heroSlides: []
   });
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState(null);
+  const [saveMessage, setSaveMessage] = useState(null);
 
   const fetchCms = async () => {
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/cms`);
       const data = await res.json();
-      setCms(data);
+      if (data) {
+        setCms(data);
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Fetch CMS error:", err);
     } finally {
       setLoading(false);
     }
@@ -37,21 +41,22 @@ const SiteManager = () => {
     setCms({ ...cms, heroSlides: updatedSlides });
   };
 
-  const handleSlideImageUpload = async (index, file, field = 'bgImage') => {
+  const handleSlideImageUpload = async (index, file) => {
     if (!file) return;
-    setUploadingIndex(`${index}-${field}`);
+    setUploadingIndex(index);
     try {
-      let formData = new FormData();
+      const formData = new FormData();
       formData.append('product', file);
-      let res = await fetch(`${API_URL}/upload`, {
+      const res = await fetch(`${API_URL}/upload`, {
         method: 'POST',
         headers: { Accept: 'application/json' },
         body: formData
       });
-      let data = await res.json();
+      const data = await res.json();
       if (data.success) {
-        handleSlideChange(index, field, data.image_url);
-        alert(`📷 Slide ${index + 1} ${field === 'bgImage' ? 'background' : 'featured product'} image uploaded!`);
+        handleSlideChange(index, 'bgImage', data.image_url);
+        setSaveMessage(`📷 Slide ${index + 1} background image uploaded! Remember to click "Save & Publish".`);
+        setTimeout(() => setSaveMessage(null), 4000);
       } else {
         alert("Upload error: " + (data.error || "Failed to upload image"));
       }
@@ -65,27 +70,45 @@ const SiteManager = () => {
   const handleAddSlide = () => {
     const newSlide = {
       id: Date.now(),
-      badgeText: "NEW COLLECTION",
-      title: "PRO PERFORMANCE<br />SPORTSWEAR",
-      subtitle: "Custom athletic apparel engineered for elite performance and comfort.",
-      specBadge: "330 GSM SPEC",
-      productName: "Custom Athletic Tracksuit",
-      priceText: "From $22.00 /pc",
-      bgImage: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1600&auto=format&fit=crop",
-      productImg: "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=1000&auto=format&fit=crop",
-      primaryCtaText: "Explore Collections",
-      primaryCtaLink: "/tracksuits"
+      titleLine1: "NEW ARRIVAL",
+      titleLine2: "SPORT COLLECTION",
+      title: "NEW ARRIVAL\nSPORT COLLECTION",
+      subtitle: "Engineered for maximum athletic comfort and performance.",
+      description: "Engineered for maximum athletic comfort and performance.",
+      ctaText: "SHOP NOW",
+      ctaLink: "/category/all",
+      rightTagTop: "NEW ARRIVALS",
+      rightTagTopVal: "2026",
+      rightTagBottom: "LIMITED TIME",
+      rightTagBottomVal: "SPECIAL OFFER",
+      bgImage: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=85&w=2000&auto=format&fit=crop"
     };
     setCms({ ...cms, heroSlides: [...(cms.heroSlides || []), newSlide] });
   };
 
   const handleDeleteSlide = (index) => {
+    if (cms.heroSlides.length <= 1) {
+      alert("You must keep at least 1 hero banner slide.");
+      return;
+    }
     if (!window.confirm(`Delete Slide #${index + 1}?`)) return;
     const updated = cms.heroSlides.filter((_, i) => i !== index);
     setCms({ ...cms, heroSlides: updated });
   };
 
+  const handleMoveSlide = (index, direction) => {
+    const targetIdx = index + direction;
+    if (targetIdx < 0 || targetIdx >= cms.heroSlides.length) return;
+    const updated = [...cms.heroSlides];
+    const temp = updated[index];
+    updated[index] = updated[targetIdx];
+    updated[targetIdx] = temp;
+    setCms({ ...cms, heroSlides: updated });
+  };
+
   const saveCmsChanges = async () => {
+    setSaving(true);
+    setSaveMessage(null);
     try {
       const res = await fetch(`${API_URL}/update-cms`, {
         method: 'POST',
@@ -94,36 +117,53 @@ const SiteManager = () => {
       });
       const data = await res.json();
       if (data.success) {
-        alert("🎉 DAAN Sports Website Banners & Hero Slides Updated Live!");
+        setSaveMessage("🎉 Storefront Hero Slider & Announcement Bar Updated Live!");
+        setTimeout(() => setSaveMessage(null), 5000);
       } else {
         alert("Failed to update CMS.");
       }
     } catch (err) {
       alert("Error saving CMS: " + err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
     <div className="site-manager-b2b">
+      
+      {/* Top Header */}
       <div className="site-manager-header">
         <div>
-          <h2>Website CMS & Hero Banner Manager</h2>
-          <p>Edit background slider imagery, product showcases, main headlines, announcement bar text, and call-to-actions dynamically across the entire website.</p>
+          <h2>Website CMS & Hero Slider Manager</h2>
+          <p>Full control over full-bleed background images, massive headline typography, subtitles, right-side badges, and top announcement text.</p>
         </div>
-        <button onClick={saveCmsChanges} className="save-cms-top-btn">
-          💾 Save & Publish Site Changes
+        <button 
+          onClick={saveCmsChanges} 
+          disabled={saving} 
+          className="save-cms-top-btn"
+        >
+          {saving ? "⏳ Saving Changes..." : "💾 Save & Publish Site Changes"}
         </button>
       </div>
+
+      {saveMessage && (
+        <div className="cms-status-alert">
+          {saveMessage}
+        </div>
+      )}
 
       {loading ? (
         <div className="loading-box">Loading Site CMS Settings...</div>
       ) : (
         <div className="cms-editor-body">
-          {/* Announcement Bar Settings */}
+          
+          {/* Top Announcement Bar Section */}
           <div className="cms-section-card">
-            <h3>Top Announcement Bar Text</h3>
+            <h3>Top Announcement Bar</h3>
+            <p className="section-note">This banner appears at the very top of every page above the navbar.</p>
             <div className="input-field">
-              <label>Announcement Bar Banner Text</label>
+              <label>Announcement Bar Text</label>
               <input
                 type="text"
                 value={cms.announcementText || ''}
@@ -138,7 +178,9 @@ const SiteManager = () => {
             <div className="section-title-row">
               <div>
                 <h3>Homepage Hero Banner Slider Entries ({cms.heroSlides ? cms.heroSlides.length : 0})</h3>
-                <p className="section-note">Each entry updates the background imagery, titles, and call-to-action buttons on the homepage slider.</p>
+                <p className="section-note">
+                  Every 5 seconds or on arrow click, the entire background image, headlines, subtitle, CTA button, and right collection tags shift together.
+                </p>
               </div>
               <button type="button" onClick={handleAddSlide} className="add-slide-btn">
                 ➕ Add New Hero Slide
@@ -147,142 +189,191 @@ const SiteManager = () => {
 
             <div className="slides-list">
               {cms.heroSlides && cms.heroSlides.map((slide, idx) => (
-                <div key={idx} className="slide-editor-card">
+                <div key={slide.id || idx} className="slide-editor-card">
+                  
                   <div className="slide-card-header">
-                    <h4>Slide #{idx + 1} Entry</h4>
-                    <button 
-                      type="button" 
-                      onClick={() => handleDeleteSlide(idx)}
-                      className="delete-slide-btn"
-                    >
-                      Delete Slide 🗑️
-                    </button>
+                    <div className="slide-card-title-wrap">
+                      <span className="slide-badge-num">Slide #{idx + 1}</span>
+                      <h4>{slide.titleLine1 || "DRESS SHARP"} {slide.titleLine2 || "LIVE STRONG"}</h4>
+                    </div>
+                    
+                    <div className="slide-actions-header">
+                      <button
+                        type="button"
+                        disabled={idx === 0}
+                        onClick={() => handleMoveSlide(idx, -1)}
+                        className="move-slide-btn"
+                        title="Move Up"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        type="button"
+                        disabled={idx === cms.heroSlides.length - 1}
+                        onClick={() => handleMoveSlide(idx, 1)}
+                        className="move-slide-btn"
+                        title="Move Down"
+                      >
+                        ▼
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => handleDeleteSlide(idx)}
+                        className="delete-slide-btn"
+                      >
+                        Delete 🗑️
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Slide Background Image Preview & Upload */}
+                  <div className="slide-preview-banner">
+                    <div className="preview-img-container">
+                      <img 
+                        src={slide.bgImage || "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=85&w=1000&auto=format&fit=crop"} 
+                        alt="Hero Background Preview" 
+                        className="preview-img"
+                      />
+                      <div className="preview-overlay-info">
+                        <span className="preview-tag">{slide.rightTagTop || "NEW COLLECTION"} {slide.rightTagTopVal || "2026"}</span>
+                        <h5 className="preview-headline">{slide.titleLine1 || "DRESS SHARP"} {slide.titleLine2 || "LIVE STRONG"}</h5>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="slide-inputs-grid">
-                    <div className="input-field">
-                      <label>Badge Header Tag</label>
-                      <input
-                        type="text"
-                        value={slide.badgeText || ''}
-                        onChange={(e) => handleSlideChange(idx, 'badgeText', e.target.value)}
-                      />
-                    </div>
                     
-                    <div className="input-field">
-                      <label>Spec Tag Badge</label>
-                      <input
-                        type="text"
-                        value={slide.specBadge || ''}
-                        onChange={(e) => handleSlideChange(idx, 'specBadge', e.target.value)}
-                        placeholder="e.g. 330 GSM FLEECE"
-                      />
-                    </div>
-
+                    {/* Background Image Input */}
                     <div className="input-field full-width">
-                      <label>Background Image</label>
+                      <label>Background Image URL / File Upload</label>
                       <div className="upload-input-group">
                         <input
                           type="text"
                           value={slide.bgImage || ''}
                           onChange={(e) => handleSlideChange(idx, 'bgImage', e.target.value)}
+                          placeholder="https://images.unsplash.com/... or upload local image"
                         />
                         <label className="file-upload-btn-custom">
-                          {uploadingIndex === `${idx}-bgImage` ? "..." : "📷 Upload"}
+                          {uploadingIndex === idx ? "Uploading..." : "📷 Upload Image"}
                           <input
                             type="file"
                             accept="image/*"
                             hidden
-                            onChange={(e) => handleSlideImageUpload(idx, e.target.files[0], 'bgImage')}
+                            onChange={(e) => handleSlideImageUpload(idx, e.target.files[0])}
                           />
                         </label>
                       </div>
-                      {/* HERO BACKGROUND DIMENSION GUIDELINE NOTICE */}
                       <div className="image-spec-guide-badge">
-                        📐 <strong>Recommended Size:</strong> 1920 × 800 px (24:10 Full-Bleed Widescreen) | Max 5MB | WebP, JPG, PNG
+                        📐 <strong>Recommended Size:</strong> 1920 × 800 px (Full-Bleed Widescreen) | High-Resolution Sportswear Photography
                       </div>
                     </div>
 
-                    <div className="input-field full-width">
-                      <label>Featured Apparel / Model Image</label>
-                      <div className="upload-input-group">
-                        <input
-                          type="text"
-                          value={slide.productImg || ''}
-                          onChange={(e) => handleSlideChange(idx, 'productImg', e.target.value)}
-                          placeholder="https://..."
-                        />
-                        <label className="file-upload-btn-custom">
-                          {uploadingIndex === `${idx}-productImg` ? "..." : "📷 Upload"}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            hidden
-                            onChange={(e) => handleSlideImageUpload(idx, e.target.files[0], 'productImg')}
-                          />
-                        </label>
-                      </div>
-                      {/* HERO FEATURED PRODUCT DIMENSION GUIDELINE NOTICE */}
-                      <div className="image-spec-guide-badge">
-                        📐 <strong>Recommended Size:</strong> 800 × 800 px (1:1 Square) or 800 × 1000 px (4:5 Crop) | Max 5MB | WebP, JPG, PNG
-                      </div>
-                    </div>
-
+                    {/* Headline Line 1 */}
                     <div className="input-field">
-                      <label>Featured Product Title</label>
+                      <label>Headline Line 1 (Upper Big Text)</label>
                       <input
                         type="text"
-                        value={slide.productName || ''}
-                        onChange={(e) => handleSlideChange(idx, 'productName', e.target.value)}
-                        placeholder="e.g. Pro Tech Fleece Tracksuit"
+                        value={slide.titleLine1 !== undefined ? slide.titleLine1 : (slide.title ? slide.title.split('\n')[0] : 'DRESS SHARP')}
+                        onChange={(e) => handleSlideChange(idx, 'titleLine1', e.target.value)}
+                        placeholder="e.g. DRESS SHARP"
                       />
                     </div>
 
+                    {/* Headline Line 2 */}
                     <div className="input-field">
-                      <label>Price Display</label>
+                      <label>Headline Line 2 (Lower Big Text)</label>
                       <input
                         type="text"
-                        value={slide.priceText || ''}
-                        onChange={(e) => handleSlideChange(idx, 'priceText', e.target.value)}
-                        placeholder="e.g. From $24.50 /pc"
+                        value={slide.titleLine2 !== undefined ? slide.titleLine2 : (slide.title ? slide.title.split('\n')[1] || '' : 'LIVE STRONG')}
+                        onChange={(e) => handleSlideChange(idx, 'titleLine2', e.target.value)}
+                        placeholder="e.g. LIVE STRONG"
                       />
                     </div>
 
-                    <div className="input-field full-width">
-                      <label>Main Headline Title (HTML Supported)</label>
-                      <input
-                        type="text"
-                        value={slide.title || ''}
-                        onChange={(e) => handleSlideChange(idx, 'title', e.target.value)}
-                      />
-                    </div>
-
+                    {/* Subtitle / Description */}
                     <div className="input-field full-width">
                       <label>Subtitle / Description Text</label>
                       <textarea
                         rows="2"
-                        value={slide.subtitle || ''}
-                        onChange={(e) => handleSlideChange(idx, 'subtitle', e.target.value)}
+                        value={slide.subtitle || slide.description || ''}
+                        onChange={(e) => {
+                          handleSlideChange(idx, 'subtitle', e.target.value);
+                          handleSlideChange(idx, 'description', e.target.value);
+                        }}
+                        placeholder="e.g. Premium quality apparel for every move you make."
                       />
                     </div>
 
+                    {/* CTA Button Text */}
                     <div className="input-field">
                       <label>Button Text</label>
                       <input
                         type="text"
-                        value={slide.primaryCtaText || ''}
-                        onChange={(e) => handleSlideChange(idx, 'primaryCtaText', e.target.value)}
+                        value={slide.ctaText || slide.primaryCtaText || 'SHOP NOW'}
+                        onChange={(e) => {
+                          handleSlideChange(idx, 'ctaText', e.target.value);
+                          handleSlideChange(idx, 'primaryCtaText', e.target.value);
+                        }}
+                        placeholder="e.g. SHOP NOW"
                       />
                     </div>
 
+                    {/* CTA Button Destination */}
                     <div className="input-field">
                       <label>Button Destination Link</label>
                       <input
                         type="text"
-                        value={slide.primaryCtaLink || ''}
-                        onChange={(e) => handleSlideChange(idx, 'primaryCtaLink', e.target.value)}
+                        value={slide.ctaLink || slide.primaryCtaLink || '/category/all'}
+                        onChange={(e) => {
+                          handleSlideChange(idx, 'ctaLink', e.target.value);
+                          handleSlideChange(idx, 'primaryCtaLink', e.target.value);
+                        }}
+                        placeholder="e.g. /category/all or /tracksuits"
                       />
                     </div>
+
+                    {/* Right Tag Top Label & Value */}
+                    <div className="input-field">
+                      <label>Right Badge 1 (Small Tag)</label>
+                      <input
+                        type="text"
+                        value={slide.rightTagTop || 'NEW COLLECTION'}
+                        onChange={(e) => handleSlideChange(idx, 'rightTagTop', e.target.value)}
+                        placeholder="e.g. NEW COLLECTION"
+                      />
+                    </div>
+
+                    <div className="input-field">
+                      <label>Right Badge 1 Value (Big Text)</label>
+                      <input
+                        type="text"
+                        value={slide.rightTagTopVal || '2026'}
+                        onChange={(e) => handleSlideChange(idx, 'rightTagTopVal', e.target.value)}
+                        placeholder="e.g. 2026"
+                      />
+                    </div>
+
+                    {/* Right Tag Bottom Label & Value */}
+                    <div className="input-field">
+                      <label>Right Badge 2 (Small Tag)</label>
+                      <input
+                        type="text"
+                        value={slide.rightTagBottom || 'UP TO'}
+                        onChange={(e) => handleSlideChange(idx, 'rightTagBottom', e.target.value)}
+                        placeholder="e.g. UP TO"
+                      />
+                    </div>
+
+                    <div className="input-field">
+                      <label>Right Badge 2 Value (Big Text)</label>
+                      <input
+                        type="text"
+                        value={slide.rightTagBottomVal || '30% OFF'}
+                        onChange={(e) => handleSlideChange(idx, 'rightTagBottomVal', e.target.value)}
+                        placeholder="e.g. 30% OFF"
+                      />
+                    </div>
+
                   </div>
 
                 </div>
@@ -290,8 +381,12 @@ const SiteManager = () => {
             </div>
           </div>
 
-          <button onClick={saveCmsChanges} className="save-cms-bottom-btn">
-            🚀 Publish Changes Live To Storefront
+          <button 
+            onClick={saveCmsChanges} 
+            disabled={saving} 
+            className="save-cms-bottom-btn"
+          >
+            {saving ? "⏳ Publishing Changes..." : "🚀 Publish Changes Live To Storefront"}
           </button>
         </div>
       )}

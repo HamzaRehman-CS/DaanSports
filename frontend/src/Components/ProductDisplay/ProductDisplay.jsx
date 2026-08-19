@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { ShopContext } from '../../Context/ShopContext';
 import { useNavigate } from 'react-router-dom';
-import { Star, ShieldCheck, Truck, PackageCheck, Eye, ShoppingCart, CreditCard, ArrowRight, Check } from 'lucide-react';
+import { ShieldCheck, Truck, PackageCheck, Eye, ShoppingCart, CreditCard, ArrowRight, Check } from 'lucide-react';
 import CardPaymentModal from '../CardPaymentModal/CardPaymentModal';
 import { useUser } from '@clerk/clerk-react';
 
@@ -77,7 +77,7 @@ const ProductDisplay = (props) => {
           {/* Details Column (7 Cols) */}
           <div className="lg:col-span-7 flex flex-col justify-between">
             <div>
-              <div className="text-golden-small font-bold uppercase tracking-widest text-[#dc2626] mb-2">
+              <div className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">
                 {product.category || "Sportswear & Apparel"}
               </div>
 
@@ -87,10 +87,7 @@ const ProductDisplay = (props) => {
 
               {/* Rating Row */}
               <div className="flex items-center gap-2 mb-6">
-                <div className="flex text-[#dc2626]">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" />)}
-                </div>
-                <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">(4.9 Factory Rating • 86 Reviews)</span>
+                <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">4.9 Factory Rating • 86 Wholesale Reviews</span>
               </div>
 
               {/* Price Banner */}
@@ -224,14 +221,14 @@ const ProductDisplay = (props) => {
               <div className="bg-[#0a0a0a] p-4 rounded border border-white/10 text-xs">
                 <div className="flex justify-between font-bold text-white mb-1">
                   <span>Alex Morgan (Team Director)</span>
-                  <span className="text-[#dc2626]">★★★★★</span>
+                  <span className="text-emerald-400 font-mono font-bold">5.0 / 5.0 Rating</span>
                 </div>
                 <p className="text-zinc-400">"Outstanding fabric density (330 GSM) and precision flatlock stitching. Custom embroidery came out flawless."</p>
               </div>
               <div className="bg-[#0a0a0a] p-4 rounded border border-white/10 text-xs">
                 <div className="flex justify-between font-bold text-white mb-1">
                   <span>David K. (Retail Apparel)</span>
-                  <span className="text-[#dc2626]">★★★★★</span>
+                  <span className="text-emerald-400 font-mono font-bold">5.0 / 5.0 Rating</span>
                 </div>
                 <p className="text-zinc-400">"Shipped fast via express cargo. Color consistency across 200 tracksuits was impressive."</p>
               </div>

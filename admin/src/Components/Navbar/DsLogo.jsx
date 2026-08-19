@@ -33,7 +33,7 @@ export default function DsLogo({ textClassName = "text-white" }) {
             display: 'inline-block'
           }}
         >
-          Dawn Sports
+          DAAN SPORTS
         </span>
       </div>
     </div>

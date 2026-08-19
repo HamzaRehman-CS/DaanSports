@@ -55,7 +55,7 @@ const Item = (props) => {
       <div className="p-3.5 flex flex-col justify-between flex-1 gap-2.5 bg-[#141416]">
         <div>
           <div className="flex items-center justify-between text-[10px] text-zinc-400 uppercase tracking-wider font-semibold mb-1">
-            <span className="text-[#dc2626] font-bold">{category || "Apparel"}</span>
+            <span className="text-zinc-400 font-semibold">{category || "Apparel"}</span>
             {gsm && <span className="text-zinc-500 font-mono text-[9px]">{gsm}</span>}
           </div>
           <Link to={`/product/${id}`} className="block">

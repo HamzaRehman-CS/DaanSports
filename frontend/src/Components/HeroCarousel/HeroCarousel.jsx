@@ -6,7 +6,7 @@ import 'swiper/css/effect-fade';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowRight, ChevronLeft, ChevronRight, Sparkles, ShieldCheck, Factory } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, ShieldCheck, Factory } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { API_URL } from '../../config';
 
@@ -200,11 +200,10 @@ export default function HeroCarousel() {
                         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                         className="space-y-2 sm:space-y-3 md:space-y-4"
                       >
-                        {/* Pill Badge */}
-                        <div className="inline-flex items-center gap-1.5 bg-[#dc2626] text-white px-2.5 py-0.5 sm:px-3 sm:py-1 text-[9px] sm:text-xs font-black uppercase tracking-widest rounded shadow-lg transform -skew-x-6 w-fit">
-                          <span className="skew-x-6 inline-flex items-center gap-1.5">
-                            <Sparkles size={11} className="text-yellow-300" />
-                            {slide.badgeText || "DIRECT FACTORY WHOLESALE"}
+                        {/* Pill Badge - Clean White text inside Red rectangle */}
+                        <div className="inline-flex items-center bg-[#dc2626] text-white px-2.5 py-0.5 sm:px-3 sm:py-1 text-[9px] sm:text-xs font-black uppercase tracking-widest rounded shadow-lg transform -skew-x-6 w-fit">
+                          <span className="skew-x-6 inline-block">
+                            {(slide.badgeText || "DIRECT FACTORY WHOLESALE").replace(/[✨⭐⚡★*]/g, '').trim()}
                           </span>
                         </div>
 

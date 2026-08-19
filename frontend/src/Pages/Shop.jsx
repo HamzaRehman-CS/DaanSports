@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { ArrowRight, CheckCircle, Globe, ShieldCheck, Zap, Factory, Package, Medal, Star, Flame, Percent, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle, Globe, ShieldCheck, Zap, Factory, Package, Medal, Flame, Percent } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CategoryBoxShowcase from '../Components/CategoryBoxShowcase/CategoryBoxShowcase';
 import FeatureTrustBar from '../Components/FeatureTrustBar/FeatureTrustBar';
@@ -52,7 +52,7 @@ const Shop = () => {
   return (
     <div className="bg-[#0a0a0a] text-white overflow-hidden selection:bg-[#dc2626] selection:text-white">
       <SEO 
-        title="Dawn Sports — #1 B2B Wholesale Apparel & Custom OEM Sportswear Manufacturer"
+        title="DAAN Sports — #1 B2B Wholesale Apparel & Custom OEM Sportswear Manufacturer"
         description="Direct factory manufacturer of premium wholesale tracksuits, 350 GSM heavyweight fleece hoodies, gym activewear, athletic jerseys, and outerwear. Low MOQ 50 pcs, custom OEM private labeling, and fast worldwide express shipping."
         keywords="wholesale sportswear, bulk tracksuits, custom athletic apparel, OEM clothing manufacturer, heavyweight fleece hoodies, gym activewear supplier, private label sports apparel, B2B sportswear export"
       />
@@ -74,7 +74,7 @@ const Shop = () => {
       {/* 5. Interactive Wholesale Catalog Explorer (Upper 9 Category Filter + Sizes + Complete Sorting Engine) */}
       <CatalogExplorer 
         products={all_product} 
-        title="Wholesale Catalog & Factory Inventory" 
+        title="WHOLESALE CATALOG & FACTORY INVENTORY" 
         subtitle="Select from our 9 specialized apparel categories, filter by size, and sort by unit price, MOQ, or fabric GSM weight."
       />
 
@@ -192,7 +192,6 @@ const Shop = () => {
               
               <div className="relative z-10 px-8 md:px-16 max-w-2xl space-y-4">
                 <span className="inline-flex items-center gap-2 bg-[#dc2626] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 transform -skew-x-12">
-                  <Sparkles size={14} className="skew-x-12" />
                   <span className="skew-x-12 inline-block">{cb.discountText || "EXCLUSIVE B2B COLLECTION"}</span>
                 </span>
 
@@ -247,7 +246,6 @@ const Shop = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/70 to-transparent"></div>
               
               <div className="relative z-10 px-8 md:px-16 max-w-xl space-y-3">
-                <span className="text-golden-small text-[#dc2626] font-bold block uppercase">WHOLESALE COLLECTION</span>
                 <h2 className="text-3xl md:text-5xl font-serif font-black italic uppercase text-white leading-none">
                   {cat.name}
                 </h2>
@@ -301,7 +299,7 @@ const WhyChooseUs = () => {
     <section className="py-24 bg-[#09090b] border-y border-white/10">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <h2 className="text-center font-serif text-3xl md:text-5xl font-black italic uppercase tracking-tight text-white mb-16 anime-reveal">
-          Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-800 py-1 inline-block leading-normal overflow-visible">Dawn Sports</span>
+          Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-800 py-1 inline-block leading-normal overflow-visible">DAAN Sports</span>
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8">
@@ -335,18 +333,18 @@ const ContactSnippet = () => {
     <section className="py-0 flex flex-col lg:flex-row bg-[#0a0a0a] border-t border-white/10">
       <div className="lg:w-1/2 bg-[#141416] p-12 lg:p-24 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-white/10 anime-reveal">
         <h2 className="text-4xl md:text-6xl font-serif font-black italic uppercase text-white mb-6">
-          Let's <span className="text-[#dc2626]">Talk Business</span>
+          Let's Talk Business
         </h2>
         <p className="text-zinc-400 mb-10 max-w-md text-sm leading-relaxed">
           Ready to manufacture premium apparel? Fill out the inquiry form or contact our B2B desk directly. We reply to all wholesale tech-pack inquiries within 24 hours.
         </p>
         <div className="space-y-6 text-sm">
           <div className="flex flex-col">
-            <span className="text-golden-small text-[#dc2626] font-bold mb-1">EMAIL INQUIRY</span>
+            <span className="text-xs text-zinc-400 font-bold mb-1 uppercase tracking-wider">EMAIL INQUIRY</span>
             <a href="mailto:export@daansports.com" className="text-lg text-white hover:text-[#dc2626] font-bold">export@daansports.com</a>
           </div>
           <div className="flex flex-col">
-            <span className="text-golden-small text-[#dc2626] font-bold mb-1">B2B PHONE DESK</span>
+            <span className="text-xs text-zinc-400 font-bold mb-1 uppercase tracking-wider">B2B PHONE DESK</span>
             <a href="tel:+18003777678" className="text-lg text-white hover:text-[#dc2626] font-bold">+1 (800) DS-SPORT</a>
           </div>
         </div>

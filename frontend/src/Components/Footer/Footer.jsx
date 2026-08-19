@@ -60,7 +60,7 @@ const Footer = () => {
             </li>
             <li className="flex items-center gap-3">
               <Mail size={18} className="text-[#dc2626] shrink-0" />
-              <a href="mailto:export@dawnsports.com" className="hover:text-white transition-colors">export@dawnsports.com</a>
+              <a href="mailto:export@daansports.com" className="hover:text-white transition-colors">export@daansports.com</a>
             </li>
             <li className="flex items-center gap-3">
               <Phone size={18} className="text-[#dc2626] shrink-0" />
@@ -72,7 +72,7 @@ const Footer = () => {
 
       {/* Copyright & Legal */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
-        <p>&copy; {new Date().getFullYear()} Dawn Sports B2B Apparel Manufacturing. All Rights Reserved.</p>
+        <p>&copy; {new Date().getFullYear()} DAAN Sports B2B Apparel Manufacturing. All Rights Reserved.</p>
         <div className="flex gap-6">
           <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
           <Link to="/terms" className="hover:text-white transition-colors">Terms & Conditions</Link>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
@@ -65,13 +65,10 @@ export default function CategoryBoxShowcase({ initialCategories }) {
         {/* Section Header */}
         <div className="category-showcase-header">
           <div>
-            <span className="category-sub-badge">
-              <Sparkles size={13} className="text-[#f59e0b]" />
-              CURATED PRODUCT LINES
-            </span>
             <h2 className="category-main-title">
               OUR CATEGORIES
             </h2>
+            <div className="w-16 h-1 bg-[#dc2626] mt-2.5 rounded-full" />
           </div>
 
           {/* Slider Arrow Controls */}

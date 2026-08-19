@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, ArrowUpDown, Filter, Sparkles, Layers, Check, X } from 'lucide-react';
+import { Search, SlidersHorizontal, ArrowUpDown, Filter, Layers, Check, X } from 'lucide-react';
 import Item from '../Item/Item';
 import './CatalogExplorer.css';
 
@@ -19,13 +19,13 @@ const CATEGORY_TABS = [
 const SIZE_OPTIONS = ['All', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
 
 const SORT_OPTIONS = [
-  { id: 'featured', label: '⭐ Featured & Best Sellers' },
-  { id: 'price-low', label: '💲 Price: Low to High' },
-  { id: 'price-high', label: '💲 Price: High to Low' },
-  { id: 'alpha-az', label: '🔤 Alphabetical: A → Z' },
-  { id: 'alpha-za', label: '🔤 Alphabetical: Z → A' },
-  { id: 'moq-low', label: '📦 Lowest MOQ (Min Order)' },
-  { id: 'gsm-high', label: '🧵 Fabric: Heavyweight First' }
+  { id: 'featured', label: 'Featured & Best Sellers' },
+  { id: 'price-low', label: 'Price: Low to High' },
+  { id: 'price-high', label: 'Price: High to Low' },
+  { id: 'alpha-az', label: 'Alphabetical: A → Z' },
+  { id: 'alpha-za', label: 'Alphabetical: Z → A' },
+  { id: 'moq-low', label: 'Lowest MOQ (Min Order)' },
+  { id: 'gsm-high', label: 'Fabric: Heavyweight First' }
 ];
 
 export default function CatalogExplorer({ products = [], title = "Explore Wholesale Catalog", subtitle = "Filter by any of our 9 sportswear categories, sort by price, sizes, or fabric specs." }) {
@@ -146,11 +146,8 @@ export default function CatalogExplorer({ products = [], title = "Explore Wholes
         {/* Explorer Header */}
         <div className="catalog-explorer-header">
           <div className="header-left">
-            <span className="explorer-badge">
-              <Sparkles size={13} className="text-[#dc2626]" />
-              DIRECT FACTORY CATALOG
-            </span>
-            <h2 className="explorer-title">{title}</h2>
+            <h2 className="explorer-title uppercase">{title}</h2>
+            <div className="w-16 h-1 bg-[#dc2626] mt-2 mb-2 rounded-full" />
             <p className="explorer-subtitle">{subtitle}</p>
           </div>
 

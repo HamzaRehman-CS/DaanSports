@@ -27,7 +27,7 @@ export default function DsLogo({ textClassName = "text-white", theme = "light-on
         }}
       />
       
-      {/* Dawn Sports in Clean White Font */}
+      {/* DAAN Sports in Clean White Font */}
       <div className="flex flex-col leading-none" style={{ flexShrink: 0 }}>
         <span 
           className={`font-display font-black tracking-wider uppercase text-white whitespace-nowrap ${textClassName}`}
@@ -40,7 +40,7 @@ export default function DsLogo({ textClassName = "text-white", theme = "light-on
             display: 'inline-block'
           }}
         >
-          Dawn Sports
+          DAAN SPORTS
         </span>
       </div>
     </div>

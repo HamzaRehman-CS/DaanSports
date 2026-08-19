@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, CreditCard, Lock, CheckCircle, ShieldAlert, Tag, Sparkles } from 'lucide-react';
+import { X, CreditCard, Lock, CheckCircle, ShieldAlert, Tag } from 'lucide-react';
 import { API_URL } from '../../config';
 
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, ShieldCheck, Tag, Zap, Factory } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Tag, Zap, Factory } from 'lucide-react';
 
 const BentoBanners = ({ banners }) => {
   const b = banners || {};
@@ -69,13 +69,10 @@ const BentoBanners = ({ banners }) => {
       {/* Section Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 mb-8 border-b border-white/10 pb-5">
         <div>
-          <span className="text-[11px] font-black text-[#dc2626] uppercase tracking-widest flex items-center gap-1.5 mb-1">
-            <Sparkles size={13} className="text-[#f59e0b]" />
-            CURATED B2B SPOTLIGHT
-          </span>
           <h2 className="text-3xl md:text-4xl font-display font-black italic uppercase text-white tracking-tight">
-            Factory Showcase & Bulk Offers
+            FACTORY SHOWCASE & BULK OFFERS
           </h2>
+          <div className="w-16 h-1 bg-[#dc2626] mt-2.5 rounded-full" />
         </div>
         <p className="text-xs text-zinc-400 max-w-md">
           Direct manufacturer pricing, certified high-tensile stitching, and rapid global supply lines.

@@ -100,29 +100,29 @@ export default function HeroCarousel() {
   }, []);
 
   return (
-    <section className="relative w-full h-screen h-[100dvh] min-h-screen min-h-[100dvh] overflow-hidden bg-[#0a0a0a] select-none">
+    <section className="relative w-full h-[100dvh] min-h-[100dvh] overflow-hidden bg-[#0a0a0a] select-none">
       
-      {/* Navigation Custom Arrows - Subtle on mobile to never block text */}
+      {/* Desktop Navigation Arrows (Cleanly hidden on mobile to keep Android view 100% uncluttered) */}
       <button
         ref={prevRef}
-        className="hero-nav-arrow hero-nav-prev absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-black/30 hover:bg-black/80 border border-white/10 hover:border-white text-white/50 hover:text-white flex items-center justify-center backdrop-blur-sm transition-all duration-300 shadow-lg cursor-pointer opacity-30 sm:opacity-75 hover:opacity-100"
+        className="hero-nav-arrow hero-nav-prev hidden md:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-30 w-11 h-11 lg:w-12 lg:h-12 rounded-full bg-black/40 hover:bg-black/90 border border-white/15 hover:border-white text-white/70 hover:text-white items-center justify-center backdrop-blur-md transition-all duration-300 shadow-2xl cursor-pointer opacity-75 hover:opacity-100"
         aria-label="Previous Hero Slide"
       >
-        <ChevronLeft size={18} className="sm:w-5 sm:h-5 md:w-6 md:h-6" />
+        <ChevronLeft size={22} />
       </button>
 
       <button
         ref={nextRef}
-        className="hero-nav-arrow hero-nav-next absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-black/30 hover:bg-black/80 border border-white/10 hover:border-white text-white/50 hover:text-white flex items-center justify-center backdrop-blur-sm transition-all duration-300 shadow-lg cursor-pointer opacity-30 sm:opacity-75 hover:opacity-100"
+        className="hero-nav-arrow hero-nav-next hidden md:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-30 w-11 h-11 lg:w-12 lg:h-12 rounded-full bg-black/40 hover:bg-black/90 border border-white/15 hover:border-white text-white/70 hover:text-white items-center justify-center backdrop-blur-sm transition-all duration-300 shadow-2xl cursor-pointer opacity-75 hover:opacity-100"
         aria-label="Next Hero Slide"
       >
-        <ChevronRight size={18} className="sm:w-5 sm:h-5 md:w-6 md:h-6" />
+        <ChevronRight size={22} />
       </button>
 
       <Swiper
         modules={[Autoplay, EffectFade, Navigation, Pagination]}
         effect="fade"
-        speed={1000}
+        speed={900}
         autoplay={{ delay: 5000, disableOnInteraction: false }}
         onInit={(swiper) => {
           swiper.params.navigation.prevEl = prevRef.current;
@@ -147,7 +147,7 @@ export default function HeroCarousel() {
           return (
             <SwiperSlide key={slide.id || index} className="relative w-full h-full">
               
-              {/* Full Background Image Layer - 100% full screen coverage */}
+              {/* Full Background Image Layer - 100% full screen coverage on Android and Desktop */}
               <div className="absolute inset-0 z-0 overflow-hidden">
                 <img 
                   src={bgImg} 
@@ -157,10 +157,10 @@ export default function HeroCarousel() {
                   loading={index === 0 ? "eager" : "lazy"}
                 />
                 
-                {/* Athletic Dark Backdrop Gradients - Translucent overlays for crisp readability and full photo visibility */}
+                {/* Athletic Dark Backdrop Gradients - Translucent overlays for rich contrast and full photo visibility */}
                 <div className="absolute inset-0 bg-black/35 sm:bg-black/30" />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/20 sm:to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/50" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/55 to-black/25 sm:to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60" />
 
                 {/* Subtle DS Watermark in background */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.04] overflow-hidden select-none">
@@ -170,8 +170,8 @@ export default function HeroCarousel() {
                 </div>
               </div>
 
-              {/* Foreground Content Container - Vertically centered on full screen */}
-              <div className="relative z-20 max-w-7xl mx-auto h-full px-5 sm:px-8 md:px-12 lg:px-16 flex flex-col justify-center pt-16 sm:pt-20 md:flex-row md:items-center md:justify-between md:pt-0 pb-16 sm:pb-20 md:pb-0">
+              {/* Foreground Content Container - Perfectly centered on Android view */}
+              <div className="relative z-20 max-w-7xl mx-auto h-full px-6 sm:px-8 md:px-12 lg:px-16 flex flex-col justify-center pt-20 sm:pt-24 md:pt-0 pb-20 sm:pb-24 md:pb-0 md:flex-row md:items-center md:justify-between">
                 
                 {/* Left Side: Bold Headlines, Subtitle & Button */}
                 <div className="max-w-xl xl:max-w-2xl flex flex-col justify-center">
@@ -179,32 +179,32 @@ export default function HeroCarousel() {
                     {isActive && (
                       <motion.div
                         key={`hero-text-${index}`}
-                        initial={{ opacity: 0, y: 25 }}
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -15 }}
-                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
                         className="space-y-3 sm:space-y-4 md:space-y-5"
                       >
                         {/* Heading Line 1 & Line 2 */}
                         <div className="space-y-0.5 sm:space-y-1">
-                          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[1.02] drop-shadow-2xl">
+                          <h1 className="text-3.5xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[1.04] drop-shadow-2xl text-balance">
                             {slide.titleLine1 || "DRESS SHARP"}
                           </h1>
-                          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[1.02] drop-shadow-2xl">
+                          <h1 className="text-3.5xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[1.04] drop-shadow-2xl text-balance">
                             {slide.titleLine2 || "LIVE STRONG"}
                           </h1>
                         </div>
 
                         {/* Subtitle */}
-                        <p className="text-sm sm:text-base md:text-lg text-zinc-200 font-normal leading-relaxed max-w-sm sm:max-w-md drop-shadow-md">
+                        <p className="text-xs xs:text-sm sm:text-base md:text-lg text-zinc-200 font-normal leading-relaxed max-w-[310px] sm:max-w-md drop-shadow-md">
                           {slide.subtitle || "Premium quality apparel for every move you make."}
                         </p>
 
                         {/* CTA White Button matching Reference Design */}
-                        <div className="pt-3 sm:pt-4">
+                        <div className="pt-2 sm:pt-4">
                           <Link 
                             to={slide.ctaLink || "/category/all"} 
-                            className="inline-flex items-center gap-2.5 sm:gap-3 bg-white text-[#0a0a0a] px-7 sm:px-8 py-3.5 sm:py-4 font-black text-xs sm:text-sm tracking-wider uppercase hover:bg-[#dc2626] hover:text-white transition-all duration-300 shadow-2xl group cursor-pointer"
+                            className="inline-flex items-center gap-2.5 sm:gap-3 bg-white text-[#0a0a0a] px-6 sm:px-8 py-3 sm:py-3.5 md:py-4 font-black text-xs sm:text-sm tracking-wider uppercase hover:bg-[#dc2626] hover:text-white transition-all duration-300 shadow-2xl group cursor-pointer"
                           >
                             <span>{slide.ctaText || "SHOP NOW"}</span>
                             <ArrowRight size={16} className="group-hover:translate-x-1.5 transition-transform duration-300" />
@@ -215,7 +215,7 @@ export default function HeroCarousel() {
                   </AnimatePresence>
                 </div>
 
-                {/* Right Side: Collection Year & Discount Highlights matching Reference Image */}
+                {/* Right Side: Collection Year & Discount Highlights on Desktop */}
                 <div className="hidden md:flex flex-col items-end text-right z-20 space-y-6 select-none pr-4 lg:pr-8">
                   <AnimatePresence mode="wait">
                     {isActive && (
@@ -259,7 +259,7 @@ export default function HeroCarousel() {
       </Swiper>
 
       {/* Pagination Dots at Bottom Center */}
-      <div className="hero-custom-pagination absolute bottom-6 sm:bottom-8 inset-x-0 z-30 flex items-center justify-center gap-2.5 pointer-events-auto" />
+      <div className="hero-custom-pagination absolute bottom-6 sm:bottom-8 inset-x-0 z-30 flex items-center justify-center gap-2 pointer-events-auto" />
 
       <style>{`
         .hero-dot {

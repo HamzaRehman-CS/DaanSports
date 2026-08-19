@@ -354,6 +354,20 @@ const SiteManager = () => {
                       />
                     </div>
 
+                    {/* Top Pill Badge (e.g. DIRECT FACTORY WHOLESALE) */}
+                    <div className="input-field full-width">
+                      <label>Top Pill Badge Text (Upper Red Badge)</label>
+                      <input
+                        type="text"
+                        value={slide.badgeText || slide.badgeTag || 'DIRECT FACTORY WHOLESALE'}
+                        onChange={(e) => {
+                          handleSlideChange(idx, 'badgeText', e.target.value);
+                          handleSlideChange(idx, 'badgeTag', e.target.value);
+                        }}
+                        placeholder="e.g. DIRECT FACTORY WHOLESALE"
+                      />
+                    </div>
+
                     {/* Right Tag Bottom Label & Value */}
                     <div className="input-field">
                       <label>Right Badge 2 (Small Tag)</label>

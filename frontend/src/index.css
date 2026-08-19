@@ -153,9 +153,8 @@
 }
 
 /* Responsive 16:9 Image container rules */
-img, video {
+img {
   max-width: 100%;
-  height: auto;
 }
 
 /* Custom golden scrollbars */

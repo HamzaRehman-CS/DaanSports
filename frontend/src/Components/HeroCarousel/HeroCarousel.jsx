@@ -92,7 +92,8 @@ export default function HeroCarousel() {
               subtitle: s.subtitle || s.description || "Premium quality apparel for every move you make.",
               ctaText: s.ctaText || s.primaryCtaText || "SHOP NOW",
               ctaLink: s.ctaLink || s.primaryCtaLink || "/category/all",
-              rightTagTop: s.rightTagTop || (s.badgeText ? "NEW COLLECTION" : "NEW COLLECTION"),
+              badgeText: s.badgeText || s.badgeTag || "DIRECT FACTORY WHOLESALE",
+              rightTagTop: s.rightTagTop || "NEW COLLECTION",
               rightTagTopVal: s.rightTagTopVal || "2026",
               rightTagBottom: s.rightTagBottom || "UP TO",
               rightTagBottomVal: s.rightTagBottomVal || (s.priceText ? s.priceText : "30% OFF"),
@@ -106,7 +107,7 @@ export default function HeroCarousel() {
   }, []);
 
   return (
-    <section className="relative w-full h-[100dvh] min-h-[100dvh] overflow-hidden bg-[#0a0a0a] select-none">
+    <section className="relative w-full h-[390px] xs:h-[410px] sm:h-[480px] md:h-[620px] lg:h-[680px] overflow-hidden bg-[#0a0a0a] select-none">
       
       {/* Desktop Navigation Arrows */}
       <button
@@ -128,7 +129,7 @@ export default function HeroCarousel() {
       <Swiper
         modules={[Autoplay, EffectFade, Navigation, Pagination]}
         effect="fade"
-        speed={900}
+        speed={800}
         autoplay={{ delay: 5000, disableOnInteraction: false }}
         onInit={(swiper) => {
           swiper.params.navigation.prevEl = prevRef.current;
@@ -154,11 +155,19 @@ export default function HeroCarousel() {
             <SwiperSlide key={slide.id || index} className="relative w-full h-full">
               
               {/* Full Background Image Layer */}
-              <div className="absolute inset-0 z-0 overflow-hidden">
+              <div 
+                className="absolute inset-0 z-0 overflow-hidden bg-cover bg-center bg-no-repeat"
+                style={{
+                  backgroundImage: `url(${bgImg})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center 25%'
+                }}
+              >
                 <img 
                   src={bgImg} 
                   alt={`${slide.titleLine1} ${slide.titleLine2}`} 
-                  className="w-full h-full object-cover object-[center_30%] md:object-center transform scale-100 transition-transform duration-7000 ease-out"
+                  className="w-full h-full object-cover object-[center_25%] md:object-center transform scale-100 transition-transform duration-7000 ease-out"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   referrerPolicy="no-referrer"
                   loading={index === 0 ? "eager" : "lazy"}
                 />
@@ -166,7 +175,7 @@ export default function HeroCarousel() {
                 {/* Athletic Dark Backdrop Gradients */}
                 <div className="absolute inset-0 bg-black/40 sm:bg-black/30" />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/30 sm:to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/60" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/50" />
 
                 {/* Subtle DS Watermark in background */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.04] overflow-hidden select-none">
@@ -176,66 +185,59 @@ export default function HeroCarousel() {
                 </div>
               </div>
 
-              {/* Foreground Content Container - Perfectly structured on mobile and desktop */}
-              <div className="relative z-20 max-w-7xl mx-auto h-full px-5 sm:px-8 md:px-12 lg:px-16 flex flex-col justify-center pt-24 sm:pt-28 md:pt-0 pb-20 sm:pb-24 md:pb-0 md:flex-row md:items-center md:justify-between">
+              {/* Foreground Content Container - Snug & Compact */}
+              <div className="relative z-20 max-w-7xl mx-auto h-full px-5 sm:px-8 md:px-12 lg:px-16 flex flex-col justify-center pt-14 sm:pt-20 md:pt-0 pb-8 sm:pb-12 md:pb-0 md:flex-row md:items-center md:justify-between">
                 
-                {/* Left Side: Badge, Bold Headlines, Subtitle, Dual Action Buttons & Feature Pills */}
+                {/* Left Side: Badge, Bold Headlines, Subtitle, Dual Action Buttons */}
                 <div className="max-w-xl xl:max-w-2xl flex flex-col justify-center">
                   <AnimatePresence mode="wait">
                     {isActive && (
                       <motion.div
                         key={`hero-text-${index}`}
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -15 }}
-                        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-                        className="space-y-3 sm:space-y-4"
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                        className="space-y-2 sm:space-y-3 md:space-y-4"
                       >
                         {/* Pill Badge */}
-                        <div className="inline-flex items-center gap-1.5 bg-[#dc2626] text-white px-3 py-1 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded shadow-lg transform -skew-x-6 w-fit">
+                        <div className="inline-flex items-center gap-1.5 bg-[#dc2626] text-white px-2.5 py-0.5 sm:px-3 sm:py-1 text-[9px] sm:text-xs font-black uppercase tracking-widest rounded shadow-lg transform -skew-x-6 w-fit">
                           <span className="skew-x-6 inline-flex items-center gap-1.5">
-                            <Sparkles size={12} className="text-yellow-300" />
-                            DIRECT FACTORY WHOLESALE
+                            <Sparkles size={11} className="text-yellow-300" />
+                            {slide.badgeText || "DIRECT FACTORY WHOLESALE"}
                           </span>
                         </div>
 
                         {/* Heading Line 1 & Line 2 */}
-                        <div className="space-y-0.5 sm:space-y-1">
-                          <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[0.98] drop-shadow-2xl">
+                        <div className="space-y-0.5">
+                          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[1.02] drop-shadow-2xl">
                             {slide.titleLine1 || "DRESS SHARP"}
                           </h1>
-                          <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[0.98] drop-shadow-2xl">
+                          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[1.02] drop-shadow-2xl">
                             {slide.titleLine2 || "LIVE STRONG"}
                           </h1>
                         </div>
 
                         {/* Subtitle */}
-                        <p className="text-xs xs:text-sm sm:text-base md:text-lg text-zinc-200 font-normal leading-relaxed max-w-sm sm:max-w-md drop-shadow-md">
+                        <p className="text-xs xs:text-sm sm:text-base text-zinc-200 font-normal leading-relaxed max-w-xs sm:max-w-md drop-shadow-md">
                           {slide.subtitle || "Premium 350 GSM heavyweight tracksuits & custom athletic apparel."}
                         </p>
 
                         {/* Dual Action Buttons */}
-                        <div className="pt-2 sm:pt-4 flex items-center gap-3">
+                        <div className="pt-2 sm:pt-3 flex items-center gap-2.5 sm:gap-3">
                           <Link 
                             to={slide.ctaLink || "/category/all"} 
-                            className="inline-flex items-center gap-2.5 sm:gap-3 bg-white text-[#0a0a0a] px-6 sm:px-8 py-3.5 sm:py-4 font-black text-xs sm:text-sm tracking-wider uppercase hover:bg-[#dc2626] hover:text-white transition-all duration-300 shadow-2xl group cursor-pointer"
+                            className="inline-flex items-center gap-2 sm:gap-2.5 bg-white text-[#0a0a0a] px-5 sm:px-8 py-3 sm:py-3.5 md:py-4 font-black text-xs sm:text-sm tracking-wider uppercase hover:bg-[#dc2626] hover:text-white transition-all duration-300 shadow-2xl group cursor-pointer"
                           >
                             <span>{slide.ctaText || "SHOP NOW"}</span>
-                            <ArrowRight size={16} className="group-hover:translate-x-1.5 transition-transform duration-300" />
+                            <ArrowRight size={15} className="group-hover:translate-x-1.5 transition-transform duration-300" />
                           </Link>
                           <Link 
                             to="/category/all" 
-                            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 sm:px-6 py-3.5 sm:py-4 font-bold text-xs sm:text-sm tracking-wider uppercase backdrop-blur-md transition-all duration-300"
+                            className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 sm:px-6 py-3 sm:py-3.5 md:py-4 font-bold text-xs sm:text-sm tracking-wider uppercase backdrop-blur-md transition-all duration-300"
                           >
                             <span>CATALOG</span>
                           </Link>
-                        </div>
-
-                        {/* Mobile Feature Highlights Bar */}
-                        <div className="flex md:hidden items-center gap-2 pt-3 text-[10px] text-zinc-300 font-bold uppercase tracking-wider">
-                          <span className="bg-white/10 border border-white/15 px-2.5 py-1 rounded backdrop-blur-sm">⚡ 50 PCS MOQ</span>
-                          <span className="bg-white/10 border border-white/15 px-2.5 py-1 rounded backdrop-blur-sm">📦 GLOBAL CARGO</span>
-                          <span className="bg-white/10 border border-white/15 px-2.5 py-1 rounded backdrop-blur-sm">🏷️ OEM LABELS</span>
                         </div>
 
                       </motion.div>
@@ -287,7 +289,7 @@ export default function HeroCarousel() {
       </Swiper>
 
       {/* Pagination Dots at Bottom Center */}
-      <div className="hero-custom-pagination absolute bottom-6 sm:bottom-8 inset-x-0 z-30 flex items-center justify-center gap-2 pointer-events-auto" />
+      <div className="hero-custom-pagination absolute bottom-2.5 sm:bottom-4 inset-x-0 z-30 flex items-center justify-center gap-2 pointer-events-auto" />
 
       <style>{`
         .hero-dot {
@@ -300,7 +302,7 @@ export default function HeroCarousel() {
           display: inline-block;
         }
         .hero-dot-active {
-          width: 26px;
+          width: 24px;
           background: #ffffff;
           border-radius: 9999px;
         }

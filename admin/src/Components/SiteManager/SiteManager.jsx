@@ -264,7 +264,8 @@ const SiteManager = () => {
                         </label>
                       </div>
                       <div className="image-spec-guide-badge">
-                        📐 <strong>Recommended Size:</strong> 1920 × 800 px (Full-Bleed Widescreen) | High-Resolution Sportswear Photography
+                        📐 <strong>Recommended Dimensions:</strong> 1920 × 800 px (2.4:1 Widescreen Ratio) | Max file size: 5MB | Formats: WebP, JPG, PNG
+                        <span className="spec-subtip">💡 Tip: Center the primary apparel/athlete subject so it crops naturally on mobile phones.</span>
                       </div>
                     </div>
 

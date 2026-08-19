@@ -72,8 +72,8 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex justify-between items-center gap-4 lg:gap-8">
           
           {/* DS Athletic Logo */}
-          <Link to="/" className="flex items-center group shrink-0">
-            <DsLogo className="h-9 md:h-10 w-auto group-hover:scale-105 transition-transform" />
+          <Link to="/" className="flex items-center group shrink-0" style={{ textDecoration: 'none' }}>
+            <DsLogo />
           </Link>
 
           {/* Navigation Links matching Reference Design */}

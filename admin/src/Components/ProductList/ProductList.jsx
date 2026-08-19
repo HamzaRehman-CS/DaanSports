@@ -383,8 +383,9 @@ const ProductList = () => {
                     />
                   </label>
                 </div>
-                <div style={{ marginTop: '6px', fontSize: '11px', color: '#93c5fd', background: 'rgba(37,99,235,0.15)', border: '1px solid rgba(59,130,246,0.3)', padding: '4px 8px', borderRadius: '4px' }}>
-                  📐 <strong>Recommended Size:</strong> 800 × 800 px (1:1 Square) or 800 × 1000 px (4:5 Crop) | Max 5MB | WebP, JPG, PNG
+                <div style={{ marginTop: '8px', fontSize: '12px', color: '#93c5fd', background: 'rgba(37,99,235,0.18)', border: '1px solid #3b82f6', padding: '8px 12px', borderRadius: '6px', lineHeight: '1.5' }}>
+                  📐 <strong>Recommended Dimensions:</strong> 800 × 800 px (1:1 Square) or 800 × 1000 px (4:5 Crop) | Max 5MB | WebP, JPG, PNG
+                  <div style={{ fontSize: '11px', color: '#60a5fa', marginTop: '2px', fontStyle: 'italic' }}>💡 Tip: High-resolution apparel photo with centered framing.</div>
                 </div>
               </div>
 

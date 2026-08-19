@@ -13,8 +13,8 @@ const Footer = () => {
         
         {/* Brand Overview */}
         <div className="lg:col-span-2">
-          <Link to="/" className="flex items-center gap-3 mb-6">
-            <DsLogo className="h-10 w-auto" />
+          <Link to="/" className="flex items-center gap-3 mb-6" style={{ textDecoration: 'none' }}>
+            <DsLogo />
           </Link>
           <p className="text-zinc-400 text-sm leading-relaxed max-w-sm mb-6">
             Premium sportswear and activewear manufacturer. Specializing in high-quality OEM/ODM services for global brands since 2012. Quality, speed, and precision in every stitch.
@@ -60,7 +60,7 @@ const Footer = () => {
             </li>
             <li className="flex items-center gap-3">
               <Mail size={18} className="text-[#dc2626] shrink-0" />
-              <a href="mailto:export@dansports.com" className="hover:text-white transition-colors">export@dansports.com</a>
+              <a href="mailto:export@dawnsports.com" className="hover:text-white transition-colors">export@dawnsports.com</a>
             </li>
             <li className="flex items-center gap-3">
               <Phone size={18} className="text-[#dc2626] shrink-0" />
@@ -72,7 +72,7 @@ const Footer = () => {
 
       {/* Copyright & Legal */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
-        <p>&copy; {new Date().getFullYear()} DAAN Sports B2B Apparel Manufacturing. All Rights Reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Dawn Sports B2B Apparel Manufacturing. All Rights Reserved.</p>
         <div className="flex gap-6">
           <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
           <Link to="/terms" className="hover:text-white transition-colors">Terms & Conditions</Link>

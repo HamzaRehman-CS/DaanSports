@@ -304,7 +304,8 @@ const BannerManager = () => {
                   </div>
                   {/* IMAGE DIMENSION GUIDELINE NOTICE */}
                   <div className="image-spec-guide-badge">
-                    📐 <strong>Recommended Size:</strong> 800 × 1200 px (2:3 Portrait Ratio) | Max 5MB | WebP, JPG, PNG
+                    📐 <strong>Recommended Dimensions:</strong> 800 × 1200 px (2:3 Vertical Portrait) | Max 5MB | WebP, JPG, PNG
+                    <span className="spec-subtip">💡 Tip: High-impact vertical imagery for flagship sportswear showcase.</span>
                   </div>
                 </div>
               </div>
@@ -383,7 +384,8 @@ const BannerManager = () => {
                   </div>
                   {/* IMAGE DIMENSION GUIDELINE NOTICE */}
                   <div className="image-spec-guide-badge">
-                    📐 <strong>Recommended Size:</strong> 1600 × 800 px (2:1 Widescreen Ratio) | Max 5MB | WebP, JPG, PNG
+                    📐 <strong>Recommended Dimensions:</strong> 1600 × 800 px (2:1 Widescreen Ratio) | Max 5MB | WebP, JPG, PNG
+                    <span className="spec-subtip">💡 Tip: Wide action or flat-lay product shot with darker left side for text readability.</span>
                   </div>
                 </div>
               </div>
@@ -454,7 +456,8 @@ const BannerManager = () => {
                   </div>
                   {/* IMAGE DIMENSION GUIDELINE NOTICE */}
                   <div className="image-spec-guide-badge">
-                    📐 <strong>Recommended Size:</strong> 800 × 600 px (4:3 Aspect Ratio) | Max 5MB | WebP, JPG, PNG
+                    📐 <strong>Recommended Dimensions:</strong> 800 × 600 px (4:3 Aspect Ratio) | Max 5MB | WebP, JPG, PNG
+                    <span className="spec-subtip">💡 Tip: Focused garment detail or athlete training shot.</span>
                   </div>
                 </div>
               </div>
@@ -525,7 +528,8 @@ const BannerManager = () => {
                   </div>
                   {/* IMAGE DIMENSION GUIDELINE NOTICE */}
                   <div className="image-spec-guide-badge">
-                    📐 <strong>Recommended Size:</strong> 800 × 600 px (4:3 Aspect Ratio) | Max 5MB | WebP, JPG, PNG
+                    📐 <strong>Recommended Dimensions:</strong> 800 × 600 px (4:3 Aspect Ratio) | Max 5MB | WebP, JPG, PNG
+                    <span className="spec-subtip">💡 Tip: High-contrast compression or activewear feature image.</span>
                   </div>
                 </div>
               </div>
@@ -587,7 +591,8 @@ const BannerManager = () => {
                   </div>
                   {/* IMAGE DIMENSION GUIDELINE NOTICE */}
                   <div className="image-spec-guide-badge">
-                    📐 <strong>Recommended Size:</strong> 1920 × 600 px (16:5 Panoramic Ratio) | Max 5MB | WebP, JPG, PNG
+                    📐 <strong>Recommended Dimensions:</strong> 1920 × 600 px (16:5 Panoramic Ratio) | Max 5MB | WebP, JPG, PNG
+                    <span className="spec-subtip">💡 Tip: Wide factory floor, production line, or athletic team panoramic photography.</span>
                   </div>
                 </div>
               </div>

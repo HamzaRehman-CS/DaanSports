@@ -6,7 +6,7 @@ const Navbar = () => {
   return (
     <div className='admin-navbar'>
       <div className="admin-nav-brand">
-        <DsLogo className="h-7 w-auto" />
+        <DsLogo />
         <div className="brand-text">
           <span>B2B WHOLESALE ADMIN PORTAL</span>
         </div>

@@ -52,7 +52,7 @@ const Shop = () => {
   return (
     <div className="bg-[#0a0a0a] text-white overflow-hidden selection:bg-[#dc2626] selection:text-white">
       <SEO 
-        title="DAAN Sports — #1 B2B Wholesale Apparel & Custom OEM Sportswear Manufacturer"
+        title="Dawn Sports — #1 B2B Wholesale Apparel & Custom OEM Sportswear Manufacturer"
         description="Direct factory manufacturer of premium wholesale tracksuits, 350 GSM heavyweight fleece hoodies, gym activewear, athletic jerseys, and outerwear. Low MOQ 50 pcs, custom OEM private labeling, and fast worldwide express shipping."
         keywords="wholesale sportswear, bulk tracksuits, custom athletic apparel, OEM clothing manufacturer, heavyweight fleece hoodies, gym activewear supplier, private label sports apparel, B2B sportswear export"
       />
@@ -301,7 +301,7 @@ const WhyChooseUs = () => {
     <section className="py-24 bg-[#09090b] border-y border-white/10">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <h2 className="text-center font-serif text-3xl md:text-5xl font-black italic uppercase tracking-tight text-white mb-16 anime-reveal">
-          Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-800 py-1 inline-block leading-normal overflow-visible">DAAN Sports</span>
+          Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-400 to-zinc-800 py-1 inline-block leading-normal overflow-visible">Dawn Sports</span>
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8">

@@ -100,23 +100,23 @@ export default function HeroCarousel() {
   }, []);
 
   return (
-    <section className="relative w-full h-[580px] sm:h-[640px] md:h-[700px] lg:h-[760px] overflow-hidden bg-[#0a0a0a] select-none pt-12 md:pt-16">
+    <section className="relative w-full min-h-[520px] h-[85vh] max-h-[660px] sm:h-[640px] md:h-[720px] lg:h-[780px] overflow-hidden bg-[#0a0a0a] select-none pt-14 md:pt-16">
       
-      {/* Navigation Custom Arrows */}
+      {/* Navigation Custom Arrows - Lower visibility on mobile to prevent obstructing headlines/text */}
       <button
         ref={prevRef}
-        className="hero-nav-arrow hero-nav-prev absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/40 hover:bg-black/80 border border-white/20 hover:border-white text-white flex items-center justify-center backdrop-blur-md transition-all duration-300 shadow-xl cursor-pointer"
+        className="hero-nav-arrow hero-nav-prev absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-black/30 hover:bg-black/80 border border-white/10 hover:border-white text-white/50 hover:text-white flex items-center justify-center backdrop-blur-sm transition-all duration-300 shadow-lg cursor-pointer opacity-30 sm:opacity-75 hover:opacity-100"
         aria-label="Previous Hero Slide"
       >
-        <ChevronLeft size={22} />
+        <ChevronLeft size={18} className="sm:w-5 sm:h-5 md:w-6 md:h-6" />
       </button>
 
       <button
         ref={nextRef}
-        className="hero-nav-arrow hero-nav-next absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/40 hover:bg-black/80 border border-white/20 hover:border-white text-white flex items-center justify-center backdrop-blur-md transition-all duration-300 shadow-xl cursor-pointer"
+        className="hero-nav-arrow hero-nav-next absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-black/30 hover:bg-black/80 border border-white/10 hover:border-white text-white/50 hover:text-white flex items-center justify-center backdrop-blur-sm transition-all duration-300 shadow-lg cursor-pointer opacity-30 sm:opacity-75 hover:opacity-100"
         aria-label="Next Hero Slide"
       >
-        <ChevronRight size={22} />
+        <ChevronRight size={18} className="sm:w-5 sm:h-5 md:w-6 md:h-6" />
       </button>
 
       <Swiper
@@ -157,23 +157,23 @@ export default function HeroCarousel() {
                   loading={index === 0 ? "eager" : "lazy"}
                 />
                 
-                {/* Athletic Dark Backdrop Gradients matching Reference Image */}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-black/80" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-black/60" />
+                {/* Athletic Dark Backdrop Gradients ensuring pristine readability on all screen widths */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-black/50 sm:to-black/80" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-black/70" />
 
                 {/* Subtle DS Watermark in background */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.04] overflow-hidden select-none">
                   <span className="text-[20vw] font-display font-black italic tracking-widest text-white whitespace-nowrap">
-                    DAAN SPORTS
+                    DAWN SPORTS
                   </span>
                 </div>
               </div>
 
               {/* Foreground Content Container matching Reference Image */}
-              <div className="relative z-20 max-w-7xl mx-auto h-full px-6 md:px-12 lg:px-16 flex items-center justify-between">
+              <div className="relative z-20 max-w-7xl mx-auto h-full px-5 sm:px-8 md:px-12 lg:px-16 flex items-center justify-between">
                 
                 {/* Left Side: Massive Bold Headlines, Subtitle & Button */}
-                <div className="max-w-xl xl:max-w-2xl py-12">
+                <div className="max-w-xl xl:max-w-2xl py-8 sm:py-12">
                   <AnimatePresence mode="wait">
                     {isActive && (
                       <motion.div
@@ -182,20 +182,20 @@ export default function HeroCarousel() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                        className="space-y-4 md:space-y-6"
+                        className="space-y-3 sm:space-y-4 md:space-y-6"
                       >
                         {/* Heading Line 1 & Line 2 */}
-                        <div className="space-y-1">
-                          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[0.95] drop-shadow-lg">
+                        <div className="space-y-0.5 sm:space-y-1">
+                          <h1 className="text-3xl sm:text-6xl md:text-7xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[1.02] sm:leading-[0.95] drop-shadow-xl">
                             {slide.titleLine1 || "DRESS SHARP"}
                           </h1>
-                          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[0.95] drop-shadow-lg">
+                          <h1 className="text-3xl sm:text-6xl md:text-7xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[1.02] sm:leading-[0.95] drop-shadow-xl">
                             {slide.titleLine2 || "LIVE STRONG"}
                           </h1>
                         </div>
 
                         {/* Subtitle */}
-                        <p className="text-sm sm:text-base md:text-lg text-zinc-300 font-normal leading-relaxed max-w-md drop-shadow-md">
+                        <p className="text-xs sm:text-base md:text-lg text-zinc-300 font-normal leading-relaxed max-w-xs sm:max-w-md drop-shadow-md line-clamp-3 sm:line-clamp-none">
                           {slide.subtitle || "Premium quality apparel for every move you make."}
                         </p>
 
@@ -203,7 +203,7 @@ export default function HeroCarousel() {
                         <div className="pt-2">
                           <Link 
                             to={slide.ctaLink || "/category/all"} 
-                            className="inline-flex items-center gap-3 bg-white text-[#0a0a0a] px-8 py-4 font-bold text-xs sm:text-sm tracking-wider uppercase hover:bg-[#dc2626] hover:text-white transition-all duration-300 shadow-2xl group cursor-pointer"
+                            className="inline-flex items-center gap-2.5 sm:gap-3 bg-white text-[#0a0a0a] px-6 sm:px-8 py-3.5 sm:py-4 font-bold text-xs sm:text-sm tracking-wider uppercase hover:bg-[#dc2626] hover:text-white transition-all duration-300 shadow-2xl group cursor-pointer"
                           >
                             <span>{slide.ctaText || "SHOP NOW"}</span>
                             <ArrowRight size={16} className="group-hover:translate-x-1.5 transition-transform duration-300" />
@@ -258,7 +258,7 @@ export default function HeroCarousel() {
       </Swiper>
 
       {/* Pagination Dots at Bottom Center */}
-      <div className="hero-custom-pagination absolute bottom-6 inset-x-0 z-30 flex items-center justify-center gap-2 pointer-events-auto" />
+      <div className="hero-custom-pagination absolute bottom-4 sm:bottom-6 inset-x-0 z-30 flex items-center justify-center gap-2 pointer-events-auto" />
 
       <style>{`
         .hero-dot {

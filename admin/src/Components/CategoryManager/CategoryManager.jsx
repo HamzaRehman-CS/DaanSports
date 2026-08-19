@@ -193,7 +193,8 @@ const CategoryManager = () => {
               </div>
               {/* IMAGE DIMENSION GUIDELINE NOTICE */}
               <div className="image-spec-guide-badge">
-                📐 <strong>Recommended Size:</strong> 600 × 750 px (4:5 Portrait Ratio) | Max 5MB | WebP, JPG, PNG
+                📐 <strong>Recommended Dimensions:</strong> 600 × 750 px (4:5 Portrait Ratio) | Max 5MB | WebP, JPG, PNG
+                <span className="spec-subtip">💡 Tip: Use clean sportswear product or athlete shots on neutral/dark background.</span>
               </div>
             </div>
           </div>
@@ -273,7 +274,8 @@ const CategoryManager = () => {
 
                       {/* IMAGE DIMENSION GUIDELINE NOTICE */}
                       <div className="image-spec-guide-badge">
-                        📐 <strong>Recommended Size:</strong> 600 × 750 px (4:5 Portrait Ratio) | Max 5MB | WebP, JPG, PNG
+                        📐 <strong>Recommended Dimensions:</strong> 600 × 750 px (4:5 Portrait Ratio) | Max 5MB | WebP, JPG, PNG
+                        <span className="spec-subtip">💡 Tip: Use clean sportswear product or athlete shots on neutral/dark background.</span>
                       </div>
 
                       <label>Description</label>

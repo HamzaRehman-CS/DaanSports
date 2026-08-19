@@ -6,7 +6,7 @@ import 'swiper/css/effect-fade';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Sparkles, ShieldCheck, Factory } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { API_URL } from '../../config';
 
@@ -16,30 +16,30 @@ const defaultHeroSlides = [
     titleLine1: "DRESS SHARP",
     titleLine2: "LIVE STRONG",
     title: "DRESS SHARP\nLIVE STRONG",
-    subtitle: "Premium quality apparel for every move you make.",
-    description: "Premium quality apparel for every move you make.",
+    subtitle: "Premium 350 GSM heavyweight tracksuits & custom athletic apparel.",
+    description: "Premium 350 GSM heavyweight tracksuits & custom athletic apparel.",
     ctaText: "SHOP NOW",
     ctaLink: "/category/all",
     rightTagTop: "NEW COLLECTION",
     rightTagTopVal: "2026",
     rightTagBottom: "UP TO",
     rightTagBottomVal: "30% OFF",
-    bgImage: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=85&w=2000&auto=format&fit=crop"
+    bgImage: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=85&w=2000&auto=format&fit=crop"
   },
   {
     id: 2,
     titleLine1: "ENGINEERED FOR",
     titleLine2: "PERFORMANCE",
     title: "ENGINEERED FOR\nPERFORMANCE",
-    subtitle: "Heavyweight 350 GSM French Terry pullovers & custom athletic apparel.",
-    description: "Heavyweight 350 GSM French Terry pullovers & custom athletic apparel.",
+    subtitle: "Heavyweight French Terry pullovers & custom athletic apparel ready for OEM branding.",
+    description: "Heavyweight French Terry pullovers & custom athletic apparel ready for OEM branding.",
     ctaText: "EXPLORE HOODIES",
     ctaLink: "/category/hoodies",
     rightTagTop: "HEAVYWEIGHT FLEECE",
     rightTagTopVal: "350 GSM",
     rightTagBottom: "BULK WHOLESALE",
     rightTagBottomVal: "SPECIALS",
-    bgImage: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=85&w=2000&auto=format&fit=crop"
+    bgImage: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=85&w=2000&auto=format&fit=crop"
   },
   {
     id: 3,
@@ -79,6 +79,12 @@ export default function HeroCarousel() {
             const line1 = s.titleLine1 || lines[0] || "DRESS SHARP";
             const line2 = s.titleLine2 || lines[1] || (lines.length > 1 ? lines.slice(1).join(' ') : "LIVE STRONG");
 
+            // Avoid dark floor image
+            let image = s.bgImage || s.image || defaultHeroSlides[idx % defaultHeroSlides.length].bgImage;
+            if (image.includes("photo-1534438327276-14e5300c3a48")) {
+              image = "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=85&w=2000&auto=format&fit=crop";
+            }
+
             return {
               id: s.id || idx + 1,
               titleLine1: line1.replace(/<[^>]*>?/gm, '').trim(),
@@ -90,7 +96,7 @@ export default function HeroCarousel() {
               rightTagTopVal: s.rightTagTopVal || "2026",
               rightTagBottom: s.rightTagBottom || "UP TO",
               rightTagBottomVal: s.rightTagBottomVal || (s.priceText ? s.priceText : "30% OFF"),
-              bgImage: s.bgImage || s.image || defaultHeroSlides[idx % defaultHeroSlides.length].bgImage
+              bgImage: image
             };
           });
           setSlides(parsed);
@@ -102,7 +108,7 @@ export default function HeroCarousel() {
   return (
     <section className="relative w-full h-[100dvh] min-h-[100dvh] overflow-hidden bg-[#0a0a0a] select-none">
       
-      {/* Desktop Navigation Arrows (Cleanly hidden on mobile to keep Android view 100% uncluttered) */}
+      {/* Desktop Navigation Arrows */}
       <button
         ref={prevRef}
         className="hero-nav-arrow hero-nav-prev hidden md:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-30 w-11 h-11 lg:w-12 lg:h-12 rounded-full bg-black/40 hover:bg-black/90 border border-white/15 hover:border-white text-white/70 hover:text-white items-center justify-center backdrop-blur-md transition-all duration-300 shadow-2xl cursor-pointer opacity-75 hover:opacity-100"
@@ -147,20 +153,20 @@ export default function HeroCarousel() {
           return (
             <SwiperSlide key={slide.id || index} className="relative w-full h-full">
               
-              {/* Full Background Image Layer - 100% full screen coverage on Android and Desktop */}
+              {/* Full Background Image Layer */}
               <div className="absolute inset-0 z-0 overflow-hidden">
                 <img 
                   src={bgImg} 
                   alt={`${slide.titleLine1} ${slide.titleLine2}`} 
-                  className="w-full h-full object-cover object-center transform scale-100 transition-transform duration-7000 ease-out"
+                  className="w-full h-full object-cover object-[center_30%] md:object-center transform scale-100 transition-transform duration-7000 ease-out"
                   referrerPolicy="no-referrer"
                   loading={index === 0 ? "eager" : "lazy"}
                 />
                 
-                {/* Athletic Dark Backdrop Gradients - Translucent overlays for rich contrast and full photo visibility */}
-                <div className="absolute inset-0 bg-black/35 sm:bg-black/30" />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/55 to-black/25 sm:to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60" />
+                {/* Athletic Dark Backdrop Gradients */}
+                <div className="absolute inset-0 bg-black/40 sm:bg-black/30" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/30 sm:to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/60" />
 
                 {/* Subtle DS Watermark in background */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.04] overflow-hidden select-none">
@@ -170,10 +176,10 @@ export default function HeroCarousel() {
                 </div>
               </div>
 
-              {/* Foreground Content Container - Perfectly centered on Android view */}
-              <div className="relative z-20 max-w-7xl mx-auto h-full px-6 sm:px-8 md:px-12 lg:px-16 flex flex-col justify-center pt-20 sm:pt-24 md:pt-0 pb-20 sm:pb-24 md:pb-0 md:flex-row md:items-center md:justify-between">
+              {/* Foreground Content Container - Perfectly structured on mobile and desktop */}
+              <div className="relative z-20 max-w-7xl mx-auto h-full px-5 sm:px-8 md:px-12 lg:px-16 flex flex-col justify-center pt-24 sm:pt-28 md:pt-0 pb-20 sm:pb-24 md:pb-0 md:flex-row md:items-center md:justify-between">
                 
-                {/* Left Side: Bold Headlines, Subtitle & Button */}
+                {/* Left Side: Badge, Bold Headlines, Subtitle, Dual Action Buttons & Feature Pills */}
                 <div className="max-w-xl xl:max-w-2xl flex flex-col justify-center">
                   <AnimatePresence mode="wait">
                     {isActive && (
@@ -183,33 +189,55 @@ export default function HeroCarousel() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -15 }}
                         transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-                        className="space-y-3 sm:space-y-4 md:space-y-5"
+                        className="space-y-3 sm:space-y-4"
                       >
+                        {/* Pill Badge */}
+                        <div className="inline-flex items-center gap-1.5 bg-[#dc2626] text-white px-3 py-1 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded shadow-lg transform -skew-x-6 w-fit">
+                          <span className="skew-x-6 inline-flex items-center gap-1.5">
+                            <Sparkles size={12} className="text-yellow-300" />
+                            DIRECT FACTORY WHOLESALE
+                          </span>
+                        </div>
+
                         {/* Heading Line 1 & Line 2 */}
                         <div className="space-y-0.5 sm:space-y-1">
-                          <h1 className="text-3.5xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[1.04] drop-shadow-2xl text-balance">
+                          <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[0.98] drop-shadow-2xl">
                             {slide.titleLine1 || "DRESS SHARP"}
                           </h1>
-                          <h1 className="text-3.5xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[1.04] drop-shadow-2xl text-balance">
+                          <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-[5.2rem] font-display font-black uppercase tracking-tight text-white leading-[0.98] drop-shadow-2xl">
                             {slide.titleLine2 || "LIVE STRONG"}
                           </h1>
                         </div>
 
                         {/* Subtitle */}
-                        <p className="text-xs xs:text-sm sm:text-base md:text-lg text-zinc-200 font-normal leading-relaxed max-w-[310px] sm:max-w-md drop-shadow-md">
-                          {slide.subtitle || "Premium quality apparel for every move you make."}
+                        <p className="text-xs xs:text-sm sm:text-base md:text-lg text-zinc-200 font-normal leading-relaxed max-w-sm sm:max-w-md drop-shadow-md">
+                          {slide.subtitle || "Premium 350 GSM heavyweight tracksuits & custom athletic apparel."}
                         </p>
 
-                        {/* CTA White Button matching Reference Design */}
-                        <div className="pt-2 sm:pt-4">
+                        {/* Dual Action Buttons */}
+                        <div className="pt-2 sm:pt-4 flex items-center gap-3">
                           <Link 
                             to={slide.ctaLink || "/category/all"} 
-                            className="inline-flex items-center gap-2.5 sm:gap-3 bg-white text-[#0a0a0a] px-6 sm:px-8 py-3 sm:py-3.5 md:py-4 font-black text-xs sm:text-sm tracking-wider uppercase hover:bg-[#dc2626] hover:text-white transition-all duration-300 shadow-2xl group cursor-pointer"
+                            className="inline-flex items-center gap-2.5 sm:gap-3 bg-white text-[#0a0a0a] px-6 sm:px-8 py-3.5 sm:py-4 font-black text-xs sm:text-sm tracking-wider uppercase hover:bg-[#dc2626] hover:text-white transition-all duration-300 shadow-2xl group cursor-pointer"
                           >
                             <span>{slide.ctaText || "SHOP NOW"}</span>
                             <ArrowRight size={16} className="group-hover:translate-x-1.5 transition-transform duration-300" />
                           </Link>
+                          <Link 
+                            to="/category/all" 
+                            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 sm:px-6 py-3.5 sm:py-4 font-bold text-xs sm:text-sm tracking-wider uppercase backdrop-blur-md transition-all duration-300"
+                          >
+                            <span>CATALOG</span>
+                          </Link>
                         </div>
+
+                        {/* Mobile Feature Highlights Bar */}
+                        <div className="flex md:hidden items-center gap-2 pt-3 text-[10px] text-zinc-300 font-bold uppercase tracking-wider">
+                          <span className="bg-white/10 border border-white/15 px-2.5 py-1 rounded backdrop-blur-sm">⚡ 50 PCS MOQ</span>
+                          <span className="bg-white/10 border border-white/15 px-2.5 py-1 rounded backdrop-blur-sm">📦 GLOBAL CARGO</span>
+                          <span className="bg-white/10 border border-white/15 px-2.5 py-1 rounded backdrop-blur-sm">🏷️ OEM LABELS</span>
+                        </div>
+
                       </motion.div>
                     )}
                   </AnimatePresence>

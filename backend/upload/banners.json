@@ -1,7 +1,7 @@
 {
   "tallVertical": {
     "category": "Tracksuits",
-    "title": "FLAGSHIP TEAM TRACKSUITS",
+    "title": "UPDATED LIVE BANNER TITLE",
     "subtitle": "Custom 330 GSM combed fleece & interlock sets engineered for elite athletics & custom private labels.",
     "badge": "FLAGSHIP SPEC",
     "ctaText": "Explore Tracksuits",
@@ -39,12 +39,6 @@
     "ctaText": "Request Tech-Pack Quote",
     "bgImage": "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=2000&auto=format&fit=crop"
   },
-  "topSellers": {
-    "title": "TOP SELLERS — FLAGSHIP EDITION",
-    "subtitle": "Handpicked Performance Gear & High-Volume Custom Apparel",
-    "badge": "BESTSELLER SELECTION",
-    "bgImage": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=2070&auto=format&fit=crop"
-  },
   "promoSection1": {
     "category": "Trousers",
     "title": "TROUSERS & JOGGERS — 10% OFF",
@@ -60,5 +54,12 @@
     "subtitle": "350 GSM French Terry pullovers and drop-shoulder streetwear cuts",
     "bgImage": "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=2070&auto=format&fit=crop",
     "discountPercent": 15
+  },
+  "customBanners": [],
+  "topSellers": {
+    "title": "TOP SELLERS — FLAGSHIP EDITION",
+    "subtitle": "Handpicked Performance Gear & High-Volume Custom Apparel",
+    "badge": "BESTSELLER SELECTION",
+    "bgImage": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=2070&auto=format&fit=crop"
   }
 }

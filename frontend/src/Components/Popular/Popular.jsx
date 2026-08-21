@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import './Popular.css'
 import Item from '../Item/Item'
+import { API_URL } from '../../config'
 
 const Popular = () => {
   const [popularItems, setPopularItems] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:4000/popular-tracksuits')
+    fetch(`${API_URL}/popular-tracksuits`)
       .then(res => res.json())
       .then(data => {
         if (data && data.length > 0) {
           setPopularItems(data);
         } else {
-          fetch('http://localhost:4000/all-products')
+          fetch(`${API_URL}/all-products`)
             .then(r => r.json())
             .then(all => setPopularItems(all.slice(0, 4)));
         }

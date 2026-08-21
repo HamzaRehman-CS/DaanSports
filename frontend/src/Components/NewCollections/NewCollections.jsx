@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import './NewCollections.css'
 import Item from '../Item/Item'
+import { API_URL } from '../../config'
 
 const NewCollections = () => {
   const [new_collection, setNew_collection] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:4000/new-collection')
+    fetch(`${API_URL}/new-collection`)
       .then(res => res.json())
       .then(data => {
         if (data && data.length > 0) {
           setNew_collection(data);
         } else {
-          fetch('http://localhost:4000/all-products')
+          fetch(`${API_URL}/all-products`)
             .then(r => r.json())
             .then(all => setNew_collection(all.slice(0, 8)));
         }

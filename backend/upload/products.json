@@ -223,5 +223,37 @@
     "stock": 5000,
     "date": "2026-08-08T05:47:15.916Z",
     "available": true
+  },
+  {
+    "id": 9,
+    "name": "Updated Worldwide Fleece Tracksuit Set (Global Sync)",
+    "image": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80"
+    ],
+    "category": "Tracksuits",
+    "new_price": 29.99,
+    "old_price": 38.987,
+    "moq": 50,
+    "description": "",
+    "material": "80% Combed Cotton / 20% Polyester",
+    "gsm": "330 GSM",
+    "stitching": "Double-Needle Flatlock Reinforced",
+    "customization": "Custom Printing & Labels Available",
+    "leadTime": "12 - 15 Business Days",
+    "colors": [
+      "Black",
+      "Gold"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "stock": 1000,
+    "available": true,
+    "date": "2026-08-21T11:32:53.702Z"
   }
 ]

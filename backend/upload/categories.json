@@ -70,5 +70,16 @@
       "Softshell"
     ],
     "banner": "https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    "id": 7,
+    "name": "Compression Gear",
+    "slug": "compressiongear",
+    "description": "Pro 4-Way Stretch Compression",
+    "subcategories": [
+      "General"
+    ],
+    "banner": "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=2070&auto=format&fit=crop",
+    "date": "2026-08-21T11:33:30.418Z"
   }
 ]

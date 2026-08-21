@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './RelatedProducts.css';
 import Item from '../Item/Item';
+import { API_URL } from '../../config';
 
 const RelatedProducts = (props) => {
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -8,7 +9,7 @@ const RelatedProducts = (props) => {
 
   useEffect(() => {
     if (product && product.category) {
-      fetch(`http://localhost:4000/popular-tracksuits`)
+      fetch(`${API_URL}/popular-tracksuits`)
         .then(res => res.json())
         .then(data => setRelatedProducts(data))
         .catch(err => console.error("Error fetching related products:", err));

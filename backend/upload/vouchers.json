@@ -1,5 +1,13 @@
 [
   {
+    "code": "GLOBAL30",
+    "type": "percent",
+    "discount": 30,
+    "minOrder": 100,
+    "description": "30% Off Worldwide Special",
+    "date": "2026-08-21T11:34:09.819Z"
+  },
+  {
     "code": "GOCART20",
     "type": "percent",
     "discount": 20,

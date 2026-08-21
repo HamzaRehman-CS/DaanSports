@@ -12,7 +12,7 @@ const Hero = () => {
       subtitle: "Custom 330-380 GSM combed cotton tracksuits, heavyweight hoodies, and technical activewear built for elite athletic clubs.",
       priceTag: "Wholesale from $9.80 / pc",
       moqTag: "MOQ 50 Pcs",
-      image: "http://localhost:4000/images/slide1.jpg",
+      image: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=85&w=2000&auto=format&fit=crop",
       primaryLink: "/tracksuits",
       primaryCta: "EXPLORE CATALOG ➔"
     },
@@ -23,7 +23,7 @@ const Hero = () => {
       subtitle: "Drop-shoulder oversized cuts, 350 GSM pre-shrunk cotton, double-lined hoods ready for 3D puff print & damask labeling.",
       priceTag: "Starting at $18.90 / pc",
       moqTag: "MOQ 50 Pcs",
-      image: "http://localhost:4000/images/slide2.jpg",
+      image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=85&w=2000&auto=format&fit=crop",
       primaryLink: "/sweatshirts",
       primaryCta: "VIEW HOODIES ➔"
     },
@@ -34,7 +34,7 @@ const Hero = () => {
       subtitle: "Anti-microbial sweat-wicking compression tops & tights engineered for high-intensity sports and international teams.",
       priceTag: "Starting at $16.50 / pc",
       moqTag: "MOQ 100 Pcs",
-      image: "http://localhost:4000/images/slide3.jpg",
+      image: "https://images.unsplash.com/photo-1542652694-40abf526446e?q=85&w=2000&auto=format&fit=crop",
       primaryLink: "/activewear",
       primaryCta: "VIEW ACTIVEWEAR ➔"
     }

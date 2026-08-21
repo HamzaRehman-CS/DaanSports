@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './CategoriesMarquee.css';
 import { Link } from 'react-router-dom';
+import { API_URL } from '../../config';
 
 const defaultCategories = [
   { name: "Tracksuits & Joggers", link: "/tracksuits", icon: "⚡" },
@@ -15,7 +16,7 @@ const CategoriesMarquee = () => {
   const [marqueeList, setMarqueeList] = useState(defaultCategories);
 
   useEffect(() => {
-    fetch("http://localhost:4000/categories")
+    fetch(`${API_URL}/categories`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {

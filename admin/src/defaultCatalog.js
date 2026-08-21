@@ -639,3 +639,83 @@ export const saveCms = (cms) => {
   }
   return combined;
 };
+
+// DIRECT ASYNC CLOUD METHODS FOR COMPONENTS
+export const fetchCloudBanners = async () => {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.current_banners`, { headers: supabaseHeaders });
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0 && data[0].data) {
+      const merged = { ...DEFAULT_BANNERS, ...data[0].data };
+      if (typeof window !== 'undefined') localStorage.setItem('daan_banners', JSON.stringify(merged));
+      broadcastSyncEvent('BANNERS_UPDATED', merged);
+      return merged;
+    }
+  } catch (err) {}
+  return loadBanners();
+};
+
+export const fetchCloudProducts = async () => {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.asc`, { headers: supabaseHeaders });
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      if (typeof window !== 'undefined') localStorage.setItem('daan_products', JSON.stringify(data));
+      broadcastSyncEvent('PRODUCTS_UPDATED', data);
+      return data;
+    }
+  } catch (err) {}
+  return loadCatalogProducts();
+};
+
+export const fetchCloudCategories = async () => {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=id.asc`, { headers: supabaseHeaders });
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      if (typeof window !== 'undefined') localStorage.setItem('daan_categories', JSON.stringify(data));
+      broadcastSyncEvent('CATEGORIES_UPDATED', data);
+      return data;
+    }
+  } catch (err) {}
+  return loadCategories();
+};
+
+export const fetchCloudCms = async () => {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/cms?id=eq.current_cms`, { headers: supabaseHeaders });
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0 && data[0].data) {
+      const merged = { ...DEFAULT_CMS, ...data[0].data };
+      if (typeof window !== 'undefined') localStorage.setItem('daan_cms', JSON.stringify(merged));
+      broadcastSyncEvent('CMS_UPDATED', merged);
+      return merged;
+    }
+  } catch (err) {}
+  return loadCms();
+};
+
+export const deleteCloudProduct = async (id) => {
+  const current = loadCatalogProducts().filter(p => p.id !== id);
+  saveCatalogProducts(current);
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: supabaseHeaders
+    });
+  } catch (err) {}
+  return current;
+};
+
+export const addCloudProduct = async (product) => {
+  const current = [product, ...loadCatalogProducts().filter(p => p.id !== product.id)];
+  saveCatalogProducts(current);
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/products`, {
+      method: 'POST',
+      headers: supabaseHeaders,
+      body: JSON.stringify([product])
+    });
+  } catch (err) {}
+  return current;
+};

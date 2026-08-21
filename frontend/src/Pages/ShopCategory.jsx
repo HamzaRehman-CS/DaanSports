@@ -5,7 +5,7 @@ import { ShopContext } from '../Context/ShopContext';
 import Item from '../Components/Item/Item';
 import SEO from '../Components/SEO/SEO';
 import { API_URL } from '../config';
-import { loadCatalogProducts, loadCategories, subscribeToGlobalSync } from '../Context/defaultCatalog';
+import { loadCatalogProducts, loadCategories, subscribeToGlobalSync, fetchCloudProducts, fetchCloudCategories } from '../Context/defaultCatalog';
 
 const SIZE_OPTIONS = ['All', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
 
@@ -33,26 +33,21 @@ const ShopCategory = (props) => {
   const [sortBy, setSortBy] = useState('price-low');
   const [selectedSize, setSelectedSize] = useState('All');
 
-  const syncData = () => {
-    fetch(`${API_URL}/categories`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          const found = data.find(c => 
-            (c.slug || '').toLowerCase() === targetCategoryRaw.toLowerCase() || 
-            (c.name || '').toLowerCase() === targetCategoryRaw.toLowerCase()
-          );
-          if (found) setActiveCategoryInfo(found);
-        }
-      })
-      .catch(() => {});
-
-    fetch(`${API_URL}/all-products`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) setFallbackProducts(data);
-      })
-      .catch(() => {});
+  const syncData = async () => {
+    try {
+      const [prods, cats] = await Promise.all([
+        fetchCloudProducts(),
+        fetchCloudCategories()
+      ]);
+      if (Array.isArray(prods) && prods.length > 0) setFallbackProducts(prods);
+      if (Array.isArray(cats) && cats.length > 0) {
+        const found = cats.find(c => 
+          (c.slug || '').toLowerCase() === targetCategoryRaw.toLowerCase() || 
+          (c.name || '').toLowerCase() === targetCategoryRaw.toLowerCase()
+        );
+        if (found) setActiveCategoryInfo(found);
+      }
+    } catch (err) {}
   };
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './SiteManager.css';
 import { API_URL } from '../../config';
-import { loadCms, saveCms } from '../../defaultCatalog';
+import { loadCms, saveCms, fetchCloudCms } from '../../defaultCatalog';
 
 const SiteManager = () => {
   const [cms, setCms] = useState(() => loadCms());
@@ -12,11 +12,9 @@ const SiteManager = () => {
 
   const fetchCms = async () => {
     try {
-      const res = await fetch(`${API_URL}/cms`);
-      const data = await res.json();
+      const data = await fetchCloudCms();
       if (data && typeof data === 'object') {
         setCms(data);
-        saveCms(data);
       }
     } catch (err) {
       const stored = loadCms();

@@ -5,7 +5,7 @@ import './CatalogExplorer.css';
 import { API_URL } from '../../config';
 import { ShopContext } from '../../Context/ShopContext';
 
-import { loadCatalogProducts, loadCategories, subscribeToGlobalSync } from '../../Context/defaultCatalog';
+import { loadCatalogProducts, loadCategories, subscribeToGlobalSync, fetchCloudProducts, fetchCloudCategories } from '../../Context/defaultCatalog';
 
 const DEFAULT_CATEGORY_TABS = [
   { id: 'all', label: 'All Catalog', slug: 'all' },
@@ -52,24 +52,15 @@ export default function CatalogExplorer({ products: propProducts, title = "WHOLE
 
   // Live Auto-Poll & Tab-Focus Synchronization
   useEffect(() => {
-    const syncCatalogData = () => {
-      fetch(`${API_URL}/all-products`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data) && data.length > 0) {
-            setFallbackProducts(data);
-          }
-        })
-        .catch(() => {});
-
-      fetch(`${API_URL}/categories`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data) && data.length > 0) {
-            setLiveCategories(data);
-          }
-        })
-        .catch(() => {});
+    const syncCatalogData = async () => {
+      try {
+        const [prods, cats] = await Promise.all([
+          fetchCloudProducts(),
+          fetchCloudCategories()
+        ]);
+        if (Array.isArray(prods) && prods.length > 0) setFallbackProducts(prods);
+        if (Array.isArray(cats) && cats.length > 0) setLiveCategories(cats);
+      } catch (err) {}
     };
 
     syncCatalogData();

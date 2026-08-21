@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './ProductList.css';
 import cross_icon from '../../assets/cross_icon.png';
 import { API_URL } from '../../config';
-import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories } from '../../defaultCatalog';
+import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudProducts, fetchCloudCategories, deleteCloudProduct } from '../../defaultCatalog';
 
 const ProductList = () => {
   const [allProducts, setAllProducts] = useState(() => loadCatalogProducts());
@@ -17,18 +17,15 @@ const ProductList = () => {
 
   const fetchAllProducts = async () => {
     try {
-      const res = await fetch(`${API_URL}/all-products`);
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        setAllProducts(data);
-        saveCatalogProducts(data);
+      const [prods, cats] = await Promise.all([
+        fetchCloudProducts(),
+        fetchCloudCategories()
+      ]);
+      if (Array.isArray(prods) && prods.length > 0) {
+        setAllProducts(prods);
       }
-
-      const catRes = await fetch(`${API_URL}/categories`);
-      const catData = await catRes.json();
-      if (Array.isArray(catData) && catData.length > 0) {
-        setCategories(catData);
-        saveCategories(catData);
+      if (Array.isArray(cats) && cats.length > 0) {
+        setCategories(cats);
       }
     } catch (err) {
       const stored = loadCatalogProducts();
@@ -38,7 +35,7 @@ const ProductList = () => {
 
   useEffect(() => {
     fetchAllProducts();
-    const interval = setInterval(fetchAllProducts, 3000);
+    const interval = setInterval(fetchAllProducts, 5000);
     const handleFocus = () => fetchAllProducts();
     window.addEventListener('focus', handleFocus);
 
@@ -52,20 +49,9 @@ const ProductList = () => {
     if (!window.confirm(`Are you sure you want to remove "${name}" from wholesale inventory?`)) {
       return;
     }
-    const updated = allProducts.filter(p => p.id !== id);
+    const updated = await deleteCloudProduct(id);
     setAllProducts(updated);
-    saveCatalogProducts(updated);
-
-    try {
-      await fetch(`${API_URL}/remove-product`, {
-        method: 'POST',
-        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: id, name: name })
-      });
-    } catch (err) {
-      console.warn("Backend sync notice (saved locally):", err.message);
-    }
-    alert(`Product "${name}" removed successfully!`);
+    alert(`Product "${name}" removed successfully from Cloud Database!`);
   };
 
   const openEditModal = (product) => {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './BannerManager.css';
 import { API_URL } from '../../config';
-import { loadBanners, saveBanners, loadCategories, saveCategories } from '../../defaultCatalog';
+import { loadBanners, saveBanners, loadCategories, saveCategories, fetchCloudBanners, fetchCloudCategories } from '../../defaultCatalog';
 
 const defaultBannersState = loadBanners();
 
@@ -16,35 +16,13 @@ const BannerManager = () => {
   const fetchBannersAndCategories = async () => {
     setLoading(true);
     try {
-      const [bRes, cRes] = await Promise.all([
-        fetch(`${API_URL}/promotional-banners`),
-        fetch(`${API_URL}/categories`)
+      const [cloudBanners, cloudCategories] = await Promise.all([
+        fetchCloudBanners(),
+        fetchCloudCategories()
       ]);
-      const bData = await bRes.json();
-      const cData = await cRes.json();
-
-      if (bData && typeof bData === 'object' && Object.keys(bData).length > 0) {
-        const merged = {
-          ...defaultBannersState,
-          ...bData,
-          tallVertical: bData.tallVertical || defaultBannersState.tallVertical,
-          wideFeature: bData.wideFeature || defaultBannersState.wideFeature,
-          compactA: bData.compactA || defaultBannersState.compactA,
-          compactB: bData.compactB || defaultBannersState.compactB,
-          oemStrip: bData.oemStrip || defaultBannersState.oemStrip,
-          promoSection1: bData.promoSection1 || defaultBannersState.promoSection1,
-          promoSection2: bData.promoSection2 || defaultBannersState.promoSection2,
-          customBanners: Array.isArray(bData.customBanners) ? bData.customBanners : []
-        };
-        setBanners(merged);
-        saveBanners(merged);
-      }
-      if (Array.isArray(cData) && cData.length > 0) {
-        setCategories(cData);
-        saveCategories(cData);
-      }
+      if (cloudBanners) setBanners(cloudBanners);
+      if (Array.isArray(cloudCategories) && cloudCategories.length > 0) setCategories(cloudCategories);
     } catch (err) {
-      // Fallback to locally loaded banners
       const stored = loadBanners();
       if (stored) setBanners(stored);
     } finally {

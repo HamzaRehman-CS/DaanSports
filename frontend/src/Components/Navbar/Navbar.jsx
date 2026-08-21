@@ -255,16 +255,6 @@ const Navbar = () => {
               <Heart size={18} />
             </Link>
 
-            {/* Admin Portal Quick Switch */}
-            <Link 
-              to="/admin" 
-              className="hidden sm:inline-flex items-center gap-1.5 bg-[#dc2626]/20 hover:bg-[#dc2626] border border-[#dc2626]/50 text-white text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded transition-all duration-200" 
-              title="Open Admin Management Portal"
-            >
-              <span>⚙️</span>
-              <span className="hidden md:inline">Admin Portal</span>
-            </Link>
-
             {/* Shopping Cart Icon with Badge */}
             <Link to="/cart" className="relative text-zinc-300 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors group" title="Cart">
               <ShoppingCart size={19} className="group-hover:text-white transition-colors" />
@@ -311,11 +301,8 @@ const Navbar = () => {
             <Link to="/category/hoodies" className="text-zinc-300 border-b border-white/10 pb-3">New Arrivals</Link>
             <Link to="/category/tracksuits" className="text-zinc-300 border-b border-white/10 pb-3">Best Sellers</Link>
             <Link to="/about" className="text-zinc-300 border-b border-white/10 pb-3">About Us</Link>
+            <Link to="/contact" className="text-zinc-300 border-b border-white/10 pb-3">Contact</Link>
             <Link to="/orders" className="text-zinc-300 border-b border-white/10 pb-3">Track Orders 🚚</Link>
-            <Link to="/admin" className="text-[#dc2626] font-extrabold border-b border-white/10 pb-3 flex items-center gap-2">
-              <span>⚙️</span>
-              <span>ADMIN MANAGEMENT PORTAL</span>
-            </Link>
           </div>
         </div>
       )}

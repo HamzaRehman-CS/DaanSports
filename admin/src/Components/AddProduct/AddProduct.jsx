@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './AddProduct.css';
 import upload_area from '../../assets/upload_area.svg';
 import { API_URL } from '../../config';
-import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories } from '../../defaultCatalog';
+import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudCategories, addCloudProduct } from '../../defaultCatalog';
 
 const AddProduct = () => {
   const [primaryImage, setPrimaryImage] = useState(null);
@@ -26,16 +26,12 @@ const AddProduct = () => {
   });
 
   useEffect(() => {
-    fetch(`${API_URL}/categories`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setCategories(data);
-          saveCategories(data);
-          setProductDetails(prev => ({ ...prev, category: data[0].name }));
-        }
-      })
-      .catch(() => {});
+    fetchCloudCategories().then(cats => {
+      if (Array.isArray(cats) && cats.length > 0) {
+        setCategories(cats);
+        setProductDetails(prev => ({ ...prev, category: cats[0].name }));
+      }
+    });
   }, []);
 
   const changeHandler = (e) => {
@@ -125,22 +121,19 @@ const AddProduct = () => {
         date: new Date().toISOString()
       };
 
-      // 1. Save locally and broadcast to website immediately
-      const updatedProducts = [...currentList, newProductObj];
-      saveCatalogProducts(updatedProducts);
+      // 1. Save locally and to Supabase Cloud Database
+      await addCloudProduct(newProductObj);
 
-      // 2. Sync to Backend API
+      // 2. Sync to Backend API if present
       try {
         await fetch(`${API_URL}/add-product`, {
           method: 'POST',
           headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
           body: JSON.stringify(newProductObj)
         });
-      } catch (err) {
-        console.warn("Backend sync notice (saved locally & broadcast live):", err.message);
-      }
+      } catch (err) {}
 
-      alert("🎉 DAAN Sports Product Added Successfully & Synced Live to Main Website!");
+      alert("🎉 DAAN Sports Product Added Successfully & Synced to Cloud Database!");
       window.location.replace('/list-product');
 
     } catch (err) {

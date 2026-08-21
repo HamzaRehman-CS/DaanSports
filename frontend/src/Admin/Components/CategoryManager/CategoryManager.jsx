@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './CategoryManager.css';
 import { API_URL } from '../../config';
-import { loadCategories, saveCategories } from '../../defaultCatalog';
+import { loadCategories, saveCategories, fetchCloudCategories } from '../../defaultCatalog';
 
 const CategoryManager = () => {
   const [categories, setCategories] = useState(() => loadCategories());
@@ -26,11 +26,9 @@ const CategoryManager = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch(`${API_URL}/categories`);
-      const data = await res.json();
+      const data = await fetchCloudCategories();
       if (Array.isArray(data) && data.length > 0) {
         setCategories(data);
-        saveCategories(data);
       }
     } catch (err) {
       const stored = loadCategories();

@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState, useCallback } from "react";
 import { API_URL } from '../config';
-import { loadCatalogProducts, saveCatalogProducts, subscribeToGlobalSync } from './defaultCatalog';
+import { loadCatalogProducts, saveCatalogProducts, subscribeToGlobalSync, fetchCloudProducts } from './defaultCatalog';
 
 export const ShopContext = createContext(null);
 
@@ -16,18 +16,13 @@ const ShopContextProvider = (props) => {
     const [cartItems, setCartItems] = useState(getDefaultCart());
     const [all_product, setAll_Product] = useState(() => loadCatalogProducts());
 
-    const fetchProducts = useCallback(() => {
-        fetch(`${API_URL}/all-products`)
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    setAll_Product(data);
-                    saveCatalogProducts(data);
-                }
-            })
-            .catch(err => {
-                // Seamlessly maintain loaded catalog data
-            });
+    const fetchProducts = useCallback(async () => {
+        try {
+            const data = await fetchCloudProducts();
+            if (Array.isArray(data) && data.length > 0) {
+                setAll_Product(data);
+            }
+        } catch (err) {}
     }, []);
 
     useEffect(() => {

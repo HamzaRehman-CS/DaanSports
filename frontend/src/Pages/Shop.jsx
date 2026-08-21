@@ -11,7 +11,7 @@ import SEO from '../Components/SEO/SEO';
 import { ShopContext } from '../Context/ShopContext';
 import { useAnimeReveal } from '../Components/AnimeScroll/AnimeScroll';
 import { API_URL } from '../config';
-import { loadBanners, saveBanners, loadCategories, saveCategories, subscribeToGlobalSync } from '../Context/defaultCatalog';
+import { loadBanners, saveBanners, loadCategories, saveCategories, subscribeToGlobalSync, fetchCloudBanners, fetchCloudCategories } from '../Context/defaultCatalog';
 
 const Shop = () => {
   const { all_product } = useContext(ShopContext);
@@ -20,26 +20,15 @@ const Shop = () => {
 
   useAnimeReveal('.anime-reveal');
 
-  const fetchShopData = () => {
-    fetch(`${API_URL}/categories`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setCategories(data);
-          saveCategories(data);
-        }
-      })
-      .catch(() => {});
-
-    fetch(`${API_URL}/promotional-banners`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && typeof data === 'object' && Object.keys(data).length > 0) {
-          setPromotionalBanners(data);
-          saveBanners(data);
-        }
-      })
-      .catch(() => {});
+  const fetchShopData = async () => {
+    try {
+      const [cloudBanners, cloudCategories] = await Promise.all([
+        fetchCloudBanners(),
+        fetchCloudCategories()
+      ]);
+      if (cloudBanners) setPromotionalBanners(cloudBanners);
+      if (Array.isArray(cloudCategories) && cloudCategories.length > 0) setCategories(cloudCategories);
+    } catch (err) {}
   };
 
   useEffect(() => {

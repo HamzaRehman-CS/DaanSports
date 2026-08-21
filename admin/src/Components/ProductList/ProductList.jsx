@@ -76,10 +76,18 @@ const ProductList = () => {
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     try {
+      const colorsArr = Array.isArray(editFormData.colors)
+        ? editFormData.colors
+        : (typeof editFormData.colors === 'string' ? editFormData.colors.split(',') : []);
+      
+      const sizesArr = Array.isArray(editFormData.sizes)
+        ? editFormData.sizes
+        : (typeof editFormData.sizes === 'string' ? editFormData.sizes.split(',') : []);
+
       const payload = {
         ...editFormData,
-        colors: editFormData.colors.split(',').map(c => c.trim()).filter(Boolean),
-        sizes: editFormData.sizes.split(',').map(s => s.trim()).filter(Boolean)
+        colors: colorsArr.map(c => typeof c === 'string' ? c.trim() : c).filter(Boolean),
+        sizes: sizesArr.map(s => typeof s === 'string' ? s.trim() : s).filter(Boolean)
       };
 
       const res = await fetch(`${API_URL}/edit-product`, {

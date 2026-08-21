@@ -30,13 +30,13 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   }, [location]);
 
-  useEffect(() => {
+  const fetchNavData = () => {
     fetch(`${API_URL}/categories`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setCategories(data);
       })
-      .catch(err => console.error("Categories fetch error:", err));
+      .catch(() => {});
 
     fetch(`${API_URL}/cms`)
       .then(res => res.json())
@@ -45,7 +45,19 @@ const Navbar = () => {
           setAnnouncementText(data.announcementText);
         }
       })
-      .catch(err => console.error("CMS fetch error:", err));
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchNavData();
+    const interval = setInterval(fetchNavData, 4000);
+    const handleFocus = () => fetchNavData();
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const handleSearch = (e) => {

@@ -698,20 +698,15 @@ const autoSeedMongoIfEmpty = async () => {
     }
 };
 
-// Pre-request Database Connection Middleware
-app.use(async (req, res, next) => {
-    try {
-        await connectDB();
-    } catch (err) {}
-    next();
-});
+// Non-blocking background database connection initialization
+connectDB().catch(() => {});
 
 // Helper for Safe Supabase Calls with Fast-Fail Timeout
 const safeSupabase = async (callback) => {
     if (!supabase) return null;
     try {
         const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Supabase Timeout')), 1500)
+            setTimeout(() => reject(new Error('Supabase Timeout')), 500)
         );
         return await Promise.race([callback(supabase), timeoutPromise]);
     } catch (err) {
@@ -720,32 +715,11 @@ const safeSupabase = async (callback) => {
 };
 
 // ----------------------------------------------------
-// UNIFIED DATA ACCESS METHODS (MONGODB -> SUPABASE -> LOCAL)
+// UNIFIED DATA ACCESS METHODS (ULTRA-FAST LOCAL-FIRST + ASYNC CLOUD SYNC)
 // ----------------------------------------------------
 
 // 1. PRODUCTS
 const getAllProductsLive = async () => {
-    if (mongoose.connection.readyState === 1) {
-        try {
-            const docs = await ProductModel.find({}).sort({ id: 1 }).lean();
-            if (docs && docs.length > 0) {
-                saveJsonProducts(docs);
-                return docs;
-            }
-        } catch (e) {}
-    }
-
-    const sRes = await safeSupabase(async (s) => await s.from('products').select('*').order('id', { ascending: true }));
-    if (sRes && sRes.data && sRes.data.length > 0) {
-        const formatted = sRes.data.map(p => ({
-            ...p,
-            leadTime: p.lead_time || p.leadTime || "12 - 15 Business Days",
-            images: p.images || [p.image]
-        }));
-        saveJsonProducts(formatted);
-        return formatted;
-    }
-
     return getJsonProducts();
 };
 
@@ -759,40 +733,40 @@ const saveProductLive = async (productObj) => {
     }
     saveJsonProducts(currentList);
 
-    if (mongoose.connection.readyState === 1) {
-        try {
-            await ProductModel.findOneAndUpdate(
-                { id: productObj.id },
-                productObj,
-                { upsert: true, new: true }
-            );
-        } catch (e) {
-            console.warn("Mongo product write warning:", e.message);
+    // Non-blocking async background cloud sync
+    Promise.resolve().then(async () => {
+        if (mongoose.connection.readyState === 1) {
+            try {
+                await ProductModel.findOneAndUpdate(
+                    { id: productObj.id },
+                    productObj,
+                    { upsert: true, new: true }
+                );
+            } catch (e) {}
         }
-    }
-
-    await safeSupabase(async (s) => {
-        await s.from('products').upsert([{
-            id: productObj.id,
-            name: productObj.name,
-            category: productObj.category,
-            new_price: productObj.new_price,
-            old_price: productObj.old_price,
-            moq: productObj.moq,
-            description: productObj.description,
-            material: productObj.material,
-            gsm: productObj.gsm,
-            stitching: productObj.stitching,
-            customization: productObj.customization,
-            lead_time: productObj.leadTime,
-            colors: productObj.colors,
-            sizes: productObj.sizes,
-            stock: productObj.stock,
-            image: productObj.image,
-            images: productObj.images,
-            available: productObj.available !== false
-        }]);
-    });
+        await safeSupabase(async (s) => {
+            await s.from('products').upsert([{
+                id: productObj.id,
+                name: productObj.name,
+                category: productObj.category,
+                new_price: productObj.new_price,
+                old_price: productObj.old_price,
+                moq: productObj.moq,
+                description: productObj.description,
+                material: productObj.material,
+                gsm: productObj.gsm,
+                stitching: productObj.stitching,
+                customization: productObj.customization,
+                lead_time: productObj.leadTime,
+                colors: productObj.colors,
+                sizes: productObj.sizes,
+                stock: productObj.stock,
+                image: productObj.image,
+                images: productObj.images,
+                available: productObj.available !== false
+            }]);
+        });
+    }).catch(() => {});
 };
 
 const deleteProductLive = async (prodId) => {
@@ -800,54 +774,40 @@ const deleteProductLive = async (prodId) => {
     currentList = currentList.filter(p => p.id !== prodId);
     saveJsonProducts(currentList);
 
-    if (mongoose.connection.readyState === 1) {
-        try {
-            await ProductModel.deleteOne({ id: prodId });
-        } catch (e) {}
-    }
-
-    await safeSupabase(async (s) => {
-        await s.from('products').delete().eq('id', prodId);
-    });
+    Promise.resolve().then(async () => {
+        if (mongoose.connection.readyState === 1) {
+            try {
+                await ProductModel.deleteOne({ id: prodId });
+            } catch (e) {}
+        }
+        await safeSupabase(async (s) => {
+            await s.from('products').delete().eq('id', prodId);
+        });
+    }).catch(() => {});
 };
 
 // 2. CATEGORIES
 const getCategoriesLive = async () => {
-    if (mongoose.connection.readyState === 1) {
-        try {
-            const docs = await CategoryModel.find({}).sort({ id: 1 }).lean();
-            if (docs && docs.length > 0) {
-                saveJsonCategories(docs);
-                return docs;
-            }
-        } catch (e) {}
-    }
-
-    const sRes = await safeSupabase(async (s) => await s.from('categories').select('*').order('id', { ascending: true }));
-    if (sRes && sRes.data && sRes.data.length > 0) {
-        saveJsonCategories(sRes.data);
-        return sRes.data;
-    }
-
     return getJsonCategories();
 };
 
 const saveCategoriesLive = async (categoriesList) => {
     saveJsonCategories(categoriesList);
 
-    if (mongoose.connection.readyState === 1) {
-        try {
-            for (const cat of categoriesList) {
-                await CategoryModel.findOneAndUpdate({ id: cat.id }, cat, { upsert: true });
-            }
-        } catch (e) {}
-    }
-
-    await safeSupabase(async (s) => {
-        for (const cat of categoriesList) {
-            await s.from('categories').upsert([cat]);
+    Promise.resolve().then(async () => {
+        if (mongoose.connection.readyState === 1) {
+            try {
+                for (const cat of categoriesList) {
+                    await CategoryModel.findOneAndUpdate({ id: cat.id }, cat, { upsert: true });
+                }
+            } catch (e) {}
         }
-    });
+        await safeSupabase(async (s) => {
+            for (const cat of categoriesList) {
+                await s.from('categories').upsert([cat]);
+            }
+        });
+    }).catch(() => {});
 };
 
 const deleteCategoryLive = async (catId) => {
@@ -855,37 +815,20 @@ const deleteCategoryLive = async (catId) => {
     currentList = currentList.filter(c => c.id !== catId);
     saveJsonCategories(currentList);
 
-    if (mongoose.connection.readyState === 1) {
-        try {
-            await CategoryModel.deleteOne({ id: catId });
-        } catch (e) {}
-    }
-
-    await safeSupabase(async (s) => {
-        await s.from('categories').delete().eq('id', catId);
-    });
+    Promise.resolve().then(async () => {
+        if (mongoose.connection.readyState === 1) {
+            try {
+                await CategoryModel.deleteOne({ id: catId });
+            } catch (e) {}
+        }
+        await safeSupabase(async (s) => {
+            await s.from('categories').delete().eq('id', catId);
+        });
+    }).catch(() => {});
 };
 
 // 3. BANNERS
 const getBannersLive = async () => {
-    if (mongoose.connection.readyState === 1) {
-        try {
-            const doc = await BannerModel.findOne({ key: 'current_banners' }).lean();
-            if (doc && doc.data && Object.keys(doc.data).length > 0) {
-                const combined = { ...defaultBanners, ...doc.data };
-                saveJsonBanners(combined);
-                return combined;
-            }
-        } catch (e) {}
-    }
-
-    const sRes = await safeSupabase(async (s) => await s.from('banners').select('*').eq('id', 'current_banners').single());
-    if (sRes && sRes.data && sRes.data.data) {
-        const combined = { ...defaultBanners, ...sRes.data.data };
-        saveJsonBanners(combined);
-        return combined;
-    }
-
     return getJsonBanners();
 };
 
@@ -893,43 +836,24 @@ const saveBannersLive = async (bannersData) => {
     const combined = { ...defaultBanners, ...bannersData };
     saveJsonBanners(combined);
 
-    if (mongoose.connection.readyState === 1) {
-        try {
-            await BannerModel.findOneAndUpdate(
-                { key: 'current_banners' },
-                { key: 'current_banners', data: combined, updatedAt: new Date() },
-                { upsert: true }
-            );
-        } catch (e) {}
-    }
-
-    await safeSupabase(async (s) => {
-        await s.from('banners').upsert([{ id: 'current_banners', data: combined, updated_at: new Date().toISOString() }]);
-    });
+    Promise.resolve().then(async () => {
+        if (mongoose.connection.readyState === 1) {
+            try {
+                await BannerModel.findOneAndUpdate(
+                    { key: 'current_banners' },
+                    { key: 'current_banners', data: combined, updatedAt: new Date() },
+                    { upsert: true }
+                );
+            } catch (e) {}
+        }
+        await safeSupabase(async (s) => {
+            await s.from('banners').upsert([{ id: 'current_banners', data: combined, updated_at: new Date().toISOString() }]);
+        });
+    }).catch(() => {});
 };
 
 // 4. CMS (HERO SLIDERS & ANNOUNCEMENTS)
 const getCmsLive = async () => {
-    if (mongoose.connection.readyState === 1) {
-        try {
-            const doc = await CmsModel.findOne({ key: 'current_cms' }).lean();
-            if (doc && doc.heroSlides && doc.heroSlides.length > 0) {
-                const combined = {
-                    announcementText: doc.announcementText || defaultCmsData.announcementText,
-                    heroSlides: doc.heroSlides
-                };
-                saveJsonCms(combined);
-                return combined;
-            }
-        } catch (e) {}
-    }
-
-    const sRes = await safeSupabase(async (s) => await s.from('cms').select('*').eq('id', 'current_cms').single());
-    if (sRes && sRes.data && sRes.data.data) {
-        saveJsonCms(sRes.data.data);
-        return sRes.data.data;
-    }
-
     return getJsonCms();
 };
 
@@ -940,39 +864,24 @@ const saveCmsLive = async (cmsData) => {
     };
     saveJsonCms(combined);
 
-    if (mongoose.connection.readyState === 1) {
-        try {
-            await CmsModel.findOneAndUpdate(
-                { key: 'current_cms' },
-                { key: 'current_cms', announcementText: combined.announcementText, heroSlides: combined.heroSlides, updatedAt: new Date() },
-                { upsert: true }
-            );
-        } catch (e) {}
-    }
-
-    await safeSupabase(async (s) => {
-        await s.from('cms').upsert([{ id: 'current_cms', data: combined, updated_at: new Date().toISOString() }]);
-    });
+    Promise.resolve().then(async () => {
+        if (mongoose.connection.readyState === 1) {
+            try {
+                await CmsModel.findOneAndUpdate(
+                    { key: 'current_cms' },
+                    { key: 'current_cms', announcementText: combined.announcementText, heroSlides: combined.heroSlides, updatedAt: new Date() },
+                    { upsert: true }
+                );
+            } catch (e) {}
+        }
+        await safeSupabase(async (s) => {
+            await s.from('cms').upsert([{ id: 'current_cms', data: combined, updated_at: new Date().toISOString() }]);
+        });
+    }).catch(() => {});
 };
 
 // 5. VOUCHERS
 const getVouchersLive = async () => {
-    if (mongoose.connection.readyState === 1) {
-        try {
-            const docs = await VoucherModel.find({}).sort({ date: -1 }).lean();
-            if (docs && docs.length > 0) {
-                saveJsonVouchers(docs);
-                return docs;
-            }
-        } catch (e) {}
-    }
-
-    const sRes = await safeSupabase(async (s) => await s.from('vouchers').select('*'));
-    if (sRes && sRes.data && sRes.data.length > 0) {
-        saveJsonVouchers(sRes.data);
-        return sRes.data;
-    }
-
     return getJsonVouchers();
 };
 
@@ -982,25 +891,26 @@ const saveVoucherLive = async (voucherObj) => {
     vouchers.unshift(voucherObj);
     saveJsonVouchers(vouchers);
 
-    if (mongoose.connection.readyState === 1) {
-        try {
-            await VoucherModel.findOneAndUpdate(
-                { code: voucherObj.code },
-                voucherObj,
-                { upsert: true }
-            );
-        } catch (e) {}
-    }
-
-    await safeSupabase(async (s) => {
-        await s.from('vouchers').upsert([{
-            code: voucherObj.code,
-            type: voucherObj.type,
-            discount: voucherObj.discount,
-            min_order: voucherObj.minOrder,
-            description: voucherObj.description
-        }]);
-    });
+    Promise.resolve().then(async () => {
+        if (mongoose.connection.readyState === 1) {
+            try {
+                await VoucherModel.findOneAndUpdate(
+                    { code: voucherObj.code },
+                    voucherObj,
+                    { upsert: true }
+                );
+            } catch (e) {}
+        }
+        await safeSupabase(async (s) => {
+            await s.from('vouchers').upsert([{
+                code: voucherObj.code,
+                type: voucherObj.type,
+                discount: voucherObj.discount,
+                min_order: voucherObj.minOrder,
+                description: voucherObj.description
+            }]);
+        });
+    }).catch(() => {});
 };
 
 const deleteVoucherLive = async (code) => {
@@ -1008,47 +918,20 @@ const deleteVoucherLive = async (code) => {
     vouchers = vouchers.filter(v => v.code !== code);
     saveJsonVouchers(vouchers);
 
-    if (mongoose.connection.readyState === 1) {
-        try {
-            await VoucherModel.deleteOne({ code: code });
-        } catch (e) {}
-    }
-
-    await safeSupabase(async (s) => {
-        await s.from('vouchers').delete().eq('code', code);
-    });
+    Promise.resolve().then(async () => {
+        if (mongoose.connection.readyState === 1) {
+            try {
+                await VoucherModel.deleteOne({ code: code });
+            } catch (e) {}
+        }
+        await safeSupabase(async (s) => {
+            await s.from('vouchers').delete().eq('code', code);
+        });
+    }).catch(() => {});
 };
 
 // 6. ORDERS
 const getAllOrdersLive = async () => {
-    if (mongoose.connection.readyState === 1) {
-        try {
-            const docs = await OrderModel.find({}).sort({ createdAt: -1 }).lean();
-            if (docs && docs.length > 0) {
-                saveJsonOrders(docs);
-                return docs;
-            }
-        } catch (e) {}
-    }
-
-    const sRes = await safeSupabase(async (s) => await s.from('orders').select('*').order('created_at', { ascending: false }));
-    if (sRes && sRes.data && sRes.data.length > 0) {
-        const formatted = sRes.data.map(o => ({
-            ...o,
-            userEmail: o.user_email || o.userEmail,
-            customerName: o.customer_name || o.customerName,
-            totalUnits: o.total_units || o.totalUnits,
-            totalAmount: o.total_amount || o.totalAmount,
-            discountAmount: o.discount_amount || o.discountAmount || 0,
-            voucherCode: o.voucher_code || o.voucherCode || '',
-            paymentMethod: o.payment_method || o.paymentMethod,
-            paymentStatus: o.payment_status || o.paymentStatus,
-            trackingNumber: o.tracking_number || o.trackingNumber
-        }));
-        saveJsonOrders(formatted);
-        return formatted;
-    }
-
     return getJsonOrders();
 };
 
@@ -1057,32 +940,31 @@ const saveOrderLive = async (orderObj) => {
     orders.unshift(orderObj);
     saveJsonOrders(orders);
 
-    if (mongoose.connection.readyState === 1) {
-        try {
-            await OrderModel.create(orderObj);
-        } catch (e) {
-            console.warn("Mongo order save warning:", e.message);
+    Promise.resolve().then(async () => {
+        if (mongoose.connection.readyState === 1) {
+            try {
+                await OrderModel.create(orderObj);
+            } catch (e) {}
         }
-    }
-
-    await safeSupabase(async (s) => {
-        await s.from('orders').insert([{
-            id: orderObj.id,
-            user_email: orderObj.userEmail,
-            customer_name: orderObj.customerName,
-            phone: orderObj.phone,
-            items: orderObj.items,
-            total_units: orderObj.totalUnits,
-            total_amount: orderObj.totalAmount,
-            discount_amount: orderObj.discountAmount || 0,
-            voucher_code: orderObj.voucherCode || '',
-            payment_method: orderObj.paymentMethod,
-            payment_status: orderObj.paymentStatus,
-            status: orderObj.status,
-            tracking_number: orderObj.trackingNumber || '',
-            notes: orderObj.notes || ''
-        }]);
-    });
+        await safeSupabase(async (s) => {
+            await s.from('orders').insert([{
+                id: orderObj.id,
+                user_email: orderObj.userEmail,
+                customer_name: orderObj.customerName,
+                phone: orderObj.phone,
+                items: orderObj.items,
+                total_units: orderObj.totalUnits,
+                total_amount: orderObj.totalAmount,
+                discount_amount: orderObj.discountAmount || 0,
+                voucher_code: orderObj.voucherCode || '',
+                payment_method: orderObj.paymentMethod,
+                payment_status: orderObj.paymentStatus,
+                status: orderObj.status,
+                tracking_number: orderObj.trackingNumber || '',
+                notes: orderObj.notes || ''
+            }]);
+        });
+    }).catch(() => {});
 };
 
 const updateOrderStatusLive = async (orderId, status, trackingNumber, notes) => {
@@ -1101,23 +983,24 @@ const updateOrderStatusLive = async (orderId, status, trackingNumber, notes) => 
     });
     saveJsonOrders(orders);
 
-    if (mongoose.connection.readyState === 1) {
-        try {
-            const updates = { updatedAt: new Date() };
-            if (status) updates.status = status;
-            if (trackingNumber !== undefined) updates.trackingNumber = trackingNumber;
-            if (notes !== undefined) updates.notes = notes;
-            await OrderModel.findOneAndUpdate({ id: orderId }, updates);
-        } catch (e) {}
-    }
-
-    await safeSupabase(async (s) => {
-        const sUpdates = { updated_at: new Date().toISOString() };
-        if (status) sUpdates.status = status;
-        if (trackingNumber !== undefined) sUpdates.tracking_number = trackingNumber;
-        if (notes !== undefined) sUpdates.notes = notes;
-        await s.from('orders').update(sUpdates).eq('id', orderId);
-    });
+    Promise.resolve().then(async () => {
+        if (mongoose.connection.readyState === 1) {
+            try {
+                const updates = { updatedAt: new Date() };
+                if (status) updates.status = status;
+                if (trackingNumber !== undefined) updates.trackingNumber = trackingNumber;
+                if (notes !== undefined) updates.notes = notes;
+                await OrderModel.findOneAndUpdate({ id: orderId }, updates);
+            } catch (e) {}
+        }
+        await safeSupabase(async (s) => {
+            const sUpdates = { updated_at: new Date().toISOString() };
+            if (status) sUpdates.status = status;
+            if (trackingNumber !== undefined) sUpdates.tracking_number = trackingNumber;
+            if (notes !== undefined) sUpdates.notes = notes;
+            await s.from('orders').update(sUpdates).eq('id', orderId);
+        });
+    }).catch(() => {});
 
     return updatedOrder;
 };
@@ -1127,16 +1010,18 @@ const deleteOrderLive = async (orderId) => {
     orders = orders.filter(o => o.id !== orderId);
     saveJsonOrders(orders);
 
-    if (mongoose.connection.readyState === 1) {
-        try {
-            await OrderModel.deleteOne({ id: orderId });
-        } catch (e) {}
-    }
-
-    await safeSupabase(async (s) => {
-        await s.from('orders').delete().eq('id', orderId);
-    });
+    Promise.resolve().then(async () => {
+        if (mongoose.connection.readyState === 1) {
+            try {
+                await OrderModel.deleteOne({ id: orderId });
+            } catch (e) {}
+        }
+        await safeSupabase(async (s) => {
+            await s.from('orders').delete().eq('id', orderId);
+        });
+    }).catch(() => {});
 };
+
 
 
 // ----------------------------------------------------

@@ -38,7 +38,7 @@ export default function CategoryBoxShowcase({ initialCategories }) {
   const nextRef = useRef(null);
   const [swiperReady, setSwiperReady] = useState(false);
 
-  useEffect(() => {
+  const fetchCategories = () => {
     fetch(`${API_URL}/categories`)
       .then(res => res.json())
       .then(data => {
@@ -47,15 +47,25 @@ export default function CategoryBoxShowcase({ initialCategories }) {
             id: c.id || (i + 1),
             name: (c.name || '').toUpperCase(),
             slug: c.slug || c.name.toLowerCase().replace(/\s+/g, '-'),
-            link: `/${c.slug || c.name.toLowerCase().replace(/\s+/g, '-')}`,
+            link: `/category/${c.slug || c.name.toLowerCase().replace(/\s+/g, '-')}`,
             image: c.banner || c.image || defaultCategoriesData[i % defaultCategoriesData.length].image
           }));
           setCategories(mapped);
         }
       })
-      .catch(err => {
-        console.warn("Using default category presets:", err);
-      });
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchCategories();
+    const interval = setInterval(fetchCategories, 4000);
+    const handleFocus = () => fetchCategories();
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   return (

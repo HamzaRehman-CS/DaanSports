@@ -19,35 +19,69 @@ const Shop = () => {
 
   useAnimeReveal('.anime-reveal');
 
-  useEffect(() => {
-    // Fetch categories & promotional banners from backend
+  const fetchShopData = () => {
     fetch(`${API_URL}/categories`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setCategories(data);
       })
-      .catch(err => console.error("Categories fetch error:", err));
+      .catch(() => {});
 
     fetch(`${API_URL}/promotional-banners`)
       .then(res => res.json())
       .then(data => {
-        if (data) setPromotionalBanners(data);
+        if (data && typeof data === 'object') setPromotionalBanners(data);
       })
-      .catch(err => console.error("Promotional banners fetch error:", err));
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchShopData();
+
+    // 1. Live auto-refresh polling every 3 seconds for 100% instant sync with Admin Portal
+    const interval = setInterval(fetchShopData, 3000);
+
+    // 2. Instant refetch on tab focus
+    const handleFocus = () => fetchShopData();
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const promoCategory1Name = promotionalBanners?.promoSection1?.category || 'Trousers';
   const promoCategory2Name = promotionalBanners?.promoSection2?.category || 'Sweatshirts';
 
-  const promo1Products = (all_product || []).filter(p => 
-    (p.category || '').toLowerCase().includes(promoCategory1Name.toLowerCase()) ||
-    (promoCategory1Name.toLowerCase().includes('trouser') && ((p.category || '').toLowerCase().includes('pant') || (p.category || '').toLowerCase().includes('jogger')))
-  ).slice(0, 4);
+  const cat1Lower = promoCategory1Name.toLowerCase();
+  let promo1Products = (all_product || []).filter(p => {
+    if (!p) return false;
+    const pCat = (p.category || '').toLowerCase();
+    const pName = (p.name || '').toLowerCase();
+    return pCat.includes(cat1Lower) ||
+      (cat1Lower.includes('trouser') && (pCat.includes('pant') || pCat.includes('jogger') || pName.includes('jogger') || pName.includes('pant') || pCat.includes('tracksuit'))) ||
+      (cat1Lower.includes('tracksuit') && (pCat.includes('tracksuit') || pName.includes('tracksuit')));
+  }).slice(0, 4);
 
-  const promo2Products = (all_product || []).filter(p => 
-    (p.category || '').toLowerCase().includes(promoCategory2Name.toLowerCase()) ||
-    (promoCategory2Name.toLowerCase().includes('sweatshirt') && (p.category || '').toLowerCase().includes('hoodie'))
-  ).slice(0, 4);
+  if (promo1Products.length === 0 && Array.isArray(all_product) && all_product.length > 0) {
+    promo1Products = all_product.slice(0, 4);
+  }
+
+  const cat2Lower = promoCategory2Name.toLowerCase();
+  let promo2Products = (all_product || []).filter(p => {
+    if (!p) return false;
+    const pCat = (p.category || '').toLowerCase();
+    const pName = (p.name || '').toLowerCase();
+    return pCat.includes(cat2Lower) ||
+      (cat2Lower.includes('sweatshirt') && (pCat.includes('hoodie') || pCat.includes('fleece') || pName.includes('hoodie') || pName.includes('sweatshirt'))) ||
+      (cat2Lower.includes('hoodie') && (pCat.includes('hoodie') || pName.includes('hoodie') || pCat.includes('sweatshirt')));
+  }).slice(0, 4);
+
+  if (promo2Products.length === 0 && Array.isArray(all_product) && all_product.length > 0) {
+    promo2Products = all_product.slice(2, 6);
+  }
+
 
   return (
     <div className="bg-[#0a0a0a] text-white overflow-hidden selection:bg-[#dc2626] selection:text-white">

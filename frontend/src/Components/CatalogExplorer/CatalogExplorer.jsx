@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, SlidersHorizontal, ArrowUpDown, Filter, Layers, Check, X } from 'lucide-react';
 import Item from '../Item/Item';
 import './CatalogExplorer.css';
+import { API_URL } from '../../config';
 
-const CATEGORY_TABS = [
+const DEFAULT_CATEGORY_TABS = [
   { id: 'all', label: 'All Catalog', slug: 'all' },
   { id: 'tracksuits', label: 'Track Suits', slug: 'tracksuits' },
   { id: 'hoodies', label: 'Hoodies', slug: 'hoodies' },
@@ -28,63 +29,125 @@ const SORT_OPTIONS = [
   { id: 'gsm-high', label: 'Fabric: Heavyweight First' }
 ];
 
-export default function CatalogExplorer({ products = [], title = "Explore Wholesale Catalog", subtitle = "Filter by any of our 9 sportswear categories, sort by price, sizes, or fabric specs." }) {
+export default function CatalogExplorer({ products = [], title = "WHOLESALE CATALOG & FACTORY INVENTORY", subtitle = "Select from our specialized apparel categories, filter by size, and sort by unit price, MOQ, or fabric GSM weight." }) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedSize, setSelectedSize] = useState('All');
   const [sortBy, setSortBy] = useState('featured');
   const [searchTerm, setSearchTerm] = useState('');
-  const [showFiltersMobile, setShowFiltersMobile] = useState(false);
+  const [liveCategories, setLiveCategories] = useState([]);
+
+  // Fetch live categories from backend for dynamic tabs
+  useEffect(() => {
+    fetch(`${API_URL}/categories`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setLiveCategories(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Compute dynamic category tabs
+  const categoryTabs = useMemo(() => {
+    const tabs = [{ id: 'all', label: 'All Catalog', slug: 'all' }];
+    const seenSlugs = new Set(['all']);
+
+    // 1. Add from live backend categories
+    if (liveCategories && liveCategories.length > 0) {
+      liveCategories.forEach(cat => {
+        const slug = cat.slug || (cat.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (slug && !seenSlugs.has(slug)) {
+          seenSlugs.add(slug);
+          tabs.push({
+            id: String(cat.id || slug),
+            label: cat.name,
+            slug: slug
+          });
+        }
+      });
+    } else {
+      DEFAULT_CATEGORY_TABS.slice(1).forEach(tab => {
+        if (!seenSlugs.has(tab.slug)) {
+          seenSlugs.add(tab.slug);
+          tabs.push(tab);
+        }
+      });
+    }
+
+    // 2. Also ensure any category present in products gets represented
+    if (Array.isArray(products)) {
+      products.forEach(p => {
+        if (p && p.category) {
+          const catName = p.category.trim();
+          const slug = catName.toLowerCase().replace(/[^a-z0-9]/g, '');
+          if (slug && !seenSlugs.has(slug)) {
+            seenSlugs.add(slug);
+            tabs.push({
+              id: slug,
+              label: catName,
+              slug: slug
+            });
+          }
+        }
+      });
+    }
+
+    return tabs;
+  }, [liveCategories, products]);
 
   // Filter & Sort Logic
   const filteredAndSortedProducts = useMemo(() => {
-    let result = [...products];
+    let result = Array.isArray(products) ? [...products] : [];
 
     // 1. Category Filter
     if (activeCategory !== 'all') {
-      const targetCat = activeCategory.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const targetSlug = activeCategory.toLowerCase().replace(/[^a-z0-9]/g, '');
       result = result.filter(item => {
-        const itemCat = (item.category || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (!item) return false;
+        const itemCat = (item.category || '').toLowerCase().trim();
+        const itemSlug = itemCat.replace(/[^a-z0-9]/g, '');
         const itemName = (item.name || '').toLowerCase();
         
-        if (targetCat === 'tshirts' || targetCat === 'tshirt') {
-          return itemCat.includes('tshirt') || itemCat.includes('tee') || itemName.includes('t-shirt') || itemName.includes('jersey');
+        if (targetSlug === 'tshirts' || targetSlug === 'tshirt') {
+          return itemCat.includes('tshirt') || itemCat.includes('tee') || itemSlug === 'tshirts' || itemName.includes('t-shirt') || itemName.includes('jersey') || itemName.includes('tee');
         }
-        if (targetCat === 'poloshirts' || targetCat === 'polo') {
+        if (targetSlug === 'poloshirts' || targetSlug === 'polo') {
           return itemCat.includes('polo') || itemName.includes('polo');
         }
-        if (targetCat === 'hoodies' || targetCat === 'hoodie') {
+        if (targetSlug === 'hoodies' || targetSlug === 'hoodie') {
           return itemCat.includes('hoodie') || itemName.includes('hoodie');
         }
-        if (targetCat === 'sweatshirts' || targetCat === 'sweatshirt') {
-          return itemCat.includes('sweatshirt') || itemName.includes('sweatshirt') || itemCat.includes('fleece');
+        if (targetSlug === 'sweatshirts' || targetSlug === 'sweatshirt') {
+          return itemCat.includes('sweatshirt') || itemName.includes('sweatshirt') || itemCat.includes('fleece') || itemName.includes('pullover');
         }
-        if (targetCat === 'tracksuits' || targetCat === 'tracksuit') {
-          return itemCat.includes('tracksuit') || itemName.includes('tracksuit') || itemName.includes('track suit');
+        if (targetSlug === 'tracksuits' || targetSlug === 'tracksuit') {
+          return itemCat.includes('tracksuit') || itemSlug === 'tracksuits' || itemName.includes('tracksuit') || itemName.includes('track suit');
         }
-        if (targetCat === 'jackets' || targetCat === 'jacket' || targetCat === 'outerwear') {
-          return itemCat.includes('jacket') || itemCat.includes('outerwear') || itemName.includes('jacket') || itemName.includes('windbreaker');
+        if (targetSlug === 'jackets' || targetSlug === 'jacket' || targetSlug === 'outerwear') {
+          return itemCat.includes('jacket') || itemCat.includes('outerwear') || itemSlug === 'jackets' || itemSlug === 'outerwear' || itemName.includes('jacket') || itemName.includes('windbreaker');
         }
-        if (targetCat === 'activewear' || targetCat === 'active') {
+        if (targetSlug === 'activewear' || targetSlug === 'active') {
           return itemCat.includes('activewear') || itemCat.includes('compression') || itemName.includes('compression') || itemName.includes('gym');
         }
-        if (targetCat === 'trousers' || targetCat === 'trouser' || targetCat === 'joggers') {
+        if (targetSlug === 'trousers' || targetSlug === 'trouser' || targetSlug === 'joggers') {
           return itemCat.includes('trouser') || itemCat.includes('pant') || itemCat.includes('jogger') || itemName.includes('jogger') || itemName.includes('pants');
         }
-        if (targetCat === 'accessories' || targetCat === 'accessory') {
+        if (targetSlug === 'accessories' || targetSlug === 'accessory') {
           return itemCat.includes('accessor') || itemName.includes('cap') || itemName.includes('bag') || itemName.includes('socks');
         }
 
-        return itemCat.includes(targetCat) || targetCat.includes(itemCat);
+        return itemSlug === targetSlug || itemCat.includes(targetSlug) || targetSlug.includes(itemSlug);
       });
     }
 
     // 2. Size Filter
     if (selectedSize !== 'All') {
       result = result.filter(item => {
+        if (!item) return false;
         if (Array.isArray(item.sizes) && item.sizes.length > 0) {
-          return item.sizes.some(s => s.trim().toUpperCase() === selectedSize.toUpperCase());
+          return item.sizes.some(s => typeof s === 'string' && s.trim().toUpperCase() === selectedSize.toUpperCase());
         }
-        // Fallback if sizes string or default sizing
         return true;
       });
     }
@@ -93,16 +156,19 @@ export default function CatalogExplorer({ products = [], title = "Explore Wholes
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       result = result.filter(item => 
-        (item.name || '').toLowerCase().includes(q) ||
-        (item.description || '').toLowerCase().includes(q) ||
-        (item.category || '').toLowerCase().includes(q) ||
-        (item.material || '').toLowerCase().includes(q) ||
-        (item.gsm || '').toLowerCase().includes(q)
+        item && (
+          (item.name || '').toLowerCase().includes(q) ||
+          (item.description || '').toLowerCase().includes(q) ||
+          (item.category || '').toLowerCase().includes(q) ||
+          (item.material || '').toLowerCase().includes(q) ||
+          (item.gsm || '').toLowerCase().includes(q)
+        )
       );
     }
 
     // 4. Sorting
     result.sort((a, b) => {
+      if (!a || !b) return 0;
       switch (sortBy) {
         case 'price-low':
           return (Number(a.new_price) || 0) - (Number(b.new_price) || 0);
@@ -128,7 +194,7 @@ export default function CatalogExplorer({ products = [], title = "Explore Wholes
     return result;
   }, [products, activeCategory, selectedSize, searchTerm, sortBy]);
 
-  const activeCategoryObj = CATEGORY_TABS.find(c => c.slug === activeCategory) || CATEGORY_TABS[0];
+  const activeCategoryObj = categoryTabs.find(c => c.slug === activeCategory) || categoryTabs[0] || { label: 'All Catalog' };
 
   const resetFilters = () => {
     setActiveCategory('all');
@@ -138,6 +204,7 @@ export default function CatalogExplorer({ products = [], title = "Explore Wholes
   };
 
   const isFiltered = activeCategory !== 'all' || selectedSize !== 'All' || sortBy !== 'featured' || searchTerm !== '';
+
 
   return (
     <section className="catalog-explorer-section" id="wholesale-catalog">
@@ -170,10 +237,10 @@ export default function CatalogExplorer({ products = [], title = "Explore Wholes
           </div>
         </div>
 
-        {/* 1. UPPER CATEGORIES SELECTOR (9 Categories + All) */}
+        {/* 1. UPPER CATEGORIES SELECTOR (Dynamic Categories + All) */}
         <div className="category-pills-bar">
           <div className="category-pills-scroll">
-            {CATEGORY_TABS.map(tab => {
+            {categoryTabs.map(tab => {
               const isActive = activeCategory === tab.slug;
               return (
                 <button

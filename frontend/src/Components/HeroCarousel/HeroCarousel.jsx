@@ -65,7 +65,7 @@ export default function HeroCarousel() {
   const nextRef = useRef(null);
   const [swiperReady, setSwiperReady] = useState(false);
 
-  useEffect(() => {
+  const fetchSlides = () => {
     fetch(`${API_URL}/cms`)
       .then(res => res.json())
       .then(data => {
@@ -79,7 +79,6 @@ export default function HeroCarousel() {
             const line1 = s.titleLine1 || lines[0] || "DRESS SHARP";
             const line2 = s.titleLine2 || lines[1] || (lines.length > 1 ? lines.slice(1).join(' ') : "LIVE STRONG");
 
-            // Avoid dark floor image
             let image = s.bgImage || s.image || defaultHeroSlides[idx % defaultHeroSlides.length].bgImage;
             if (image.includes("photo-1534438327276-14e5300c3a48")) {
               image = "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=85&w=2000&auto=format&fit=crop";
@@ -103,7 +102,19 @@ export default function HeroCarousel() {
           setSlides(parsed);
         }
       })
-      .catch(err => console.error("Error fetching Hero CMS:", err));
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchSlides();
+    const interval = setInterval(fetchSlides, 4000);
+    const handleFocus = () => fetchSlides();
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   return (

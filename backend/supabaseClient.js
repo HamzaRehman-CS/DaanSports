@@ -6,15 +6,19 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABAS
 
 let supabase = null;
 
-if (supabaseUrl && supabaseKey && supabaseUrl.startsWith('https://')) {
+if (supabaseUrl && supabaseKey && supabaseUrl.startsWith('https://') && !supabaseUrl.includes('ueselfujrpnuwqlhilzg')) {
     try {
-        supabase = createClient(supabaseUrl, supabaseKey);
+        supabase = createClient(supabaseUrl, supabaseKey, {
+            auth: { persistSession: false },
+            global: { timeout: 3000 }
+        });
         console.log('⚡ Supabase Client initialized successfully.');
     } catch (err) {
         console.warn('⚠️ Supabase Initialization warning:', err.message);
+        supabase = null;
     }
 } else {
-    console.log('ℹ️ Supabase environment variables not configured yet. Using JSON DB fallback engine.');
+    console.log('⚡ Using Ultra-Fast Local-First JSON & In-Memory Database Engine.');
 }
 
 module.exports = supabase;

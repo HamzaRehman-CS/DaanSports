@@ -1,5 +1,13 @@
 [
   {
+    "code": "CHAMPION20",
+    "type": "percent",
+    "discount": 20,
+    "minOrder": 100,
+    "description": "20% Championship Launch Discount",
+    "date": "2026-08-21T11:56:00.837Z"
+  },
+  {
     "code": "GLOBAL30",
     "type": "percent",
     "discount": 30,

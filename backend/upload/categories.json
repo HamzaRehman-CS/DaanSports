@@ -81,5 +81,16 @@
     ],
     "banner": "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=2070&auto=format&fit=crop",
     "date": "2026-08-21T11:33:30.418Z"
+  },
+  {
+    "id": 8,
+    "name": "Pro Cycling Gear",
+    "slug": "procyclinggear",
+    "description": "Aerodynamic Tri-Suit & Cycling Kits",
+    "subcategories": [
+      "General"
+    ],
+    "banner": "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=2070&auto=format&fit=crop",
+    "date": "2026-08-21T11:56:00.631Z"
   }
 ]

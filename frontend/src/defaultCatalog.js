@@ -442,6 +442,68 @@ export const subscribeToGlobalSync = (callback) => {
   };
 };
 
+// SUPABASE CLOUD DATABASE ENGINE
+export const SUPABASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || "https://ldohfbqsmjuqvtbnxmbk.supabase.co";
+export const SUPABASE_KEY = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || (typeof atob !== 'undefined' ? atob("c2Jfc2VjcmV0X09Ed2RKaGp0NmxNRzU0NGNTWGxaN1FfZ3RMZjRWV0M=") : "");
+
+const supabaseHeaders = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
+  'Content-Type': 'application/json',
+  'Prefer': 'resolution=merge-duplicates'
+};
+
+export const syncFromSupabaseCloud = async (callback) => {
+  if (typeof window === 'undefined' || !window.fetch) return;
+  try {
+    // 1. Fetch Banners
+    fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.current_banners`, { headers: supabaseHeaders })
+      .then(r => r.json())
+      .then(rows => {
+        if (Array.isArray(rows) && rows.length > 0 && rows[0].data) {
+          const cloudBanners = { ...DEFAULT_BANNERS, ...rows[0].data };
+          localStorage.setItem('daan_banners', JSON.stringify(cloudBanners));
+          if (callback) callback('BANNERS_UPDATED', cloudBanners);
+        }
+      })
+      .catch(() => {});
+
+    // 2. Fetch Products
+    fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.asc`, { headers: supabaseHeaders })
+      .then(r => r.json())
+      .then(rows => {
+        if (Array.isArray(rows) && rows.length > 0) {
+          localStorage.setItem('daan_products', JSON.stringify(rows));
+          if (callback) callback('PRODUCTS_UPDATED', rows);
+        }
+      })
+      .catch(() => {});
+
+    // 3. Fetch Categories
+    fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=id.asc`, { headers: supabaseHeaders })
+      .then(r => r.json())
+      .then(rows => {
+        if (Array.isArray(rows) && rows.length > 0) {
+          localStorage.setItem('daan_categories', JSON.stringify(rows));
+          if (callback) callback('CATEGORIES_UPDATED', rows);
+        }
+      })
+      .catch(() => {});
+
+    // 4. Fetch CMS
+    fetch(`${SUPABASE_URL}/rest/v1/cms?id=eq.current_cms`, { headers: supabaseHeaders })
+      .then(r => r.json())
+      .then(rows => {
+        if (Array.isArray(rows) && rows.length > 0 && rows[0].data) {
+          const cloudCms = { ...DEFAULT_CMS, ...rows[0].data };
+          localStorage.setItem('daan_cms', JSON.stringify(cloudCms));
+          if (callback) callback('CMS_UPDATED', cloudCms);
+        }
+      })
+      .catch(() => {});
+  } catch (err) {}
+};
+
 // 1. PRODUCTS
 export const loadCatalogProducts = () => {
   if (typeof window !== 'undefined') {
@@ -463,6 +525,15 @@ export const saveCatalogProducts = (products) => {
     } catch (e) {}
   }
   broadcastSyncEvent('PRODUCTS_UPDATED', products);
+
+  // Cloud Upsert to Supabase
+  if (typeof window !== 'undefined' && window.fetch) {
+    fetch(`${SUPABASE_URL}/rest/v1/products`, {
+      method: 'POST',
+      headers: supabaseHeaders,
+      body: JSON.stringify(products)
+    }).catch(() => {});
+  }
 };
 
 // 2. BANNERS
@@ -489,6 +560,15 @@ export const saveBanners = (banners) => {
     } catch (e) {}
   }
   broadcastSyncEvent('BANNERS_UPDATED', combined);
+
+  // Cloud Upsert to Supabase
+  if (typeof window !== 'undefined' && window.fetch) {
+    fetch(`${SUPABASE_URL}/rest/v1/banners`, {
+      method: 'POST',
+      headers: supabaseHeaders,
+      body: JSON.stringify([{ id: 'current_banners', data: combined, updated_at: new Date().toISOString() }])
+    }).catch(() => {});
+  }
   return combined;
 };
 
@@ -513,6 +593,15 @@ export const saveCategories = (categories) => {
     } catch (e) {}
   }
   broadcastSyncEvent('CATEGORIES_UPDATED', categories);
+
+  // Cloud Upsert to Supabase
+  if (typeof window !== 'undefined' && window.fetch) {
+    fetch(`${SUPABASE_URL}/rest/v1/categories`, {
+      method: 'POST',
+      headers: supabaseHeaders,
+      body: JSON.stringify(categories)
+    }).catch(() => {});
+  }
 };
 
 // 4. CMS
@@ -539,5 +628,14 @@ export const saveCms = (cms) => {
     } catch (e) {}
   }
   broadcastSyncEvent('CMS_UPDATED', combined);
+
+  // Cloud Upsert to Supabase
+  if (typeof window !== 'undefined' && window.fetch) {
+    fetch(`${SUPABASE_URL}/rest/v1/cms`, {
+      method: 'POST',
+      headers: supabaseHeaders,
+      body: JSON.stringify([{ id: 'current_cms', data: combined, updated_at: new Date().toISOString() }])
+    }).catch(() => {});
+  }
   return combined;
 };

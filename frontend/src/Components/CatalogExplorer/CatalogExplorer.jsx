@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useContext } from 'react';
 import { Search, SlidersHorizontal, ArrowUpDown, Filter, Layers, Check, X } from 'lucide-react';
 import Item from '../Item/Item';
 import './CatalogExplorer.css';
 import { API_URL } from '../../config';
+import { ShopContext } from '../../Context/ShopContext';
 
 const DEFAULT_CATEGORY_TABS = [
   { id: 'all', label: 'All Catalog', slug: 'all' },
@@ -29,24 +30,55 @@ const SORT_OPTIONS = [
   { id: 'gsm-high', label: 'Fabric: Heavyweight First' }
 ];
 
-export default function CatalogExplorer({ products = [], title = "WHOLESALE CATALOG & FACTORY INVENTORY", subtitle = "Select from our specialized apparel categories, filter by size, and sort by unit price, MOQ, or fabric GSM weight." }) {
+export default function CatalogExplorer({ products: propProducts, title = "WHOLESALE CATALOG & FACTORY INVENTORY", subtitle = "Select from our specialized apparel categories, filter by size, and sort by unit price, MOQ, or fabric GSM weight." }) {
+  const context = useContext(ShopContext);
+  const contextProducts = context?.all_product || [];
+  const [fallbackProducts, setFallbackProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedSize, setSelectedSize] = useState('All');
   const [sortBy, setSortBy] = useState('featured');
   const [searchTerm, setSearchTerm] = useState('');
   const [liveCategories, setLiveCategories] = useState([]);
 
-  // Fetch live categories from backend for dynamic tabs
+  // Triple-layer product resolution: propProducts -> contextProducts -> fallbackProducts
+  const products = useMemo(() => {
+    if (Array.isArray(propProducts) && propProducts.length > 0) return propProducts;
+    if (Array.isArray(contextProducts) && contextProducts.length > 0) return contextProducts;
+    return fallbackProducts;
+  }, [propProducts, contextProducts, fallbackProducts]);
+
+  // Live Auto-Poll & Tab-Focus Synchronization
   useEffect(() => {
-    fetch(`${API_URL}/categories`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setLiveCategories(data);
-        }
-      })
-      .catch(() => {});
+    const syncCatalogData = () => {
+      fetch(`${API_URL}/all-products`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setFallbackProducts(data);
+          }
+        })
+        .catch(() => {});
+
+      fetch(`${API_URL}/categories`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setLiveCategories(data);
+          }
+        })
+        .catch(() => {});
+    };
+
+    syncCatalogData();
+    const interval = setInterval(syncCatalogData, 3000);
+    window.addEventListener('focus', syncCatalogData);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', syncCatalogData);
+    };
   }, []);
+
 
   // Compute dynamic category tabs
   const categoryTabs = useMemo(() => {

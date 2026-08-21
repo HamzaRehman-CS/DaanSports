@@ -33,6 +33,14 @@ const ProductList = () => {
 
   useEffect(() => {
     fetchAllProducts();
+    const interval = setInterval(fetchAllProducts, 3000);
+    const handleFocus = () => fetchAllProducts();
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const removeProduct = async (id, name) => {

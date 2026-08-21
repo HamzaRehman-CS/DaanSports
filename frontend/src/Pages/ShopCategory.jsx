@@ -19,13 +19,14 @@ const SORT_OPTIONS = [
 
 const ShopCategory = (props) => {
   const { all_product } = useContext(ShopContext);
+  const [fallbackProducts, setFallbackProducts] = useState([]);
   const { categoryId, query: searchQuery } = useParams();
   const targetCategoryRaw = props.category || categoryId || "all";
   const [activeCategoryInfo, setActiveCategoryInfo] = useState(null);
   const [sortBy, setSortBy] = useState('price-low');
   const [selectedSize, setSelectedSize] = useState('All');
 
-  useEffect(() => {
+  const syncData = () => {
     fetch(`${API_URL}/categories`)
       .then(res => res.json())
       .then(data => {
@@ -37,11 +38,35 @@ const ShopCategory = (props) => {
           if (found) setActiveCategoryInfo(found);
         }
       })
-      .catch(err => console.error("Error fetching categories:", err));
+      .catch(() => {});
+
+    fetch(`${API_URL}/all-products`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) setFallbackProducts(data);
+      })
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    syncData();
+    const interval = setInterval(syncData, 3000);
+    window.addEventListener('focus', syncData);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', syncData);
+    };
   }, [targetCategoryRaw]);
 
+  const activeProducts = useMemo(() => {
+    if (Array.isArray(all_product) && all_product.length > 0) return all_product;
+    return fallbackProducts;
+  }, [all_product, fallbackProducts]);
+
   const filteredAndSortedProducts = useMemo(() => {
-    let result = (all_product || []).filter(item => {
+    let result = (activeProducts || []).filter(item => {
+
       let matchesCategory = true;
 
       if (targetCategoryRaw && targetCategoryRaw !== 'all') {

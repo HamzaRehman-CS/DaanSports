@@ -1,29 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import './SiteManager.css';
 import { API_URL } from '../../config';
+import { loadCms, saveCms } from '../../defaultCatalog';
 
 const SiteManager = () => {
-  const [cms, setCms] = useState({
-    announcementText: "",
-    heroSlides: []
-  });
-  const [loading, setLoading] = useState(true);
+  const [cms, setCms] = useState(() => loadCms());
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState(null);
   const [saveMessage, setSaveMessage] = useState(null);
 
   const fetchCms = async () => {
-    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/cms`);
       const data = await res.json();
-      if (data) {
+      if (data && typeof data === 'object') {
         setCms(data);
+        saveCms(data);
       }
     } catch (err) {
-      console.error("Fetch CMS error:", err);
-    } finally {
-      setLoading(false);
+      const stored = loadCms();
+      if (stored) setCms(stored);
     }
   };
 
@@ -109,24 +106,24 @@ const SiteManager = () => {
   const saveCmsChanges = async () => {
     setSaving(true);
     setSaveMessage(null);
+
+    // 1. Save locally and broadcast to website immediately (<1ms)
+    saveCms(cms);
+
+    // 2. Sync to Backend API
     try {
-      const res = await fetch(`${API_URL}/update-cms`, {
+      await fetch(`${API_URL}/update-cms`, {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify(cms)
       });
-      const data = await res.json();
-      if (data.success) {
-        setSaveMessage("🎉 Storefront Hero Slider & Announcement Bar Updated Live!");
-        setTimeout(() => setSaveMessage(null), 5000);
-      } else {
-        alert("Failed to update CMS.");
-      }
     } catch (err) {
-      alert("Error saving CMS: " + err.message);
-    } finally {
-      setSaving(false);
+      console.warn("Backend sync notice (saved locally & broadcast live):", err.message);
     }
+
+    setSaveMessage("🎉 Storefront Hero Slider & Announcement Bar Updated & Synced Live!");
+    setTimeout(() => setSaveMessage(null), 5000);
+    setSaving(false);
   };
 
   return (

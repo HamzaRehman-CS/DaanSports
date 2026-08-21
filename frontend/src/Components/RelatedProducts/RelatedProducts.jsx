@@ -2,19 +2,31 @@ import React, { useEffect, useState } from 'react';
 import './RelatedProducts.css';
 import Item from '../Item/Item';
 import { API_URL } from '../../config';
+import { loadCatalogProducts } from '../../Context/defaultCatalog';
 
 const RelatedProducts = (props) => {
-  const [relatedProducts, setRelatedProducts] = useState([]);
   const { product } = props;
+  const [relatedProducts, setRelatedProducts] = useState(() => {
+    const prods = loadCatalogProducts();
+    if (product && product.category) {
+      const matched = prods.filter(p => (p.category || '').toLowerCase() === (product.category || '').toLowerCase() && p.id !== product.id);
+      return matched.length > 0 ? matched.slice(0, 4) : prods.slice(0, 4);
+    }
+    return prods.slice(0, 4);
+  });
 
   useEffect(() => {
     if (product && product.category) {
-      fetch(`${API_URL}/popular-tracksuits`)
+      fetch(`${API_URL}/all-products`)
         .then(res => res.json())
-        .then(data => setRelatedProducts(data))
-        .catch(err => console.error("Error fetching related products:", err));
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            const matched = data.filter(p => (p.category || '').toLowerCase() === (product.category || '').toLowerCase() && p.id !== product.id);
+            setRelatedProducts(matched.length > 0 ? matched.slice(0, 4) : data.slice(0, 4));
+          }
+        })
+        .catch(() => {});
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product]);
 
   return (

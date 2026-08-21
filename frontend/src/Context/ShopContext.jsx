@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState, useCallback } from "react";
 import { API_URL } from '../config';
+import { loadCatalogProducts, saveCatalogProducts, subscribeToGlobalSync } from './defaultCatalog';
 
 export const ShopContext = createContext(null);
 
@@ -13,37 +14,48 @@ const getDefaultCart = () => {
 
 const ShopContextProvider = (props) => {
     const [cartItems, setCartItems] = useState(getDefaultCart());
-    const [all_product, setAll_Product] = useState([]);
+    const [all_product, setAll_Product] = useState(() => loadCatalogProducts());
 
     const fetchProducts = useCallback(() => {
         fetch(`${API_URL}/all-products`)
             .then(res => res.json())
             .then(data => {
-                if (Array.isArray(data)) {
+                if (Array.isArray(data) && data.length > 0) {
                     setAll_Product(data);
+                    saveCatalogProducts(data);
                 }
             })
             .catch(err => {
-                console.warn("Product sync notice:", err.message);
+                // Seamlessly maintain loaded catalog data
             });
     }, []);
 
     useEffect(() => {
-        // Initial fetch
         fetchProducts();
 
-        // 1. Live auto-refresh polling every 3 seconds for 100% instant sync with Admin Portal
+        // 1. Instant cross-tab sync when Admin publishes products
+        const unsubscribe = subscribeToGlobalSync((type, payload) => {
+            if (type === 'PRODUCTS_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+                setAll_Product(payload);
+            }
+        });
+
+        // 2. Live auto-refresh polling every 3 seconds
         const pollInterval = setInterval(() => {
             fetchProducts();
         }, 3000);
 
-        // 2. Instant refetch whenever user switches back to this browser tab
+        // 3. Instant refetch whenever user switches back to this browser tab
         const handleFocus = () => {
             fetchProducts();
+            const stored = loadCatalogProducts();
+            if (stored && stored.length > 0) setAll_Product(stored);
         };
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
                 fetchProducts();
+                const stored = loadCatalogProducts();
+                if (stored && stored.length > 0) setAll_Product(stored);
             }
         };
 
@@ -70,6 +82,7 @@ const ShopContextProvider = (props) => {
         }
 
         return () => {
+            unsubscribe();
             clearInterval(pollInterval);
             window.removeEventListener('focus', handleFocus);
             document.removeEventListener('visibilitychange', handleVisibilityChange);

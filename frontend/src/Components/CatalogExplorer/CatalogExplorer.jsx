@@ -5,6 +5,8 @@ import './CatalogExplorer.css';
 import { API_URL } from '../../config';
 import { ShopContext } from '../../Context/ShopContext';
 
+import { loadCatalogProducts, loadCategories, subscribeToGlobalSync } from '../../Context/defaultCatalog';
+
 const DEFAULT_CATEGORY_TABS = [
   { id: 'all', label: 'All Catalog', slug: 'all' },
   { id: 'tracksuits', label: 'Track Suits', slug: 'tracksuits' },
@@ -33,18 +35,19 @@ const SORT_OPTIONS = [
 export default function CatalogExplorer({ products: propProducts, title = "WHOLESALE CATALOG & FACTORY INVENTORY", subtitle = "Select from our specialized apparel categories, filter by size, and sort by unit price, MOQ, or fabric GSM weight." }) {
   const context = useContext(ShopContext);
   const contextProducts = context?.all_product || [];
-  const [fallbackProducts, setFallbackProducts] = useState([]);
+  const [fallbackProducts, setFallbackProducts] = useState(() => loadCatalogProducts());
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedSize, setSelectedSize] = useState('All');
   const [sortBy, setSortBy] = useState('featured');
   const [searchTerm, setSearchTerm] = useState('');
-  const [liveCategories, setLiveCategories] = useState([]);
+  const [liveCategories, setLiveCategories] = useState(() => loadCategories());
 
   // Triple-layer product resolution: propProducts -> contextProducts -> fallbackProducts
   const products = useMemo(() => {
     if (Array.isArray(propProducts) && propProducts.length > 0) return propProducts;
     if (Array.isArray(contextProducts) && contextProducts.length > 0) return contextProducts;
-    return fallbackProducts;
+    if (Array.isArray(fallbackProducts) && fallbackProducts.length > 0) return fallbackProducts;
+    return loadCatalogProducts();
   }, [propProducts, contextProducts, fallbackProducts]);
 
   // Live Auto-Poll & Tab-Focus Synchronization
@@ -70,12 +73,30 @@ export default function CatalogExplorer({ products: propProducts, title = "WHOLE
     };
 
     syncCatalogData();
+
+    // 1. Instant cross-tab real-time sync with Admin Portal
+    const unsubscribe = subscribeToGlobalSync((type, payload) => {
+      if (type === 'PRODUCTS_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+        setFallbackProducts(payload);
+      } else if (type === 'CATEGORIES_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+        setLiveCategories(payload);
+      }
+    });
+
     const interval = setInterval(syncCatalogData, 3000);
-    window.addEventListener('focus', syncCatalogData);
+    const handleFocus = () => {
+      syncCatalogData();
+      const storedP = loadCatalogProducts();
+      if (storedP && storedP.length > 0) setFallbackProducts(storedP);
+      const storedC = loadCategories();
+      if (storedC && storedC.length > 0) setLiveCategories(storedC);
+    };
+    window.addEventListener('focus', handleFocus);
 
     return () => {
+      unsubscribe();
       clearInterval(interval);
-      window.removeEventListener('focus', syncCatalogData);
+      window.removeEventListener('focus', handleFocus);
     };
   }, []);
 

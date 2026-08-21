@@ -5,12 +5,13 @@ import { ShopContext } from '../Context/ShopContext';
 import Item from '../Components/Item/Item';
 import SEO from '../Components/SEO/SEO';
 import { API_URL } from '../config';
+import { loadCatalogProducts, loadCategories, subscribeToGlobalSync } from '../Context/defaultCatalog';
 
 const SIZE_OPTIONS = ['All', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
 
 const SORT_OPTIONS = [
-  { id: 'price-low', label: 'Price: Low → High' },
-  { id: 'price-high', label: 'Price: High → Low' },
+  { id: 'price-low', label: 'Price: Low to High' },
+  { id: 'price-high', label: 'Price: High to Low' },
   { id: 'alpha-az', label: 'Alphabetical: A → Z' },
   { id: 'alpha-za', label: 'Alphabetical: Z → A' },
   { id: 'moq-low', label: 'Lowest MOQ First' },
@@ -19,10 +20,16 @@ const SORT_OPTIONS = [
 
 const ShopCategory = (props) => {
   const { all_product } = useContext(ShopContext);
-  const [fallbackProducts, setFallbackProducts] = useState([]);
+  const [fallbackProducts, setFallbackProducts] = useState(() => loadCatalogProducts());
   const { categoryId, query: searchQuery } = useParams();
   const targetCategoryRaw = props.category || categoryId || "all";
-  const [activeCategoryInfo, setActiveCategoryInfo] = useState(null);
+  const [activeCategoryInfo, setActiveCategoryInfo] = useState(() => {
+    const cats = loadCategories();
+    return cats.find(c => 
+      (c.slug || '').toLowerCase() === targetCategoryRaw.toLowerCase() || 
+      (c.name || '').toLowerCase() === targetCategoryRaw.toLowerCase()
+    ) || null;
+  });
   const [sortBy, setSortBy] = useState('price-low');
   const [selectedSize, setSelectedSize] = useState('All');
 
@@ -30,7 +37,7 @@ const ShopCategory = (props) => {
     fetch(`${API_URL}/categories`)
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           const found = data.find(c => 
             (c.slug || '').toLowerCase() === targetCategoryRaw.toLowerCase() || 
             (c.name || '').toLowerCase() === targetCategoryRaw.toLowerCase()
@@ -50,18 +57,44 @@ const ShopCategory = (props) => {
 
   useEffect(() => {
     syncData();
+
+    const unsubscribe = subscribeToGlobalSync((type, payload) => {
+      if (type === 'PRODUCTS_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+        setFallbackProducts(payload);
+      } else if (type === 'CATEGORIES_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+        const found = payload.find(c => 
+          (c.slug || '').toLowerCase() === targetCategoryRaw.toLowerCase() || 
+          (c.name || '').toLowerCase() === targetCategoryRaw.toLowerCase()
+        );
+        if (found) setActiveCategoryInfo(found);
+      }
+    });
+
     const interval = setInterval(syncData, 3000);
-    window.addEventListener('focus', syncData);
+    const handleFocus = () => {
+      syncData();
+      const storedP = loadCatalogProducts();
+      if (storedP && storedP.length > 0) setFallbackProducts(storedP);
+      const storedC = loadCategories();
+      const found = (storedC || []).find(c => 
+        (c.slug || '').toLowerCase() === targetCategoryRaw.toLowerCase() || 
+        (c.name || '').toLowerCase() === targetCategoryRaw.toLowerCase()
+      );
+      if (found) setActiveCategoryInfo(found);
+    };
+    window.addEventListener('focus', handleFocus);
 
     return () => {
+      unsubscribe();
       clearInterval(interval);
-      window.removeEventListener('focus', syncData);
+      window.removeEventListener('focus', handleFocus);
     };
   }, [targetCategoryRaw]);
 
   const activeProducts = useMemo(() => {
     if (Array.isArray(all_product) && all_product.length > 0) return all_product;
-    return fallbackProducts;
+    if (Array.isArray(fallbackProducts) && fallbackProducts.length > 0) return fallbackProducts;
+    return loadCatalogProducts();
   }, [all_product, fallbackProducts]);
 
   const filteredAndSortedProducts = useMemo(() => {

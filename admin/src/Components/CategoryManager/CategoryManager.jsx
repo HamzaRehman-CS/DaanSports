@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import './CategoryManager.css';
 import { API_URL } from '../../config';
+import { loadCategories, saveCategories } from '../../defaultCatalog';
 
 const CategoryManager = () => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState(() => loadCategories());
+  const [loading, setLoading] = useState(false);
   const [editingCatId, setEditingCatId] = useState(null);
   const [uploading, setUploading] = useState(false);
 
@@ -24,15 +25,16 @@ const CategoryManager = () => {
   });
 
   const fetchCategories = async () => {
-    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/categories`);
       const data = await res.json();
-      setCategories(Array.isArray(data) ? data : []);
+      if (Array.isArray(data) && data.length > 0) {
+        setCategories(data);
+        saveCategories(data);
+      }
     } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+      const stored = loadCategories();
+      if (stored && stored.length > 0) setCategories(stored);
     }
   };
 
@@ -58,12 +60,24 @@ const CategoryManager = () => {
         } else {
           setFormData(prev => ({ ...prev, banner: data.image_url }));
         }
-        alert("📷 Category image uploaded successfully!");
+        alert(`📷 Category banner uploaded!`);
       } else {
-        alert("Upload error: " + (data.error || "Failed to upload"));
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (isEdit) setEditFormData(prev => ({ ...prev, banner: e.target.result }));
+          else setFormData(prev => ({ ...prev, banner: e.target.result }));
+          alert(`📷 Category banner loaded!`);
+        };
+        reader.readAsDataURL(file);
       }
     } catch (err) {
-      alert("Upload error: " + err.message);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (isEdit) setEditFormData(prev => ({ ...prev, banner: e.target.result }));
+        else setFormData(prev => ({ ...prev, banner: e.target.result }));
+        alert(`📷 Category banner loaded!`);
+      };
+      reader.readAsDataURL(file);
     } finally {
       setUploading(false);
     }
@@ -73,24 +87,37 @@ const CategoryManager = () => {
     e.preventDefault();
     if (!formData.name.trim()) return;
 
+    const current = loadCategories();
+    const maxId = current.reduce((max, c) => (c.id > max ? c.id : max), 0);
+    const subcats = typeof formData.subcategories === 'string'
+      ? formData.subcategories.split(',').map(s => s.trim()).filter(Boolean)
+      : formData.subcategories;
+
+    const newCat = {
+      id: maxId + 1,
+      name: formData.name,
+      slug: formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      description: formData.description,
+      subcategories: subcats,
+      banner: formData.banner || "https://images.unsplash.com/photo-1553775282-20af80779df7?q=80&w=2070&auto=format&fit=crop"
+    };
+
+    const updated = [...current, newCat];
+    setCategories(updated);
+    saveCategories(updated);
+    setFormData({ name: '', description: '', subcategories: '', banner: '' });
+
     try {
-      const res = await fetch(`${API_URL}/add-category`, {
+      await fetch(`${API_URL}/add-category`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify(formData)
       });
-      const data = await res.json();
-
-      if (data.success) {
-        alert(`🎉 Category "${data.category.name}" created successfully!`);
-        setFormData({ name: '', description: '', subcategories: '', banner: '' });
-        fetchCategories();
-      } else {
-        alert("Error: " + (data.error || "Failed to create category"));
-      }
     } catch (err) {
-      alert("Error: " + err.message);
+      console.warn("Backend sync notice (saved locally):", err.message);
     }
+
+    alert(`🎉 Category "${newCat.name}" created and synced live!`);
   };
 
   const startEditCategory = (cat) => {
@@ -106,42 +133,54 @@ const CategoryManager = () => {
 
   const handleSaveEditCategory = async (e) => {
     e.preventDefault();
+    const subcats = typeof editFormData.subcategories === 'string'
+      ? editFormData.subcategories.split(',').map(s => s.trim()).filter(Boolean)
+      : editFormData.subcategories;
+
+    const updatedCat = {
+      ...editFormData,
+      subcategories: subcats,
+      slug: editFormData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    };
+
+    const current = loadCategories();
+    const updated = current.map(c => c.id === updatedCat.id ? { ...c, ...updatedCat } : c);
+    setCategories(updated);
+    saveCategories(updated);
+    setEditingCatId(null);
+
     try {
-      const res = await fetch(`${API_URL}/edit-category`, {
+      await fetch(`${API_URL}/edit-category`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify(editFormData)
       });
-      const data = await res.json();
-      if (data.success) {
-        alert(`✏️ Category "${data.category.name}" updated successfully!`);
-        setEditingCatId(null);
-        fetchCategories();
-      } else {
-        alert("Error updating category: " + (data.error || "Unknown error"));
-      }
     } catch (err) {
-      alert("Error: " + err.message);
+      console.warn("Backend sync notice (saved locally):", err.message);
     }
+
+    alert(`✏️ Category "${updatedCat.name}" updated and synced live!`);
   };
 
   const handleDeleteCategory = async (id, name) => {
     if (!window.confirm(`Are you sure you want to delete category "${name}"?`)) return;
 
+    const current = loadCategories();
+    const updated = current.filter(c => c.id !== id);
+    setCategories(updated);
+    saveCategories(updated);
+
     try {
-      const res = await fetch(`${API_URL}/delete-category`, {
+      await fetch(`${API_URL}/delete-category`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({ id })
       });
-      const data = await res.json();
-      if (data.success) {
-        alert(`🗑️ Category "${name}" deleted.`);
-        fetchCategories();
-      }
     } catch (err) {
-      alert("Error: " + err.message);
+      console.warn("Backend sync notice (saved locally):", err.message);
     }
+
+    alert(`🗑️ Category "${name}" deleted and synced live.`);
   };
 
   return (

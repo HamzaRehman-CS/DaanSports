@@ -2,11 +2,15 @@ import React, { useEffect, useState } from 'react'
 import './NewCollections.css'
 import Item from '../Item/Item'
 import { API_URL } from '../../config'
+import { loadCatalogProducts, subscribeToGlobalSync } from '../../Context/defaultCatalog'
 
 const NewCollections = () => {
-  const [new_collection, setNew_collection] = useState([]);
+  const [new_collection, setNew_collection] = useState(() => {
+    const prods = loadCatalogProducts();
+    return prods.slice(0, 8);
+  });
 
-  useEffect(() => {
+  const syncNewCollections = () => {
     fetch(`${API_URL}/new-collection`)
       .then(res => res.json())
       .then(data => {
@@ -15,10 +19,27 @@ const NewCollections = () => {
         } else {
           fetch(`${API_URL}/all-products`)
             .then(r => r.json())
-            .then(all => setNew_collection(all.slice(0, 8)));
+            .then(all => {
+              if (Array.isArray(all) && all.length > 0) {
+                setNew_collection(all.slice(0, 8));
+              }
+            })
+            .catch(() => {});
         }
       })
-      .catch(err => console.error(err));
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    syncNewCollections();
+
+    const unsubscribe = subscribeToGlobalSync((type, payload) => {
+      if (type === 'PRODUCTS_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+        setNew_collection(payload.slice(0, 8));
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   return (

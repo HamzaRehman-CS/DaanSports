@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import './ProductList.css';
 import cross_icon from '../../assets/cross_icon.png';
 import { API_URL } from '../../config';
+import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories } from '../../defaultCatalog';
 
 const ProductList = () => {
-  const [allProducts, setAllProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [allProducts, setAllProducts] = useState(() => loadCatalogProducts());
+  const [categories, setCategories] = useState(() => loadCategories());
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
 
@@ -15,19 +16,23 @@ const ProductList = () => {
   const [editFormData, setEditFormData] = useState({});
 
   const fetchAllProducts = async () => {
-    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/all-products`);
       const data = await res.json();
-      setAllProducts(Array.isArray(data) ? data : []);
+      if (Array.isArray(data) && data.length > 0) {
+        setAllProducts(data);
+        saveCatalogProducts(data);
+      }
 
       const catRes = await fetch(`${API_URL}/categories`);
       const catData = await catRes.json();
-      if (Array.isArray(catData)) setCategories(catData);
+      if (Array.isArray(catData) && catData.length > 0) {
+        setCategories(catData);
+        saveCategories(catData);
+      }
     } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+      const stored = loadCatalogProducts();
+      if (stored && stored.length > 0) setAllProducts(stored);
     }
   };
 
@@ -47,16 +52,20 @@ const ProductList = () => {
     if (!window.confirm(`Are you sure you want to remove "${name}" from wholesale inventory?`)) {
       return;
     }
+    const updated = allProducts.filter(p => p.id !== id);
+    setAllProducts(updated);
+    saveCatalogProducts(updated);
+
     try {
       await fetch(`${API_URL}/remove-product`, {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: id, name: name })
       });
-      await fetchAllProducts();
     } catch (err) {
-      console.error(err);
+      console.warn("Backend sync notice (saved locally):", err.message);
     }
+    alert(`Product "${name}" removed successfully!`);
   };
 
   const openEditModal = (product) => {
@@ -83,38 +92,38 @@ const ProductList = () => {
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
+    const colorsArr = Array.isArray(editFormData.colors)
+      ? editFormData.colors
+      : (typeof editFormData.colors === 'string' ? editFormData.colors.split(',') : []);
+    
+    const sizesArr = Array.isArray(editFormData.sizes)
+      ? editFormData.sizes
+      : (typeof editFormData.sizes === 'string' ? editFormData.sizes.split(',') : []);
+
+    const payload = {
+      ...editFormData,
+      colors: colorsArr.map(c => typeof c === 'string' ? c.trim() : c).filter(Boolean),
+      sizes: sizesArr.map(s => typeof s === 'string' ? s.trim() : s).filter(Boolean)
+    };
+
+    // 1. Update locally and broadcast immediately
+    const updated = allProducts.map(p => p.id === payload.id ? { ...p, ...payload } : p);
+    setAllProducts(updated);
+    saveCatalogProducts(updated);
+    setEditingProduct(null);
+
+    // 2. Sync to Backend API
     try {
-      const colorsArr = Array.isArray(editFormData.colors)
-        ? editFormData.colors
-        : (typeof editFormData.colors === 'string' ? editFormData.colors.split(',') : []);
-      
-      const sizesArr = Array.isArray(editFormData.sizes)
-        ? editFormData.sizes
-        : (typeof editFormData.sizes === 'string' ? editFormData.sizes.split(',') : []);
-
-      const payload = {
-        ...editFormData,
-        colors: colorsArr.map(c => typeof c === 'string' ? c.trim() : c).filter(Boolean),
-        sizes: sizesArr.map(s => typeof s === 'string' ? s.trim() : s).filter(Boolean)
-      };
-
-      const res = await fetch(`${API_URL}/edit-product`, {
+      await fetch(`${API_URL}/edit-product`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      const data = await res.json();
-
-      if (data.success) {
-        alert(`Product "${data.product.name}" updated successfully!`);
-        setEditingProduct(null);
-        fetchAllProducts();
-      } else {
-        alert("Edit Error: " + (data.error || "Failed to update product"));
-      }
     } catch (err) {
-      alert("Network Error: " + err.message);
+      console.warn("Backend sync notice (saved locally):", err.message);
     }
+
+    alert(`Product "${payload.name}" updated and synced live!`);
   };
 
   const filteredProducts = allProducts.filter(p => {

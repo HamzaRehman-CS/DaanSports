@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, ChevronLeft, ChevronRight, ShieldCheck, Factory } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { API_URL } from '../../config';
+import { loadCms, subscribeToGlobalSync } from '../../Context/defaultCatalog';
 
 const defaultHeroSlides = [
   {
@@ -107,11 +108,19 @@ export default function HeroCarousel() {
 
   useEffect(() => {
     fetchSlides();
+
+    const unsubscribe = subscribeToGlobalSync((type, payload) => {
+      if (type === 'CMS_UPDATED') {
+        fetchSlides();
+      }
+    });
+
     const interval = setInterval(fetchSlides, 4000);
     const handleFocus = () => fetchSlides();
     window.addEventListener('focus', handleFocus);
 
     return () => {
+      unsubscribe();
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
     };

@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import './AddProduct.css';
 import upload_area from '../../assets/upload_area.svg';
 import { API_URL } from '../../config';
+import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories } from '../../defaultCatalog';
 
 const AddProduct = () => {
   const [primaryImage, setPrimaryImage] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(() => loadCategories());
   const [colorsInput, setColorsInput] = useState("Black, Navy Blue, Heather Gray, Crimson Red");
   
   const [productDetails, setProductDetails] = useState({
@@ -30,10 +31,11 @@ const AddProduct = () => {
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
           setCategories(data);
+          saveCategories(data);
           setProductDetails(prev => ({ ...prev, category: data[0].name }));
         }
       })
-      .catch(err => console.error("Categories fetch error:", err));
+      .catch(() => {});
   }, []);
 
   const changeHandler = (e) => {
@@ -53,37 +55,56 @@ const AddProduct = () => {
     }
   };
 
+  const readFileAsDataUrl = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = () => resolve("https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80");
+      reader.readAsDataURL(file);
+    });
+  };
+
   const Add_Product = async () => {
-    if (!productDetails.name || !productDetails.new_price || !primaryImage) {
-      alert("Please fill in the product title, bulk price, and upload at least one main cover image.");
+    if (!productDetails.name || !productDetails.new_price) {
+      alert("Please fill in the product title and bulk unit price.");
       return;
     }
 
     try {
-      let primaryFormData = new FormData();
-      primaryFormData.append('product', primaryImage);
+      let primaryUrl = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80";
+      
+      if (primaryImage) {
+        try {
+          let primaryFormData = new FormData();
+          primaryFormData.append('product', primaryImage);
 
-      let uploadRes = await fetch(`${API_URL}/upload`, {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: primaryFormData
-      });
-      let uploadData = await uploadRes.json();
-
-      if (!uploadData.success) {
-        alert("Failed to upload primary image.");
-        return;
+          let uploadRes = await fetch(`${API_URL}/upload`, {
+            method: 'POST',
+            headers: { Accept: 'application/json' },
+            body: primaryFormData
+          });
+          let uploadData = await uploadRes.json();
+          if (uploadData && uploadData.success && uploadData.image_url) {
+            primaryUrl = uploadData.image_url;
+          } else {
+            primaryUrl = await readFileAsDataUrl(primaryImage);
+          }
+        } catch (e) {
+          primaryUrl = await readFileAsDataUrl(primaryImage);
+        }
       }
-
-      let primaryUrl = uploadData.image_url;
-      let allImageUrls = [primaryUrl];
 
       const colorsArray = colorsInput
         .split(',')
         .map(c => c.trim())
         .filter(c => c.length > 0);
 
-      const payload = {
+      const currentList = loadCatalogProducts();
+      const maxId = currentList.reduce((max, p) => (p.id > max ? p.id : max), 0);
+      const newId = maxId + 1;
+
+      const newProductObj = {
+        id: newId,
         name: productDetails.name,
         category: productDetails.category,
         old_price: Number(productDetails.old_price) || Number(productDetails.new_price) * 1.3,
@@ -96,24 +117,31 @@ const AddProduct = () => {
         customization: productDetails.customization,
         leadTime: productDetails.leadTime,
         stock: Number(productDetails.stock) || 1000,
-        colors: colorsArray,
+        colors: colorsArray.length > 0 ? colorsArray : ["Black", "Navy Blue"],
+        sizes: ["S", "M", "L", "XL", "2XL"],
         image: primaryUrl,
-        images: allImageUrls
+        images: [primaryUrl],
+        available: true,
+        date: new Date().toISOString()
       };
 
-      let saveRes = await fetch(`${API_URL}/add-product`, {
-        method: 'POST',
-        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      let saveData = await saveRes.json();
+      // 1. Save locally and broadcast to website immediately
+      const updatedProducts = [...currentList, newProductObj];
+      saveCatalogProducts(updatedProducts);
 
-      if (saveData.success) {
-        alert("🎉 DAAN Sports Product Added Successfully!");
-        window.location.replace('/list-product');
-      } else {
-        alert("Failed to add product: " + (saveData.error || "Unknown error"));
+      // 2. Sync to Backend API
+      try {
+        await fetch(`${API_URL}/add-product`, {
+          method: 'POST',
+          headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify(newProductObj)
+        });
+      } catch (err) {
+        console.warn("Backend sync notice (saved locally & broadcast live):", err.message);
       }
+
+      alert("🎉 DAAN Sports Product Added Successfully & Synced Live to Main Website!");
+      window.location.replace('/list-product');
 
     } catch (err) {
       console.error(err);

@@ -5,14 +5,15 @@ import { ShopContext } from '../../Context/ShopContext';
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 import { API_URL } from '../../config';
 import DsLogo from './DsLogo';
+import { loadCategories, saveCategories, loadCms, saveCms, subscribeToGlobalSync } from '../../Context/defaultCatalog';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [categories, setCategories] = useState([]);
-  const [announcementText, setAnnouncementText] = useState("FREE SHIPPING ON ORDERS OVER $99 | LIMITED TIME ONLY!");
+  const [categories, setCategories] = useState(() => loadCategories());
+  const [announcementText, setAnnouncementText] = useState(() => loadCms()?.announcementText || "FREE SHIPPING ON ORDERS OVER $99 | LIMITED TIME ONLY!");
   const { getTotalCartItems } = useContext(ShopContext);
   const location = useLocation();
   const navigate = useNavigate();
@@ -34,7 +35,10 @@ const Navbar = () => {
     fetch(`${API_URL}/categories`)
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data)) setCategories(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setCategories(data);
+          saveCategories(data);
+        }
       })
       .catch(() => {});
 
@@ -43,6 +47,7 @@ const Navbar = () => {
       .then(data => {
         if (data && data.announcementText) {
           setAnnouncementText(data.announcementText);
+          saveCms(data);
         }
       })
       .catch(() => {});
@@ -50,11 +55,31 @@ const Navbar = () => {
 
   useEffect(() => {
     fetchNavData();
-    const interval = setInterval(fetchNavData, 4000);
-    const handleFocus = () => fetchNavData();
+
+    // 1. Instant cross-tab real-time sync with Admin Portal
+    const unsubscribe = subscribeToGlobalSync((type, payload) => {
+      if (type === 'CATEGORIES_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+        setCategories(payload);
+      } else if (type === 'CMS_UPDATED' && payload && payload.announcementText) {
+        setAnnouncementText(payload.announcementText);
+      }
+    });
+
+    // 2. Live auto-refresh polling every 3 seconds
+    const interval = setInterval(fetchNavData, 3000);
+
+    // 3. Instant refetch on window focus
+    const handleFocus = () => {
+      fetchNavData();
+      const storedCats = loadCategories();
+      if (storedCats && storedCats.length > 0) setCategories(storedCats);
+      const storedCms = loadCms();
+      if (storedCms?.announcementText) setAnnouncementText(storedCms.announcementText);
+    };
     window.addEventListener('focus', handleFocus);
 
     return () => {
+      unsubscribe();
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
     };

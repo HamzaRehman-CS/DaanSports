@@ -2,11 +2,16 @@ import React, { useEffect, useState } from 'react'
 import './Popular.css'
 import Item from '../Item/Item'
 import { API_URL } from '../../config'
+import { loadCatalogProducts, subscribeToGlobalSync } from '../../Context/defaultCatalog'
 
 const Popular = () => {
-  const [popularItems, setPopularItems] = useState([]);
+  const [popularItems, setPopularItems] = useState(() => {
+    const prods = loadCatalogProducts();
+    const tracksuits = prods.filter(p => (p.category || '').toLowerCase().includes('tracksuit'));
+    return tracksuits.length > 0 ? tracksuits.slice(0, 4) : prods.slice(0, 4);
+  });
 
-  useEffect(() => {
+  const syncPopular = () => {
     fetch(`${API_URL}/popular-tracksuits`)
       .then(res => res.json())
       .then(data => {
@@ -15,10 +20,29 @@ const Popular = () => {
         } else {
           fetch(`${API_URL}/all-products`)
             .then(r => r.json())
-            .then(all => setPopularItems(all.slice(0, 4)));
+            .then(all => {
+              if (Array.isArray(all) && all.length > 0) {
+                const tracksuits = all.filter(p => (p.category || '').toLowerCase().includes('tracksuit'));
+                setPopularItems(tracksuits.length > 0 ? tracksuits.slice(0, 4) : all.slice(0, 4));
+              }
+            })
+            .catch(() => {});
         }
       })
-      .catch(err => console.error(err));
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    syncPopular();
+
+    const unsubscribe = subscribeToGlobalSync((type, payload) => {
+      if (type === 'PRODUCTS_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+        const tracksuits = payload.filter(p => (p.category || '').toLowerCase().includes('tracksuit'));
+        setPopularItems(tracksuits.length > 0 ? tracksuits.slice(0, 4) : payload.slice(0, 4));
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   return (

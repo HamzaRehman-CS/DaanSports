@@ -11,11 +11,12 @@ import SEO from '../Components/SEO/SEO';
 import { ShopContext } from '../Context/ShopContext';
 import { useAnimeReveal } from '../Components/AnimeScroll/AnimeScroll';
 import { API_URL } from '../config';
+import { loadBanners, saveBanners, loadCategories, saveCategories, subscribeToGlobalSync } from '../Context/defaultCatalog';
 
 const Shop = () => {
   const { all_product } = useContext(ShopContext);
-  const [categories, setCategories] = useState([]);
-  const [promotionalBanners, setPromotionalBanners] = useState(null);
+  const [categories, setCategories] = useState(() => loadCategories());
+  const [promotionalBanners, setPromotionalBanners] = useState(() => loadBanners());
 
   useAnimeReveal('.anime-reveal');
 
@@ -23,14 +24,20 @@ const Shop = () => {
     fetch(`${API_URL}/categories`)
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data)) setCategories(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setCategories(data);
+          saveCategories(data);
+        }
       })
       .catch(() => {});
 
     fetch(`${API_URL}/promotional-banners`)
       .then(res => res.json())
       .then(data => {
-        if (data && typeof data === 'object') setPromotionalBanners(data);
+        if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+          setPromotionalBanners(data);
+          saveBanners(data);
+        }
       })
       .catch(() => {});
   };
@@ -38,14 +45,30 @@ const Shop = () => {
   useEffect(() => {
     fetchShopData();
 
-    // 1. Live auto-refresh polling every 3 seconds for 100% instant sync with Admin Portal
+    // 1. Instant cross-tab real-time sync with Admin Portal
+    const unsubscribe = subscribeToGlobalSync((type, payload) => {
+      if (type === 'BANNERS_UPDATED' && payload) {
+        setPromotionalBanners(payload);
+      } else if (type === 'CATEGORIES_UPDATED' && Array.isArray(payload)) {
+        setCategories(payload);
+      }
+    });
+
+    // 2. Live auto-refresh polling every 3 seconds
     const interval = setInterval(fetchShopData, 3000);
 
-    // 2. Instant refetch on tab focus
-    const handleFocus = () => fetchShopData();
+    // 3. Instant refetch on tab focus
+    const handleFocus = () => {
+      fetchShopData();
+      const storedB = loadBanners();
+      if (storedB) setPromotionalBanners(storedB);
+      const storedC = loadCategories();
+      if (storedC && storedC.length > 0) setCategories(storedC);
+    };
     window.addEventListener('focus', handleFocus);
 
     return () => {
+      unsubscribe();
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
     };

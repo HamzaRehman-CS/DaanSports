@@ -352,10 +352,26 @@ try {
   }
 } catch (e) {}
 
+const CLOUD_SYNC_TOPIC = "daan_sports_global_sync_prod_2026";
+const CLOUD_SYNC_URL = `https://ntfy.sh/${CLOUD_SYNC_TOPIC}`;
+
 export const broadcastSyncEvent = (type, payload) => {
+  // 1. Instant local tab broadcast (<1ms)
   if (broadcastChannel) {
     try {
       broadcastChannel.postMessage({ type, payload, timestamp: Date.now() });
+    } catch (e) {}
+  }
+
+  // 2. Global cross-domain cloud push (connects Vercel Admin to Vercel Storefront globally)
+  if (typeof window !== 'undefined' && window.fetch) {
+    try {
+      fetch(CLOUD_SYNC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain', 'Title': type },
+        body: JSON.stringify({ type, payload, timestamp: Date.now() }),
+        mode: 'cors'
+      }).catch(() => {});
     } catch (e) {}
   }
 };
@@ -386,11 +402,43 @@ export const subscribeToGlobalSync = (callback) => {
   }
   window.addEventListener('storage', handleStorage);
 
+  // 3. Global Cloud EventSource listener for cross-domain Vercel sync
+  let eventSource = null;
+  try {
+    if (typeof window !== 'undefined' && 'EventSource' in window) {
+      eventSource = new EventSource(`${CLOUD_SYNC_URL}/sse`);
+      eventSource.onmessage = (event) => {
+        try {
+          const envelope = JSON.parse(event.data);
+          if (envelope && envelope.message) {
+            const data = JSON.parse(envelope.message);
+            if (data && data.type && data.payload) {
+              // Persist locally
+              if (data.type === 'PRODUCTS_UPDATED') {
+                localStorage.setItem('daan_products', JSON.stringify(data.payload));
+              } else if (data.type === 'BANNERS_UPDATED') {
+                localStorage.setItem('daan_banners', JSON.stringify(data.payload));
+              } else if (data.type === 'CATEGORIES_UPDATED') {
+                localStorage.setItem('daan_categories', JSON.stringify(data.payload));
+              } else if (data.type === 'CMS_UPDATED') {
+                localStorage.setItem('daan_cms', JSON.stringify(data.payload));
+              }
+              callback(data.type, data.payload);
+            }
+          }
+        } catch (err) {}
+      };
+    }
+  } catch (e) {}
+
   return () => {
     if (broadcastChannel) {
       broadcastChannel.removeEventListener('message', handleMessage);
     }
     window.removeEventListener('storage', handleStorage);
+    if (eventSource) {
+      eventSource.close();
+    }
   };
 };
 

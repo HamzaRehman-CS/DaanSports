@@ -87,7 +87,7 @@ const BentoBanners = ({ banners }) => {
           {/* Background Image with Hover Scale */}
           <div className="absolute inset-0 z-0">
             <img 
-              src={tall.bgImage} 
+              src={tall.bgImage || tall.image} 
               alt={tall.title} 
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
               loading="lazy"
@@ -133,7 +133,7 @@ const BentoBanners = ({ banners }) => {
           <div className="group relative rounded-2xl overflow-hidden border border-white/10 bg-[#141416] p-6 md:p-8 min-h-[240px] flex flex-col justify-between shadow-xl transition-all duration-500 hover:border-[#dc2626]/60">
             <div className="absolute inset-0 z-0">
               <img 
-                src={wide.bgImage} 
+                src={wide.bgImage || wide.image} 
                 alt={wide.title} 
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 loading="lazy"
@@ -176,7 +176,7 @@ const BentoBanners = ({ banners }) => {
             <div className="group relative rounded-2xl overflow-hidden border border-white/10 bg-[#141416] p-5 min-h-[200px] flex flex-col justify-between shadow-xl transition-all duration-500 hover:border-[#dc2626]/60">
               <div className="absolute inset-0 z-0">
                 <img 
-                  src={compactA.bgImage} 
+                  src={compactA.bgImage || compactA.image} 
                   alt={compactA.title} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   loading="lazy"
@@ -216,7 +216,7 @@ const BentoBanners = ({ banners }) => {
             <div className="group relative rounded-2xl overflow-hidden border border-white/10 bg-[#141416] p-5 min-h-[200px] flex flex-col justify-between shadow-xl transition-all duration-500 hover:border-[#dc2626]/60">
               <div className="absolute inset-0 z-0">
                 <img 
-                  src={compactB.bgImage} 
+                  src={compactB.bgImage || compactB.image} 
                   alt={compactB.title} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   loading="lazy"

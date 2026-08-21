@@ -47,6 +47,7 @@ const Footer = () => {
             <li><Link to="/oem" className="hover:text-white transition-colors">Private Labeling</Link></li>
             <li><Link to="/certifications" className="hover:text-white transition-colors">ISO Certifications</Link></li>
             <li><Link to="/orders" className="hover:text-white transition-colors">Customer Order Portal</Link></li>
+            <li><Link to="/admin" className="text-[#dc2626] font-bold hover:underline transition-colors">⚙️ Admin Portal</Link></li>
           </ul>
         </div>
 

@@ -718,8 +718,20 @@ const safeSupabase = async (callback) => {
 // UNIFIED DATA ACCESS METHODS (ULTRA-FAST LOCAL-FIRST + ASYNC CLOUD SYNC)
 // ----------------------------------------------------
 
+// ----------------------------------------------------
+// UNIFIED DATA ACCESS METHODS (DUAL-ENGINE: LOCALHOST + VERCEL CLOUD PERSISTENCE)
+// ----------------------------------------------------
+
 // 1. PRODUCTS
 const getAllProductsLive = async () => {
+    if (mongoose.connection.readyState === 1) {
+        try {
+            const dbProducts = await ProductModel.find({}).sort({ id: 1 }).lean();
+            if (Array.isArray(dbProducts) && dbProducts.length > 0) {
+                return dbProducts;
+            }
+        } catch (e) {}
+    }
     return getJsonProducts();
 };
 
@@ -733,8 +745,7 @@ const saveProductLive = async (productObj) => {
     }
     saveJsonProducts(currentList);
 
-    // Non-blocking async background cloud sync
-    Promise.resolve().then(async () => {
+    const cloudTask = async () => {
         if (mongoose.connection.readyState === 1) {
             try {
                 await ProductModel.findOneAndUpdate(
@@ -766,7 +777,13 @@ const saveProductLive = async (productObj) => {
                 available: productObj.available !== false
             }]);
         });
-    }).catch(() => {});
+    };
+
+    if (process.env.VERCEL) {
+        await cloudTask();
+    } else {
+        cloudTask().catch(() => {});
+    }
 };
 
 const deleteProductLive = async (prodId) => {
@@ -774,7 +791,7 @@ const deleteProductLive = async (prodId) => {
     currentList = currentList.filter(p => p.id !== prodId);
     saveJsonProducts(currentList);
 
-    Promise.resolve().then(async () => {
+    const cloudTask = async () => {
         if (mongoose.connection.readyState === 1) {
             try {
                 await ProductModel.deleteOne({ id: prodId });
@@ -783,18 +800,32 @@ const deleteProductLive = async (prodId) => {
         await safeSupabase(async (s) => {
             await s.from('products').delete().eq('id', prodId);
         });
-    }).catch(() => {});
+    };
+
+    if (process.env.VERCEL) {
+        await cloudTask();
+    } else {
+        cloudTask().catch(() => {});
+    }
 };
 
 // 2. CATEGORIES
 const getCategoriesLive = async () => {
+    if (mongoose.connection.readyState === 1) {
+        try {
+            const dbCategories = await CategoryModel.find({}).sort({ id: 1 }).lean();
+            if (Array.isArray(dbCategories) && dbCategories.length > 0) {
+                return dbCategories;
+            }
+        } catch (e) {}
+    }
     return getJsonCategories();
 };
 
 const saveCategoriesLive = async (categoriesList) => {
     saveJsonCategories(categoriesList);
 
-    Promise.resolve().then(async () => {
+    const cloudTask = async () => {
         if (mongoose.connection.readyState === 1) {
             try {
                 for (const cat of categoriesList) {
@@ -807,7 +838,13 @@ const saveCategoriesLive = async (categoriesList) => {
                 await s.from('categories').upsert([cat]);
             }
         });
-    }).catch(() => {});
+    };
+
+    if (process.env.VERCEL) {
+        await cloudTask();
+    } else {
+        cloudTask().catch(() => {});
+    }
 };
 
 const deleteCategoryLive = async (catId) => {
@@ -815,7 +852,7 @@ const deleteCategoryLive = async (catId) => {
     currentList = currentList.filter(c => c.id !== catId);
     saveJsonCategories(currentList);
 
-    Promise.resolve().then(async () => {
+    const cloudTask = async () => {
         if (mongoose.connection.readyState === 1) {
             try {
                 await CategoryModel.deleteOne({ id: catId });
@@ -824,11 +861,25 @@ const deleteCategoryLive = async (catId) => {
         await safeSupabase(async (s) => {
             await s.from('categories').delete().eq('id', catId);
         });
-    }).catch(() => {});
+    };
+
+    if (process.env.VERCEL) {
+        await cloudTask();
+    } else {
+        cloudTask().catch(() => {});
+    }
 };
 
 // 3. BANNERS
 const getBannersLive = async () => {
+    if (mongoose.connection.readyState === 1) {
+        try {
+            const bannerDoc = await BannerModel.findOne({ key: 'current_banners' }).lean();
+            if (bannerDoc && bannerDoc.data && Object.keys(bannerDoc.data).length > 0) {
+                return { ...defaultBanners, ...bannerDoc.data };
+            }
+        } catch (e) {}
+    }
     return getJsonBanners();
 };
 
@@ -836,7 +887,7 @@ const saveBannersLive = async (bannersData) => {
     const combined = { ...defaultBanners, ...bannersData };
     saveJsonBanners(combined);
 
-    Promise.resolve().then(async () => {
+    const cloudTask = async () => {
         if (mongoose.connection.readyState === 1) {
             try {
                 await BannerModel.findOneAndUpdate(
@@ -849,11 +900,28 @@ const saveBannersLive = async (bannersData) => {
         await safeSupabase(async (s) => {
             await s.from('banners').upsert([{ id: 'current_banners', data: combined, updated_at: new Date().toISOString() }]);
         });
-    }).catch(() => {});
+    };
+
+    if (process.env.VERCEL) {
+        await cloudTask();
+    } else {
+        cloudTask().catch(() => {});
+    }
 };
 
 // 4. CMS (HERO SLIDERS & ANNOUNCEMENTS)
 const getCmsLive = async () => {
+    if (mongoose.connection.readyState === 1) {
+        try {
+            const cmsDoc = await CmsModel.findOne({ key: 'current_cms' }).lean();
+            if (cmsDoc) {
+                return {
+                    announcementText: cmsDoc.announcementText || defaultCmsData.announcementText,
+                    heroSlides: (cmsDoc.heroSlides && cmsDoc.heroSlides.length > 0) ? cmsDoc.heroSlides : defaultCmsData.heroSlides
+                };
+            }
+        } catch (e) {}
+    }
     return getJsonCms();
 };
 
@@ -864,7 +932,7 @@ const saveCmsLive = async (cmsData) => {
     };
     saveJsonCms(combined);
 
-    Promise.resolve().then(async () => {
+    const cloudTask = async () => {
         if (mongoose.connection.readyState === 1) {
             try {
                 await CmsModel.findOneAndUpdate(
@@ -877,40 +945,47 @@ const saveCmsLive = async (cmsData) => {
         await safeSupabase(async (s) => {
             await s.from('cms').upsert([{ id: 'current_cms', data: combined, updated_at: new Date().toISOString() }]);
         });
-    }).catch(() => {});
+    };
+
+    if (process.env.VERCEL) {
+        await cloudTask();
+    } else {
+        cloudTask().catch(() => {});
+    }
 };
 
 // 5. VOUCHERS
 const getVouchersLive = async () => {
+    if (mongoose.connection.readyState === 1) {
+        try {
+            const dbVouchers = await VoucherModel.find({}).lean();
+            if (Array.isArray(dbVouchers) && dbVouchers.length > 0) {
+                return dbVouchers;
+            }
+        } catch (e) {}
+    }
     return getJsonVouchers();
 };
 
 const saveVoucherLive = async (voucherObj) => {
     let vouchers = getJsonVouchers();
     vouchers = vouchers.filter(v => v.code !== voucherObj.code);
-    vouchers.unshift(voucherObj);
+    vouchers.push(voucherObj);
     saveJsonVouchers(vouchers);
 
-    Promise.resolve().then(async () => {
+    const cloudTask = async () => {
         if (mongoose.connection.readyState === 1) {
             try {
-                await VoucherModel.findOneAndUpdate(
-                    { code: voucherObj.code },
-                    voucherObj,
-                    { upsert: true }
-                );
+                await VoucherModel.findOneAndUpdate({ code: voucherObj.code }, voucherObj, { upsert: true });
             } catch (e) {}
         }
-        await safeSupabase(async (s) => {
-            await s.from('vouchers').upsert([{
-                code: voucherObj.code,
-                type: voucherObj.type,
-                discount: voucherObj.discount,
-                min_order: voucherObj.minOrder,
-                description: voucherObj.description
-            }]);
-        });
-    }).catch(() => {});
+    };
+
+    if (process.env.VERCEL) {
+        await cloudTask();
+    } else {
+        cloudTask().catch(() => {});
+    }
 };
 
 const deleteVoucherLive = async (code) => {

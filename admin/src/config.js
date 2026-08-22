@@ -7,9 +7,9 @@ export const API_URL = (() => {
     if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.')) {
       return `http://${hostname}:4000`;
     }
-    return window.location.origin;
   }
-  return "http://localhost:4000";
+  return "https://daan-sports-98ol.vercel.app";
 })();
+
 
 

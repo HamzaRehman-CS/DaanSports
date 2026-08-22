@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './ProductList.css';
 import cross_icon from '../../assets/cross_icon.png';
 import { API_URL } from '../../config';
-import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudProducts, fetchCloudCategories, updateCloudProduct, deleteCloudProduct } from '../../defaultCatalog';
+import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudProducts, fetchCloudCategories, updateCloudProduct, deleteCloudProduct, uploadCloudImage } from '../../defaultCatalog';
 
 const ProductList = () => {
   const [allProducts, setAllProducts] = useState(() => loadCatalogProducts());
@@ -379,13 +379,12 @@ const ProductList = () => {
                       hidden
                       onChange={async (e) => {
                         if (!e.target.files?.[0]) return;
-                        const form = new FormData();
-                        form.append('product', e.target.files[0]);
-                        const res = await fetch(`${API_URL}/upload`, { method: 'POST', body: form });
-                        const data = await res.json();
-                        if (data.success) {
-                          setEditFormData(prev => ({ ...prev, image: data.image_url }));
-                          alert("Product image uploaded!");
+                        try {
+                          const publicUrl = await uploadCloudImage(e.target.files[0]);
+                          setEditFormData(prev => ({ ...prev, image: publicUrl }));
+                          alert("📷 Product image uploaded to Supabase Storage!");
+                        } catch (err) {
+                          alert("Upload error: " + err.message);
                         }
                       }}
                     />

@@ -267,6 +267,58 @@ export const sanitizeProductForSupabase = (p) => {
 };
 
 // ----------------------------------------------------
+// DIRECT SUPABASE STORAGE CLOUD IMAGE UPLOADER
+// ----------------------------------------------------
+export const uploadCloudImage = async (file) => {
+  if (!file) throw new Error('No file provided');
+
+  const nameParts = (file.name || 'image.png').split('.');
+  const ext = nameParts.length > 1 ? nameParts.pop().toLowerCase().replace(/[^a-z0-9]/g, '') : 'png';
+  const cleanFilename = `upload_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext || 'png'}`;
+
+  // 1. Direct upload to Supabase Storage bucket 'images'
+  try {
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/images/${cleanFilename}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': file.type || 'image/jpeg'
+      },
+      body: file
+    });
+    if (res.ok) {
+      const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/images/${cleanFilename}`;
+      return publicUrl;
+    }
+  } catch (err) {
+    console.warn('Supabase Storage direct upload notice:', err);
+  }
+
+  // 2. Fallback to API_URL/upload
+  try {
+    const form = new FormData();
+    form.append('product', file);
+    const res = await fetch(`${API_URL}/upload`, {
+      method: 'POST',
+      headers: { Accept: 'application/json' },
+      body: form
+    });
+    const data = await res.json();
+    if (data && data.success && data.image_url) {
+      return data.image_url;
+    }
+  } catch (e) {}
+
+  // 3. Fallback to base64 DataURL
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.readAsDataURL(file);
+  });
+};
+
+// ----------------------------------------------------
 // MULTI-LAYER INSTANT LOCAL & BROADCAST STORAGE BRIDGE
 // ----------------------------------------------------
 const SYNC_CHANNEL_NAME = 'daan_sports_global_sync';
@@ -518,12 +570,26 @@ export const saveBanners = async (banners) => {
   broadcastSyncEvent('BANNERS_UPDATED', combined);
 
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/banners`, {
-      method: 'POST',
-      headers: supabaseHeaders,
-      body: JSON.stringify([{ id: 'current_banners', data: combined, updated_at: new Date().toISOString() }])
+    const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.current_banners`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({ data: combined, updated_at: new Date().toISOString() })
     });
-  } catch (err) {}
+    if (!patchRes.ok) {
+      await fetch(`${SUPABASE_URL}/rest/v1/banners`, {
+        method: 'POST',
+        headers: supabaseHeaders,
+        body: JSON.stringify([{ id: 'current_banners', data: combined, updated_at: new Date().toISOString() }])
+      });
+    }
+  } catch (err) {
+    console.warn("Supabase banner cloud save fallback:", err);
+  }
   return combined;
 };
 
@@ -573,7 +639,9 @@ export const saveCategories = async (categories) => {
       headers: supabaseHeaders,
       body: JSON.stringify(categories)
     });
-  } catch (err) {}
+  } catch (err) {
+    console.warn("Supabase categories cloud save fallback:", err);
+  }
   return categories;
 };
 
@@ -649,12 +717,26 @@ export const saveCms = async (cms) => {
   broadcastSyncEvent('CMS_UPDATED', combined);
 
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/cms`, {
-      method: 'POST',
-      headers: supabaseHeaders,
-      body: JSON.stringify([{ id: 'current_cms', data: combined, updated_at: new Date().toISOString() }])
+    const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/cms?id=eq.current_cms`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({ data: combined, updated_at: new Date().toISOString() })
     });
-  } catch (err) {}
+    if (!patchRes.ok) {
+      await fetch(`${SUPABASE_URL}/rest/v1/cms`, {
+        method: 'POST',
+        headers: supabaseHeaders,
+        body: JSON.stringify([{ id: 'current_cms', data: combined, updated_at: new Date().toISOString() }])
+      });
+    }
+  } catch (err) {
+    console.warn("Supabase CMS cloud save fallback:", err);
+  }
   return combined;
 };
 

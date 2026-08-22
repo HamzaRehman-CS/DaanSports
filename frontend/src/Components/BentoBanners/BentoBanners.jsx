@@ -261,7 +261,7 @@ const BentoBanners = ({ banners }) => {
       <div className="group relative rounded-2xl overflow-hidden border border-white/10 bg-[#18181b] p-6 md:p-8 mt-6 shadow-2xl transition-all duration-500 hover:border-white/25">
         <div className="absolute inset-0 z-0">
           <img 
-            src={oem.bgImage} 
+            src={oem.bgImage || oem.image} 
             alt={oem.title} 
             className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-700 ease-out"
             loading="lazy"

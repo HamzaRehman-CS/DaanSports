@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './CategoryManager.css';
 import { API_URL } from '../../config';
-import { loadCategories, saveCategories, fetchCloudCategories, deleteCloudCategory } from '../../defaultCatalog';
+import { loadCategories, saveCategories, fetchCloudCategories, deleteCloudCategory, uploadCloudImage } from '../../defaultCatalog';
 
 const CategoryManager = () => {
   const [categories, setCategories] = useState(() => loadCategories());
@@ -44,38 +44,15 @@ const CategoryManager = () => {
     if (!file) return;
     setUploading(true);
     try {
-      const form = new FormData();
-      form.append('product', file);
-      const res = await fetch(`${API_URL}/upload`, {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: form
-      });
-      const data = await res.json();
-      if (data.success) {
-        if (isEdit) {
-          setEditFormData(prev => ({ ...prev, banner: data.image_url }));
-        } else {
-          setFormData(prev => ({ ...prev, banner: data.image_url }));
-        }
-        alert(`📷 Category banner uploaded!`);
+      const publicUrl = await uploadCloudImage(file);
+      if (isEdit) {
+        setEditFormData(prev => ({ ...prev, banner: publicUrl }));
       } else {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          if (isEdit) setEditFormData(prev => ({ ...prev, banner: e.target.result }));
-          else setFormData(prev => ({ ...prev, banner: e.target.result }));
-          alert(`📷 Category banner loaded!`);
-        };
-        reader.readAsDataURL(file);
+        setFormData(prev => ({ ...prev, banner: publicUrl }));
       }
+      alert(`📷 Category banner uploaded to Supabase Cloud!`);
     } catch (err) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (isEdit) setEditFormData(prev => ({ ...prev, banner: e.target.result }));
-        else setFormData(prev => ({ ...prev, banner: e.target.result }));
-        alert(`📷 Category banner loaded!`);
-      };
-      reader.readAsDataURL(file);
+      alert(`Error uploading image: ${err.message}`);
     } finally {
       setUploading(false);
     }

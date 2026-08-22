@@ -706,7 +706,7 @@ const safeSupabase = async (callback) => {
     if (!supabase) return null;
     try {
         const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Supabase Timeout')), 500)
+            setTimeout(() => reject(new Error('Supabase Timeout')), 8000)
         );
         return await Promise.race([callback(supabase), timeoutPromise]);
     } catch (err) {
@@ -724,6 +724,12 @@ const safeSupabase = async (callback) => {
 
 // 1. PRODUCTS
 const getAllProductsLive = async () => {
+    const supaProducts = await safeSupabase(async (s) => {
+        const { data, error } = await s.from('products').select('*').order('id', { ascending: true });
+        return (!error && Array.isArray(data) && data.length > 0) ? data : null;
+    });
+    if (supaProducts) return supaProducts;
+
     if (mongoose.connection.readyState === 1) {
         try {
             const dbProducts = await ProductModel.find({}).sort({ id: 1 }).lean();
@@ -745,39 +751,32 @@ const saveProductLive = async (productObj) => {
     }
     saveJsonProducts(currentList);
 
-    const cloudTask = async () => {
-        if (mongoose.connection.readyState === 1) {
-            try {
-                await ProductModel.findOneAndUpdate(
-                    { id: productObj.id },
-                    productObj,
-                    { upsert: true, new: true }
-                );
-            } catch (e) {}
-        }
-        await safeSupabase(async (s) => {
-            await s.from('products').upsert([{
-                id: Number(productObj.id),
-                name: String(productObj.name || ''),
-                category: String(productObj.category || 'Tracksuits'),
-                new_price: Number(productObj.new_price || 0),
-                old_price: Number(productObj.old_price || 0),
-                moq: Number(productObj.moq || 50),
-                description: String(productObj.description || ''),
-                colors: Array.isArray(productObj.colors) ? productObj.colors : (typeof productObj.colors === 'string' ? productObj.colors.split(',').map(c => c.trim()).filter(Boolean) : []),
-                sizes: Array.isArray(productObj.sizes) ? productObj.sizes : (typeof productObj.sizes === 'string' ? productObj.sizes.split(',').map(s => s.trim()).filter(Boolean) : ["S", "M", "L", "XL", "2XL"]),
-                image: String(productObj.image || ''),
-                images: Array.isArray(productObj.images) && productObj.images.length > 0 ? productObj.images : [String(productObj.image || '')],
-                available: productObj.available !== false,
-                date: productObj.date || new Date().toISOString()
-            }]);
-        });
-    };
+    await safeSupabase(async (s) => {
+        await s.from('products').upsert([{
+            id: Number(productObj.id),
+            name: String(productObj.name || ''),
+            category: String(productObj.category || 'Tracksuits'),
+            new_price: Number(productObj.new_price || 0),
+            old_price: Number(productObj.old_price || 0),
+            moq: Number(productObj.moq || 50),
+            description: String(productObj.description || ''),
+            colors: Array.isArray(productObj.colors) ? productObj.colors : (typeof productObj.colors === 'string' ? productObj.colors.split(',').map(c => c.trim()).filter(Boolean) : []),
+            sizes: Array.isArray(productObj.sizes) ? productObj.sizes : (typeof productObj.sizes === 'string' ? productObj.sizes.split(',').map(s => s.trim()).filter(Boolean) : ["S", "M", "L", "XL", "2XL"]),
+            image: String(productObj.image || ''),
+            images: Array.isArray(productObj.images) && productObj.images.length > 0 ? productObj.images : [String(productObj.image || '')],
+            available: productObj.available !== false,
+            date: productObj.date || new Date().toISOString()
+        }]);
+    });
 
-    if (process.env.VERCEL) {
-        await cloudTask();
-    } else {
-        cloudTask().catch(() => {});
+    if (mongoose.connection.readyState === 1) {
+        try {
+            await ProductModel.findOneAndUpdate(
+                { id: productObj.id },
+                productObj,
+                { upsert: true, new: true }
+            );
+        } catch (e) {}
     }
 };
 
@@ -786,26 +785,25 @@ const deleteProductLive = async (prodId) => {
     currentList = currentList.filter(p => p.id !== prodId);
     saveJsonProducts(currentList);
 
-    const cloudTask = async () => {
-        if (mongoose.connection.readyState === 1) {
-            try {
-                await ProductModel.deleteOne({ id: prodId });
-            } catch (e) {}
-        }
-        await safeSupabase(async (s) => {
-            await s.from('products').delete().eq('id', prodId);
-        });
-    };
+    await safeSupabase(async (s) => {
+        await s.from('products').delete().eq('id', prodId);
+    });
 
-    if (process.env.VERCEL) {
-        await cloudTask();
-    } else {
-        cloudTask().catch(() => {});
+    if (mongoose.connection.readyState === 1) {
+        try {
+            await ProductModel.deleteOne({ id: prodId });
+        } catch (e) {}
     }
 };
 
 // 2. CATEGORIES
 const getCategoriesLive = async () => {
+    const supaCats = await safeSupabase(async (s) => {
+        const { data, error } = await s.from('categories').select('*').order('id', { ascending: true });
+        return (!error && Array.isArray(data) && data.length > 0) ? data : null;
+    });
+    if (supaCats) return supaCats;
+
     if (mongoose.connection.readyState === 1) {
         try {
             const dbCategories = await CategoryModel.find({}).sort({ id: 1 }).lean();
@@ -820,25 +818,18 @@ const getCategoriesLive = async () => {
 const saveCategoriesLive = async (categoriesList) => {
     saveJsonCategories(categoriesList);
 
-    const cloudTask = async () => {
-        if (mongoose.connection.readyState === 1) {
-            try {
-                for (const cat of categoriesList) {
-                    await CategoryModel.findOneAndUpdate({ id: cat.id }, cat, { upsert: true });
-                }
-            } catch (e) {}
+    await safeSupabase(async (s) => {
+        for (const cat of categoriesList) {
+            await s.from('categories').upsert([cat]);
         }
-        await safeSupabase(async (s) => {
-            for (const cat of categoriesList) {
-                await s.from('categories').upsert([cat]);
-            }
-        });
-    };
+    });
 
-    if (process.env.VERCEL) {
-        await cloudTask();
-    } else {
-        cloudTask().catch(() => {});
+    if (mongoose.connection.readyState === 1) {
+        try {
+            for (const cat of categoriesList) {
+                await CategoryModel.findOneAndUpdate({ id: cat.id }, cat, { upsert: true });
+            }
+        } catch (e) {}
     }
 };
 
@@ -847,26 +838,27 @@ const deleteCategoryLive = async (catId) => {
     currentList = currentList.filter(c => c.id !== catId);
     saveJsonCategories(currentList);
 
-    const cloudTask = async () => {
-        if (mongoose.connection.readyState === 1) {
-            try {
-                await CategoryModel.deleteOne({ id: catId });
-            } catch (e) {}
-        }
-        await safeSupabase(async (s) => {
-            await s.from('categories').delete().eq('id', catId);
-        });
-    };
+    await safeSupabase(async (s) => {
+        await s.from('categories').delete().eq('id', catId);
+    });
 
-    if (process.env.VERCEL) {
-        await cloudTask();
-    } else {
-        cloudTask().catch(() => {});
+    if (mongoose.connection.readyState === 1) {
+        try {
+            await CategoryModel.deleteOne({ id: catId });
+        } catch (e) {}
     }
 };
 
 // 3. BANNERS
 const getBannersLive = async () => {
+    const supaBanners = await safeSupabase(async (s) => {
+        const { data, error } = await s.from('banners').select('data').eq('id', 'current_banners').single();
+        return (!error && data && data.data) ? data.data : null;
+    });
+    if (supaBanners && Object.keys(supaBanners).length > 0) {
+        return { ...defaultBanners, ...supaBanners };
+    }
+
     if (mongoose.connection.readyState === 1) {
         try {
             const bannerDoc = await BannerModel.findOne({ key: 'current_banners' }).lean();
@@ -882,30 +874,34 @@ const saveBannersLive = async (bannersData) => {
     const combined = { ...defaultBanners, ...bannersData };
     saveJsonBanners(combined);
 
-    const cloudTask = async () => {
-        if (mongoose.connection.readyState === 1) {
-            try {
-                await BannerModel.findOneAndUpdate(
-                    { key: 'current_banners' },
-                    { key: 'current_banners', data: combined, updatedAt: new Date() },
-                    { upsert: true }
-                );
-            } catch (e) {}
-        }
-        await safeSupabase(async (s) => {
-            await s.from('banners').upsert([{ id: 'current_banners', data: combined, updated_at: new Date().toISOString() }]);
-        });
-    };
+    await safeSupabase(async (s) => {
+        await s.from('banners').upsert([{ id: 'current_banners', data: combined, updated_at: new Date().toISOString() }]);
+    });
 
-    if (process.env.VERCEL) {
-        await cloudTask();
-    } else {
-        cloudTask().catch(() => {});
+    if (mongoose.connection.readyState === 1) {
+        try {
+            await BannerModel.findOneAndUpdate(
+                { key: 'current_banners' },
+                { key: 'current_banners', data: combined, updatedAt: new Date() },
+                { upsert: true }
+            );
+        } catch (e) {}
     }
 };
 
 // 4. CMS (HERO SLIDERS & ANNOUNCEMENTS)
 const getCmsLive = async () => {
+    const supaCms = await safeSupabase(async (s) => {
+        const { data, error } = await s.from('cms').select('data').eq('id', 'current_cms').single();
+        return (!error && data && data.data) ? data.data : null;
+    });
+    if (supaCms) {
+        return {
+            announcementText: supaCms.announcementText || defaultCmsData.announcementText,
+            heroSlides: (supaCms.heroSlides && supaCms.heroSlides.length > 0) ? supaCms.heroSlides : defaultCmsData.heroSlides
+        };
+    }
+
     if (mongoose.connection.readyState === 1) {
         try {
             const cmsDoc = await CmsModel.findOne({ key: 'current_cms' }).lean();
@@ -927,25 +923,18 @@ const saveCmsLive = async (cmsData) => {
     };
     saveJsonCms(combined);
 
-    const cloudTask = async () => {
-        if (mongoose.connection.readyState === 1) {
-            try {
-                await CmsModel.findOneAndUpdate(
-                    { key: 'current_cms' },
-                    { key: 'current_cms', announcementText: combined.announcementText, heroSlides: combined.heroSlides, updatedAt: new Date() },
-                    { upsert: true }
-                );
-            } catch (e) {}
-        }
-        await safeSupabase(async (s) => {
-            await s.from('cms').upsert([{ id: 'current_cms', data: combined, updated_at: new Date().toISOString() }]);
-        });
-    };
+    await safeSupabase(async (s) => {
+        await s.from('cms').upsert([{ id: 'current_cms', data: combined, updated_at: new Date().toISOString() }]);
+    });
 
-    if (process.env.VERCEL) {
-        await cloudTask();
-    } else {
-        cloudTask().catch(() => {});
+    if (mongoose.connection.readyState === 1) {
+        try {
+            await CmsModel.findOneAndUpdate(
+                { key: 'current_cms' },
+                { key: 'current_cms', announcementText: combined.announcementText, heroSlides: combined.heroSlides, updatedAt: new Date() },
+                { upsert: true }
+            );
+        } catch (e) {}
     }
 };
 
@@ -988,20 +977,25 @@ const deleteVoucherLive = async (code) => {
     vouchers = vouchers.filter(v => v.code !== code);
     saveJsonVouchers(vouchers);
 
-    Promise.resolve().then(async () => {
-        if (mongoose.connection.readyState === 1) {
-            try {
-                await VoucherModel.deleteOne({ code: code });
-            } catch (e) {}
-        }
-        await safeSupabase(async (s) => {
-            await s.from('vouchers').delete().eq('code', code);
-        });
-    }).catch(() => {});
+    await safeSupabase(async (s) => {
+        await s.from('vouchers').delete().eq('code', code);
+    });
+
+    if (mongoose.connection.readyState === 1) {
+        try {
+            await VoucherModel.deleteOne({ code: code });
+        } catch (e) {}
+    }
 };
 
 // 6. ORDERS
 const getAllOrdersLive = async () => {
+    const supaOrders = await safeSupabase(async (s) => {
+        const { data, error } = await s.from('orders').select('*').order('created_at', { ascending: false });
+        return (!error && Array.isArray(data) && data.length > 0) ? data : null;
+    });
+    if (supaOrders) return supaOrders;
+
     return getJsonOrders();
 };
 
@@ -1010,31 +1004,30 @@ const saveOrderLive = async (orderObj) => {
     orders.unshift(orderObj);
     saveJsonOrders(orders);
 
-    Promise.resolve().then(async () => {
-        if (mongoose.connection.readyState === 1) {
-            try {
-                await OrderModel.create(orderObj);
-            } catch (e) {}
-        }
-        await safeSupabase(async (s) => {
-            await s.from('orders').insert([{
-                id: orderObj.id,
-                user_email: orderObj.userEmail,
-                customer_name: orderObj.customerName,
-                phone: orderObj.phone,
-                items: orderObj.items,
-                total_units: orderObj.totalUnits,
-                total_amount: orderObj.totalAmount,
-                discount_amount: orderObj.discountAmount || 0,
-                voucher_code: orderObj.voucherCode || '',
-                payment_method: orderObj.paymentMethod,
-                payment_status: orderObj.paymentStatus,
-                status: orderObj.status,
-                tracking_number: orderObj.trackingNumber || '',
-                notes: orderObj.notes || ''
-            }]);
-        });
-    }).catch(() => {});
+    await safeSupabase(async (s) => {
+        await s.from('orders').insert([{
+            id: orderObj.id,
+            user_email: orderObj.userEmail,
+            customer_name: orderObj.customerName,
+            phone: orderObj.phone,
+            items: orderObj.items,
+            total_units: orderObj.totalUnits,
+            total_amount: orderObj.totalAmount,
+            discount_amount: orderObj.discountAmount || 0,
+            voucher_code: orderObj.voucherCode || '',
+            payment_method: orderObj.paymentMethod,
+            payment_status: orderObj.paymentStatus,
+            status: orderObj.status,
+            tracking_number: orderObj.trackingNumber || '',
+            notes: orderObj.notes || ''
+        }]);
+    });
+
+    if (mongoose.connection.readyState === 1) {
+        try {
+            await OrderModel.create(orderObj);
+        } catch (e) {}
+    }
 };
 
 const updateOrderStatusLive = async (orderId, status, trackingNumber, notes) => {
@@ -1053,25 +1046,23 @@ const updateOrderStatusLive = async (orderId, status, trackingNumber, notes) => 
     });
     saveJsonOrders(orders);
 
-    Promise.resolve().then(async () => {
-        if (mongoose.connection.readyState === 1) {
-            try {
-                const updates = { updatedAt: new Date() };
-                if (status) updates.status = status;
-                if (trackingNumber !== undefined) updates.trackingNumber = trackingNumber;
-                if (notes !== undefined) updates.notes = notes;
-                await OrderModel.findOneAndUpdate({ id: orderId }, updates);
-            } catch (e) {}
-        }
-        await safeSupabase(async (s) => {
-            const sUpdates = { updated_at: new Date().toISOString() };
-            if (status) sUpdates.status = status;
-            if (trackingNumber !== undefined) sUpdates.tracking_number = trackingNumber;
-            if (notes !== undefined) sUpdates.notes = notes;
-            await s.from('orders').update(sUpdates).eq('id', orderId);
-        });
-    }).catch(() => {});
+    await safeSupabase(async (s) => {
+        const payload = {};
+        if (status) payload.status = status;
+        if (trackingNumber !== undefined) payload.tracking_number = trackingNumber;
+        if (notes !== undefined) payload.notes = notes;
+        await s.from('orders').update(payload).eq('id', orderId);
+    });
 
+    if (mongoose.connection.readyState === 1) {
+        try {
+            const updates = { updatedAt: new Date() };
+            if (status) updates.status = status;
+            if (trackingNumber !== undefined) updates.trackingNumber = trackingNumber;
+            if (notes !== undefined) updates.notes = notes;
+            await OrderModel.findOneAndUpdate({ id: orderId }, updates);
+        } catch (e) {}
+    }
     return updatedOrder;
 };
 

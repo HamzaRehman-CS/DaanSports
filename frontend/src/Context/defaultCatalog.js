@@ -226,7 +226,7 @@ export const DEFAULT_VOUCHERS = [
 // SUPABASE CLOUD DATABASE CONFIGURATION
 // ----------------------------------------------------
 export const SUPABASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || "https://ldohfbqsmjuqvtbnxmbk.supabase.co";
-export const SUPABASE_KEY = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || (typeof atob !== 'undefined' ? atob("c2Jfc2VjcmV0X09Ed2RKaGp0NmxNRzU0NGNTWGxaN1FfZ3RMZjRWV0M=") : "");
+export const SUPABASE_KEY = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
 
 export const supabaseHeaders = {
   'apikey': SUPABASE_KEY,

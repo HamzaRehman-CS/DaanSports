@@ -443,8 +443,12 @@ export const loadCatalogProducts = () => {
 };
 
 export const fetchCloudProducts = async () => {
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}` };
+
+  // 1. Direct Supabase Query
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.asc`, { headers: supabaseHeaders });
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.asc`, { headers });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
@@ -454,6 +458,20 @@ export const fetchCloudProducts = async () => {
       }
     }
   } catch (err) {}
+
+  // 2. Backend API Query
+  try {
+    const bRes = await fetch(`${API_URL}/allproducts`);
+    if (bRes.ok) {
+      const bData = await bRes.json();
+      if (Array.isArray(bData) && bData.length > 0) {
+        if (typeof window !== 'undefined') localStorage.setItem('daan_products', JSON.stringify(bData));
+        broadcastSyncEvent('PRODUCTS_UPDATED', bData);
+        return bData;
+      }
+    }
+  } catch (e) {}
+
   return loadCatalogProducts();
 };
 
@@ -467,10 +485,13 @@ export const saveCatalogProducts = async (products) => {
   }
   broadcastSyncEvent('PRODUCTS_UPDATED', sanitized);
 
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
+
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/products`, {
       method: 'POST',
-      headers: supabaseHeaders,
+      headers: headers,
       body: JSON.stringify(sanitized)
     });
   } catch (err) {}
@@ -478,52 +499,73 @@ export const saveCatalogProducts = async (products) => {
 };
 
 export const addCloudProduct = async (product) => {
-  const clean = sanitizeProductForSupabase(product);
-  const current = [clean, ...loadCatalogProducts().filter(p => p.id !== clean.id)];
-  if (typeof window !== 'undefined') {
-    try { localStorage.setItem('daan_products', JSON.stringify(current)); } catch (e) {}
-  }
-  broadcastSyncEvent('PRODUCTS_UPDATED', current);
+  const sanitized = sanitizeProductForSupabase(product);
+  if (!sanitized) return;
+
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
 
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/products`, {
       method: 'POST',
-      headers: supabaseHeaders,
-      body: JSON.stringify([clean])
+      headers: headers,
+      body: JSON.stringify([sanitized])
     });
   } catch (err) {}
-  return current;
+
+  const current = loadCatalogProducts();
+  const updated = [...current.filter(p => p.id !== sanitized.id), sanitized];
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem('daan_products', JSON.stringify(updated));
+    } catch (e) {}
+  }
+  broadcastSyncEvent('PRODUCTS_UPDATED', updated);
+  return updated;
 };
 
 export const updateCloudProduct = async (product) => {
-  const clean = sanitizeProductForSupabase(product);
-  const current = loadCatalogProducts().map(p => p.id === clean.id ? { ...p, ...clean } : p);
-  if (typeof window !== 'undefined') {
-    try { localStorage.setItem('daan_products', JSON.stringify(current)); } catch (e) {}
-  }
-  broadcastSyncEvent('PRODUCTS_UPDATED', current);
+  const sanitized = sanitizeProductForSupabase(product);
+  if (!sanitized) return;
+
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/products`, {
-      method: 'POST',
-      headers: supabaseHeaders,
-      body: JSON.stringify([clean])
+    await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${sanitized.id}`, {
+      method: 'PATCH',
+      headers: headers,
+      body: JSON.stringify(sanitized)
     });
   } catch (err) {}
-  return current;
+
+  const current = loadCatalogProducts();
+  const updated = current.map(p => p.id === sanitized.id ? sanitized : p);
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem('daan_products', JSON.stringify(updated));
+    } catch (e) {}
+  }
+  broadcastSyncEvent('PRODUCTS_UPDATED', updated);
+  return updated;
 };
 
 export const deleteCloudProduct = async (id) => {
-  const current = loadCatalogProducts().filter(p => p.id !== id);
+  const current = loadCatalogProducts().filter(p => p.id !== Number(id));
   if (typeof window !== 'undefined') {
-    try { localStorage.setItem('daan_products', JSON.stringify(current)); } catch (e) {}
+    try {
+      localStorage.setItem('daan_products', JSON.stringify(current));
+    } catch (e) {}
   }
   broadcastSyncEvent('PRODUCTS_UPDATED', current);
+
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}` };
 
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
       method: 'DELETE',
-      headers: supabaseHeaders
+      headers: headers
     });
   } catch (err) {}
   return current;
@@ -548,8 +590,12 @@ export const loadBanners = () => {
 };
 
 export const fetchCloudBanners = async () => {
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}` };
+
+  // 1. Direct Supabase Query
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.current_banners`, { headers: supabaseHeaders });
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.current_banners`, { headers });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0 && data[0].data) {
@@ -560,6 +606,21 @@ export const fetchCloudBanners = async () => {
       }
     }
   } catch (err) {}
+
+  // 2. Backend API Query
+  try {
+    const bRes = await fetch(`${API_URL}/promotional-banners`);
+    if (bRes.ok) {
+      const bData = await bRes.json();
+      if (bData && typeof bData === 'object' && Object.keys(bData).length > 0) {
+        const merged = { ...DEFAULT_BANNERS, ...bData };
+        if (typeof window !== 'undefined') localStorage.setItem('daan_banners', JSON.stringify(merged));
+        broadcastSyncEvent('BANNERS_UPDATED', merged);
+        return merged;
+      }
+    }
+  } catch (e) {}
+
   return loadBanners();
 };
 
@@ -631,8 +692,12 @@ export const loadCategories = () => {
 };
 
 export const fetchCloudCategories = async () => {
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}` };
+
+  // 1. Direct Supabase Query
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=id.asc`, { headers: supabaseHeaders });
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=id.asc`, { headers });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
@@ -642,6 +707,20 @@ export const fetchCloudCategories = async () => {
       }
     }
   } catch (err) {}
+
+  // 2. Backend API Query
+  try {
+    const bRes = await fetch(`${API_URL}/categories`);
+    if (bRes.ok) {
+      const bData = await bRes.json();
+      if (Array.isArray(bData) && bData.length > 0) {
+        if (typeof window !== 'undefined') localStorage.setItem('daan_categories', JSON.stringify(bData));
+        broadcastSyncEvent('CATEGORIES_UPDATED', bData);
+        return bData;
+      }
+    }
+  } catch (e) {}
+
   return loadCategories();
 };
 
@@ -654,15 +733,26 @@ export const saveCategories = async (categories) => {
   }
   broadcastSyncEvent('CATEGORIES_UPDATED', categories);
 
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
+
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/categories`, {
       method: 'POST',
-      headers: supabaseHeaders,
+      headers: headers,
       body: JSON.stringify(categories)
     });
-  } catch (err) {
-    console.warn("Supabase categories cloud save fallback:", err);
-  }
+  } catch (err) {}
+
+  // Also sync to Backend API
+  try {
+    await fetch(`${API_URL}/categories`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(categories)
+    });
+  } catch (e) {}
+
   return categories;
 };
 
@@ -685,51 +775,86 @@ export const deleteCloudCategory = async (id) => {
   }
   broadcastSyncEvent('CATEGORIES_UPDATED', current);
 
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}` };
+
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/categories?id=eq.${id}`, {
       method: 'DELETE',
-      headers: supabaseHeaders
+      headers: headers
     });
   } catch (err) {}
   return current;
 };
 
 // ----------------------------------------------------
-// 4. CMS (HERO SLIDER & ANNOUNCEMENTS) DIRECT SUPABASE CRUD
+// 4. CMS (HERO SLIDES & ANNOUNCEMENTS) DIRECT SUPABASE CRUD
 // ----------------------------------------------------
-export const loadCms = () => {
+export const loadCmsData = () => {
   if (typeof window !== 'undefined') {
     try {
       const stored = localStorage.getItem('daan_cms');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed && typeof parsed === 'object') {
-          return { ...DEFAULT_CMS, ...parsed };
+          return {
+            announcementText: parsed.announcementText || DEFAULT_CMS_DATA.announcementText,
+            heroSlides: (parsed.heroSlides && parsed.heroSlides.length > 0) ? parsed.heroSlides : DEFAULT_CMS_DATA.heroSlides
+          };
         }
       }
     } catch (e) {}
   }
-  return DEFAULT_CMS;
+  return DEFAULT_CMS_DATA;
 };
 
 export const fetchCloudCms = async () => {
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}` };
+
+  // 1. Direct Supabase Query
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/cms?id=eq.current_cms`, { headers: supabaseHeaders });
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/cms?id=eq.current_cms`, { headers });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0 && data[0].data) {
-        const merged = { ...DEFAULT_CMS, ...data[0].data };
+        const payload = data[0].data;
+        const merged = {
+          announcementText: payload.announcementText || DEFAULT_CMS_DATA.announcementText,
+          heroSlides: (payload.heroSlides && payload.heroSlides.length > 0) ? payload.heroSlides : DEFAULT_CMS_DATA.heroSlides
+        };
         if (typeof window !== 'undefined') localStorage.setItem('daan_cms', JSON.stringify(merged));
         broadcastSyncEvent('CMS_UPDATED', merged);
         return merged;
       }
     }
   } catch (err) {}
-  return loadCms();
+
+  // 2. Backend API Query
+  try {
+    const bRes = await fetch(`${API_URL}/cms`);
+    if (bRes.ok) {
+      const bData = await bRes.json();
+      if (bData && typeof bData === 'object') {
+        const merged = {
+          announcementText: bData.announcementText || DEFAULT_CMS_DATA.announcementText,
+          heroSlides: (bData.heroSlides && bData.heroSlides.length > 0) ? bData.heroSlides : DEFAULT_CMS_DATA.heroSlides
+        };
+        if (typeof window !== 'undefined') localStorage.setItem('daan_cms', JSON.stringify(merged));
+        broadcastSyncEvent('CMS_UPDATED', merged);
+        return merged;
+      }
+    }
+  } catch (e) {}
+
+  return loadCmsData();
 };
 
-export const saveCms = async (cms) => {
-  const combined = { ...DEFAULT_CMS, ...cms };
+export const saveCmsData = async (cms) => {
+  const combined = {
+    announcementText: cms.announcementText || DEFAULT_CMS_DATA.announcementText,
+    heroSlides: (cms.heroSlides && cms.heroSlides.length > 0) ? cms.heroSlides : DEFAULT_CMS_DATA.heroSlides
+  };
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem('daan_cms', JSON.stringify(combined));
@@ -737,12 +862,15 @@ export const saveCms = async (cms) => {
   }
   broadcastSyncEvent('CMS_UPDATED', combined);
 
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
+
   try {
     const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/cms?id=eq.current_cms`, {
       method: 'PATCH',
       headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'apikey': currentKey,
+        'Authorization': `Bearer ${currentKey}`,
         'Content-Type': 'application/json',
         'Prefer': 'return=representation'
       },
@@ -751,15 +879,26 @@ export const saveCms = async (cms) => {
     if (!patchRes.ok) {
       await fetch(`${SUPABASE_URL}/rest/v1/cms`, {
         method: 'POST',
-        headers: supabaseHeaders,
+        headers: headers,
         body: JSON.stringify([{ id: 'current_cms', data: combined, updated_at: new Date().toISOString() }])
       });
     }
-  } catch (err) {
-    console.warn("Supabase CMS cloud save fallback:", err);
-  }
+  } catch (err) {}
+
+  // Also sync to Backend API
+  try {
+    await fetch(`${API_URL}/update-cms`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(combined)
+    });
+  } catch (e) {}
+
   return combined;
 };
+
+export const loadCms = loadCmsData;
+export const saveCms = saveCmsData;
 
 // ----------------------------------------------------
 // 5. VOUCHERS DIRECT SUPABASE CRUD

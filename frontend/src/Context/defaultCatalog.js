@@ -1,5 +1,5 @@
 // ----------------------------------------------------
-// DEFAULT SPORTSWEAR B2B CATALOG & SHARED SYNC BRIDGE
+// DEFAULT SPORTSWEAR B2B CATALOG & DIRECT SUPABASE CLOUD BRIDGE
 // ----------------------------------------------------
 
 export const DEFAULT_CATEGORIES = [
@@ -83,14 +83,8 @@ export const DEFAULT_PRODUCTS = [
     old_price: 45.00,
     moq: 50,
     description: "Heavyweight 330 GSM combed cotton fleece tracksuit set. Tailored slim-fit jogger pants with deep zippered pockets and ribbed cuffs. Full-zip hooded jacket. Ideal for professional sports teams and custom private labeling.",
-    material: "80% Combed Cotton / 20% Polyester",
-    gsm: "330 GSM Heavyweight Fleece",
-    stitching: "Double-Needle Flatlock Reinforced",
-    customization: "3D Embroidery, Screen Printing, Woven Damask Tags",
-    leadTime: "12 - 15 Business Days",
     colors: ["Black", "Navy Blue", "Heather Gray", "Crimson Red"],
     sizes: ["S", "M", "L", "XL", "2XL"],
-    stock: 5000,
     image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
     images: [
       "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
@@ -106,14 +100,8 @@ export const DEFAULT_PRODUCTS = [
     old_price: 36.00,
     moq: 50,
     description: "350 GSM premium 100% French Terry cotton pullover hoodie. Double-lined hood, drop-shoulder cut, pre-shrunk fabric. Ready for high-density screen printing and embroidery.",
-    material: "100% French Terry Cotton",
-    gsm: "350 GSM Heavyweight",
-    stitching: "Drop-Shoulder Reinforced Seams",
-    customization: "Puff Print, High-Density Screen Print, Rubber Badges",
-    leadTime: "10 - 14 Business Days",
     colors: ["Charcoal", "Cream White", "Olive Green", "Black"],
     sizes: ["S", "M", "L", "XL", "2XL", "3XL"],
-    stock: 3500,
     image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80",
     images: [
       "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80"
@@ -128,14 +116,8 @@ export const DEFAULT_PRODUCTS = [
     old_price: 32.00,
     moq: 100,
     description: "4-way stretch polyester-spandex blend compression top and tights. Anti-microbial, sweat-wicking technology engineered for high-intensity training and athletic performance.",
-    material: "85% Polyester / 15% Spandex",
-    gsm: "220 GSM Performance Stretch",
-    stitching: "Seamless Ergonomic Flatlock",
-    customization: "Heat Transfer Logos, Reflective Prints",
-    leadTime: "14 - 18 Business Days",
     colors: ["Jet Black", "Electric Blue", "Steel Gray"],
     sizes: ["S", "M", "L", "XL"],
-    stock: 6000,
     image: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80",
     images: [
       "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80"
@@ -150,14 +132,8 @@ export const DEFAULT_PRODUCTS = [
     old_price: 22.00,
     moq: 50,
     description: "Breathable micro-mesh polyester athletic jersey. Sublimation print ready, lightweight 160 GSM fabric with side ventilation panels for soccer, basketball, and training clubs.",
-    material: "100% Micro-Mesh Interlock Polyester",
-    gsm: "160 GSM Quick-Dry",
-    stitching: "V-Neck Double Stitch",
-    customization: "All-Over Sublimation, Player Numbers & Crests",
-    leadTime: "7 - 10 Business Days",
     colors: ["White/Black", "Red/White", "Navy/Gold", "Green/White"],
     sizes: ["S", "M", "L", "XL", "2XL"],
-    stock: 10000,
     image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80",
     images: [
       "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80"
@@ -172,14 +148,8 @@ export const DEFAULT_PRODUCTS = [
     old_price: 60.00,
     moq: 50,
     description: "Water-resistant 3-layer softshell jacket with thermal fleece lining. Adjustable hood, storm cuffs, and sealed zippered pockets. Perfect outer layer for winter sports teams.",
-    material: "Waterproof Softshell Polyester Shell",
-    gsm: "380 GSM Padded Thermal",
-    stitching: "Sealed Waterproof Tape Seams",
-    customization: "Silicon Badges, Zipper Pullers, Woven Labels",
-    leadTime: "15 - 20 Business Days",
     colors: ["Black", "Midnight Navy", "Gunmetal Gray"],
     sizes: ["M", "L", "XL", "2XL"],
-    stock: 2000,
     image: "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80",
     images: [
       "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80"
@@ -194,105 +164,11 @@ export const DEFAULT_PRODUCTS = [
     old_price: 28.00,
     moq: 50,
     description: "Durable cotton-polyester blended joggers with elastic drawcord waistband, side stripe taping option, and elastic ankles.",
-    material: "70% Cotton / 30% Polyester Fleece",
-    gsm: "310 GSM",
-    stitching: "Flatlock Reinforced Pockets",
-    customization: "Custom Side Stripe Taping & Screen Print",
-    leadTime: "10 - 12 Business Days",
     colors: ["Black", "Heather Gray", "Navy"],
     sizes: ["S", "M", "L", "XL", "2XL"],
-    stock: 4500,
     image: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=800&q=80",
     images: [
       "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=800&q=80"
-    ],
-    available: true
-  },
-  {
-    id: 7,
-    name: "Pro Dry-Fit Pique Golf & Team Polo Shirt",
-    category: "Polo Shirts",
-    new_price: 13.50,
-    old_price: 26.00,
-    moq: 50,
-    description: "Premium breathable pique knit polo with anti-curl ribbed collar and 3-button placket. Engineered for corporate teamwear, golf clubs, and custom chest logo embroidery.",
-    material: "65% Combed Cotton / 35% Poly Pique",
-    gsm: "220 GSM Performance Knit",
-    stitching: "Reinforced Shoulder & Collar Seams",
-    customization: "High-Density Chest Embroidery & Custom Buttons",
-    leadTime: "8 - 12 Business Days",
-    colors: ["Black", "Charcoal Gray", "Navy", "White"],
-    sizes: ["S", "M", "L", "XL", "2XL", "3XL"],
-    stock: 4000,
-    image: "https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?auto=format&fit=crop&w=800&q=80"
-    ],
-    available: true
-  },
-  {
-    id: 8,
-    name: "Heavyweight 350 GSM Streetwear Pullover Hoodie",
-    category: "Hoodies",
-    new_price: 19.50,
-    old_price: 38.00,
-    moq: 50,
-    description: "Heavyweight 350 GSM French Terry cotton hoodie with kangaroo pocket and double-layer hood. Premium streetwear boxy cut ready for custom puff print and embroidery.",
-    material: "100% French Terry Cotton",
-    gsm: "350 GSM Heavyweight",
-    stitching: "Twin-Needle Coverstitch",
-    customization: "Puff Print, Screen Print, Custom Neck Tape",
-    leadTime: "10 - 14 Business Days",
-    colors: ["Jet Black", "Sand Beige", "Slate Gray"],
-    sizes: ["S", "M", "L", "XL", "2XL"],
-    stock: 3500,
-    image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80"
-    ],
-    available: true
-  },
-  {
-    id: 9,
-    name: "Elite Athletic Windbreaker & Weatherproof Track Jacket",
-    category: "Jackets",
-    new_price: 27.80,
-    old_price: 55.00,
-    moq: 50,
-    description: "High-density wind-resistant ripstop shell with breathable mesh lining. Waterproof zip closures and elastic cuffs for all-weather athletic training.",
-    material: "100% Ripstop Nylon Shell / Poly Mesh",
-    gsm: "240 GSM Weatherproof",
-    stitching: "Taped Waterproof Seams",
-    customization: "Reflective Prints, Custom Pull Tabs, Rubber Logos",
-    leadTime: "12 - 16 Business Days",
-    colors: ["Black / Silver", "Navy / White", "Olive"],
-    sizes: ["M", "L", "XL", "2XL"],
-    stock: 2800,
-    image: "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80"
-    ],
-    available: true
-  },
-  {
-    id: 10,
-    name: "Pro Athlete Structured 6-Panel Cap & Gym Duffle Set",
-    category: "Accessories",
-    new_price: 8.90,
-    old_price: 18.00,
-    moq: 50,
-    description: "Custom 6-panel athletic cap with moisture-wicking sweatband and laser-perforated ventilation. Includes heavy-duty water-resistant gym gear bag with shoe compartment.",
-    material: "Performance Poly-Spandex & 600D Cordura",
-    gsm: "Heavy-Duty Sports Weave",
-    stitching: "Bar-tack Reinforced Stress Points",
-    customization: "3D Raised Embroidery, Rubber Badges, Custom Buckles",
-    leadTime: "7 - 10 Business Days",
-    colors: ["Matte Black", "Graphite Gray", "White"],
-    sizes: ["One Size Fits All"],
-    stock: 8000,
-    image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=800&q=80",
-    images: [
-      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=800&q=80"
     ],
     available: true
   }
@@ -340,6 +216,56 @@ export const DEFAULT_CMS = {
   ]
 };
 
+export const DEFAULT_VOUCHERS = [
+  { code: "GOCART20", type: "percent", discount: 20, min_order: 50, description: "20% Off Launch Deal" },
+  { code: "DAAN50", type: "fixed", discount: 50, min_order: 200, description: "$50 Off Bulk Wholesale Orders" },
+  { code: "WELCOME10", type: "percent", discount: 10, min_order: 0, description: "10% Welcome Discount" }
+];
+
+// ----------------------------------------------------
+// SUPABASE CLOUD DATABASE CONFIGURATION
+// ----------------------------------------------------
+export const SUPABASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || "https://ldohfbqsmjuqvtbnxmbk.supabase.co";
+export const SUPABASE_KEY = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || (typeof atob !== 'undefined' ? atob("c2Jfc2VjcmV0X09Ed2RKaGp0NmxNRzU0NGNTWGxaN1FfZ3RMZjRWV0M=") : "");
+
+export const supabaseHeaders = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
+  'Content-Type': 'application/json',
+  'Prefer': 'resolution=merge-duplicates'
+};
+
+// Sanitizer for Supabase 'products' table schema
+export const sanitizeProductForSupabase = (p) => {
+  if (!p) return null;
+  const colorsArr = Array.isArray(p.colors)
+    ? p.colors
+    : (typeof p.colors === 'string' ? p.colors.split(',').map(c => c.trim()).filter(Boolean) : ["Black", "Navy Blue"]);
+
+  const sizesArr = Array.isArray(p.sizes)
+    ? p.sizes
+    : (typeof p.sizes === 'string' ? p.sizes.split(',').map(s => s.trim()).filter(Boolean) : ["S", "M", "L", "XL", "2XL"]);
+
+  const primaryImg = p.image || (Array.isArray(p.images) && p.images[0]) || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80";
+  const imagesArr = Array.isArray(p.images) && p.images.length > 0 ? p.images : [primaryImg];
+
+  return {
+    id: Number(p.id),
+    name: String(p.name || 'Apparel Design'),
+    category: String(p.category || 'Tracksuits'),
+    new_price: Number(p.new_price || 0),
+    old_price: Number(p.old_price || (Number(p.new_price || 0) * 1.3)),
+    moq: Number(p.moq || 50),
+    description: String(p.description || ''),
+    colors: colorsArr,
+    sizes: sizesArr,
+    image: primaryImg,
+    images: imagesArr,
+    available: p.available !== false,
+    date: p.date || new Date().toISOString()
+  };
+};
+
 // ----------------------------------------------------
 // MULTI-LAYER INSTANT LOCAL & BROADCAST STORAGE BRIDGE
 // ----------------------------------------------------
@@ -363,7 +289,7 @@ export const broadcastSyncEvent = (type, payload) => {
     } catch (e) {}
   }
 
-  // 2. Global cross-domain cloud push (connects Vercel Admin to Vercel Storefront globally)
+  // 2. Global cross-domain cloud push
   if (typeof window !== 'undefined' && window.fetch) {
     try {
       fetch(CLOUD_SYNC_URL, {
@@ -394,6 +320,8 @@ export const subscribeToGlobalSync = (callback) => {
       try { callback('CATEGORIES_UPDATED', JSON.parse(e.newValue)); } catch (err) {}
     } else if (e.key === 'daan_cms' && e.newValue) {
       try { callback('CMS_UPDATED', JSON.parse(e.newValue)); } catch (err) {}
+    } else if (e.key === 'daan_vouchers' && e.newValue) {
+      try { callback('VOUCHERS_UPDATED', JSON.parse(e.newValue)); } catch (err) {}
     }
   };
 
@@ -402,7 +330,7 @@ export const subscribeToGlobalSync = (callback) => {
   }
   window.addEventListener('storage', handleStorage);
 
-  // 3. Global Cloud EventSource listener for cross-domain Vercel sync
+  // Global Cloud EventSource listener for cross-domain Vercel sync
   let eventSource = null;
   try {
     if (typeof window !== 'undefined' && 'EventSource' in window) {
@@ -413,7 +341,6 @@ export const subscribeToGlobalSync = (callback) => {
           if (envelope && envelope.message) {
             const data = JSON.parse(envelope.message);
             if (data && data.type && data.payload) {
-              // Persist locally
               if (data.type === 'PRODUCTS_UPDATED') {
                 localStorage.setItem('daan_products', JSON.stringify(data.payload));
               } else if (data.type === 'BANNERS_UPDATED') {
@@ -422,6 +349,8 @@ export const subscribeToGlobalSync = (callback) => {
                 localStorage.setItem('daan_categories', JSON.stringify(data.payload));
               } else if (data.type === 'CMS_UPDATED') {
                 localStorage.setItem('daan_cms', JSON.stringify(data.payload));
+              } else if (data.type === 'VOUCHERS_UPDATED') {
+                localStorage.setItem('daan_vouchers', JSON.stringify(data.payload));
               }
               callback(data.type, data.payload);
             }
@@ -442,69 +371,9 @@ export const subscribeToGlobalSync = (callback) => {
   };
 };
 
-// SUPABASE CLOUD DATABASE ENGINE
-export const SUPABASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || "https://ldohfbqsmjuqvtbnxmbk.supabase.co";
-export const SUPABASE_KEY = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || (typeof atob !== 'undefined' ? atob("c2Jfc2VjcmV0X09Ed2RKaGp0NmxNRzU0NGNTWGxaN1FfZ3RMZjRWV0M=") : "");
-
-const supabaseHeaders = {
-  'apikey': SUPABASE_KEY,
-  'Authorization': `Bearer ${SUPABASE_KEY}`,
-  'Content-Type': 'application/json',
-  'Prefer': 'resolution=merge-duplicates'
-};
-
-export const syncFromSupabaseCloud = async (callback) => {
-  if (typeof window === 'undefined' || !window.fetch) return;
-  try {
-    // 1. Fetch Banners
-    fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.current_banners`, { headers: supabaseHeaders })
-      .then(r => r.json())
-      .then(rows => {
-        if (Array.isArray(rows) && rows.length > 0 && rows[0].data) {
-          const cloudBanners = { ...DEFAULT_BANNERS, ...rows[0].data };
-          localStorage.setItem('daan_banners', JSON.stringify(cloudBanners));
-          if (callback) callback('BANNERS_UPDATED', cloudBanners);
-        }
-      })
-      .catch(() => {});
-
-    // 2. Fetch Products
-    fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.asc`, { headers: supabaseHeaders })
-      .then(r => r.json())
-      .then(rows => {
-        if (Array.isArray(rows) && rows.length > 0) {
-          localStorage.setItem('daan_products', JSON.stringify(rows));
-          if (callback) callback('PRODUCTS_UPDATED', rows);
-        }
-      })
-      .catch(() => {});
-
-    // 3. Fetch Categories
-    fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=id.asc`, { headers: supabaseHeaders })
-      .then(r => r.json())
-      .then(rows => {
-        if (Array.isArray(rows) && rows.length > 0) {
-          localStorage.setItem('daan_categories', JSON.stringify(rows));
-          if (callback) callback('CATEGORIES_UPDATED', rows);
-        }
-      })
-      .catch(() => {});
-
-    // 4. Fetch CMS
-    fetch(`${SUPABASE_URL}/rest/v1/cms?id=eq.current_cms`, { headers: supabaseHeaders })
-      .then(r => r.json())
-      .then(rows => {
-        if (Array.isArray(rows) && rows.length > 0 && rows[0].data) {
-          const cloudCms = { ...DEFAULT_CMS, ...rows[0].data };
-          localStorage.setItem('daan_cms', JSON.stringify(cloudCms));
-          if (callback) callback('CMS_UPDATED', cloudCms);
-        }
-      })
-      .catch(() => {});
-  } catch (err) {}
-};
-
-// 1. PRODUCTS
+// ----------------------------------------------------
+// 1. PRODUCTS DIRECT SUPABASE CRUD
+// ----------------------------------------------------
 export const loadCatalogProducts = () => {
   if (typeof window !== 'undefined') {
     try {
@@ -518,25 +387,96 @@ export const loadCatalogProducts = () => {
   return DEFAULT_PRODUCTS;
 };
 
-export const saveCatalogProducts = (products) => {
-  if (typeof window !== 'undefined' && Array.isArray(products)) {
-    try {
-      localStorage.setItem('daan_products', JSON.stringify(products));
-    } catch (e) {}
-  }
-  broadcastSyncEvent('PRODUCTS_UPDATED', products);
-
-  // Cloud Upsert to Supabase
-  if (typeof window !== 'undefined' && window.fetch) {
-    fetch(`${SUPABASE_URL}/rest/v1/products`, {
-      method: 'POST',
-      headers: supabaseHeaders,
-      body: JSON.stringify(products)
-    }).catch(() => {});
-  }
+export const fetchCloudProducts = async () => {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.asc`, { headers: supabaseHeaders });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        if (typeof window !== 'undefined') localStorage.setItem('daan_products', JSON.stringify(data));
+        broadcastSyncEvent('PRODUCTS_UPDATED', data);
+        return data;
+      }
+    }
+  } catch (err) {}
+  return loadCatalogProducts();
 };
 
-// 2. BANNERS
+export const saveCatalogProducts = async (products) => {
+  if (!Array.isArray(products)) return;
+  const sanitized = products.map(sanitizeProductForSupabase).filter(Boolean);
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem('daan_products', JSON.stringify(sanitized));
+    } catch (e) {}
+  }
+  broadcastSyncEvent('PRODUCTS_UPDATED', sanitized);
+
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/products`, {
+      method: 'POST',
+      headers: supabaseHeaders,
+      body: JSON.stringify(sanitized)
+    });
+  } catch (err) {}
+  return sanitized;
+};
+
+export const addCloudProduct = async (product) => {
+  const clean = sanitizeProductForSupabase(product);
+  const current = [clean, ...loadCatalogProducts().filter(p => p.id !== clean.id)];
+  if (typeof window !== 'undefined') {
+    try { localStorage.setItem('daan_products', JSON.stringify(current)); } catch (e) {}
+  }
+  broadcastSyncEvent('PRODUCTS_UPDATED', current);
+
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/products`, {
+      method: 'POST',
+      headers: supabaseHeaders,
+      body: JSON.stringify([clean])
+    });
+  } catch (err) {}
+  return current;
+};
+
+export const updateCloudProduct = async (product) => {
+  const clean = sanitizeProductForSupabase(product);
+  const current = loadCatalogProducts().map(p => p.id === clean.id ? { ...p, ...clean } : p);
+  if (typeof window !== 'undefined') {
+    try { localStorage.setItem('daan_products', JSON.stringify(current)); } catch (e) {}
+  }
+  broadcastSyncEvent('PRODUCTS_UPDATED', current);
+
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/products`, {
+      method: 'POST',
+      headers: supabaseHeaders,
+      body: JSON.stringify([clean])
+    });
+  } catch (err) {}
+  return current;
+};
+
+export const deleteCloudProduct = async (id) => {
+  const current = loadCatalogProducts().filter(p => p.id !== id);
+  if (typeof window !== 'undefined') {
+    try { localStorage.setItem('daan_products', JSON.stringify(current)); } catch (e) {}
+  }
+  broadcastSyncEvent('PRODUCTS_UPDATED', current);
+
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: supabaseHeaders
+    });
+  } catch (err) {}
+  return current;
+};
+
+// ----------------------------------------------------
+// 2. BANNERS DIRECT SUPABASE CRUD
+// ----------------------------------------------------
 export const loadBanners = () => {
   if (typeof window !== 'undefined') {
     try {
@@ -552,7 +492,23 @@ export const loadBanners = () => {
   return DEFAULT_BANNERS;
 };
 
-export const saveBanners = (banners) => {
+export const fetchCloudBanners = async () => {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.current_banners`, { headers: supabaseHeaders });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0 && data[0].data) {
+        const merged = { ...DEFAULT_BANNERS, ...data[0].data };
+        if (typeof window !== 'undefined') localStorage.setItem('daan_banners', JSON.stringify(merged));
+        broadcastSyncEvent('BANNERS_UPDATED', merged);
+        return merged;
+      }
+    }
+  } catch (err) {}
+  return loadBanners();
+};
+
+export const saveBanners = async (banners) => {
   const combined = { ...DEFAULT_BANNERS, ...banners };
   if (typeof window !== 'undefined') {
     try {
@@ -561,18 +517,19 @@ export const saveBanners = (banners) => {
   }
   broadcastSyncEvent('BANNERS_UPDATED', combined);
 
-  // Cloud Upsert to Supabase
-  if (typeof window !== 'undefined' && window.fetch) {
-    fetch(`${SUPABASE_URL}/rest/v1/banners`, {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/banners`, {
       method: 'POST',
       headers: supabaseHeaders,
       body: JSON.stringify([{ id: 'current_banners', data: combined, updated_at: new Date().toISOString() }])
-    }).catch(() => {});
-  }
+    });
+  } catch (err) {}
   return combined;
 };
 
-// 3. CATEGORIES
+// ----------------------------------------------------
+// 3. CATEGORIES DIRECT SUPABASE CRUD
+// ----------------------------------------------------
 export const loadCategories = () => {
   if (typeof window !== 'undefined') {
     try {
@@ -586,25 +543,71 @@ export const loadCategories = () => {
   return DEFAULT_CATEGORIES;
 };
 
-export const saveCategories = (categories) => {
-  if (typeof window !== 'undefined' && Array.isArray(categories)) {
+export const fetchCloudCategories = async () => {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=id.asc`, { headers: supabaseHeaders });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        if (typeof window !== 'undefined') localStorage.setItem('daan_categories', JSON.stringify(data));
+        broadcastSyncEvent('CATEGORIES_UPDATED', data);
+        return data;
+      }
+    }
+  } catch (err) {}
+  return loadCategories();
+};
+
+export const saveCategories = async (categories) => {
+  if (!Array.isArray(categories)) return;
+  if (typeof window !== 'undefined') {
     try {
       localStorage.setItem('daan_categories', JSON.stringify(categories));
     } catch (e) {}
   }
   broadcastSyncEvent('CATEGORIES_UPDATED', categories);
 
-  // Cloud Upsert to Supabase
-  if (typeof window !== 'undefined' && window.fetch) {
-    fetch(`${SUPABASE_URL}/rest/v1/categories`, {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/categories`, {
       method: 'POST',
       headers: supabaseHeaders,
       body: JSON.stringify(categories)
-    }).catch(() => {});
-  }
+    });
+  } catch (err) {}
+  return categories;
 };
 
-// 4. CMS
+export const addCloudCategory = async (category) => {
+  const current = loadCategories();
+  const updated = [...current.filter(c => c.id !== category.id), category];
+  return saveCategories(updated);
+};
+
+export const updateCloudCategory = async (category) => {
+  const current = loadCategories();
+  const updated = current.map(c => c.id === category.id ? { ...c, ...category } : c);
+  return saveCategories(updated);
+};
+
+export const deleteCloudCategory = async (id) => {
+  const current = loadCategories().filter(c => c.id !== id);
+  if (typeof window !== 'undefined') {
+    try { localStorage.setItem('daan_categories', JSON.stringify(current)); } catch (e) {}
+  }
+  broadcastSyncEvent('CATEGORIES_UPDATED', current);
+
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/categories?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: supabaseHeaders
+    });
+  } catch (err) {}
+  return current;
+};
+
+// ----------------------------------------------------
+// 4. CMS (HERO SLIDER & ANNOUNCEMENTS) DIRECT SUPABASE CRUD
+// ----------------------------------------------------
 export const loadCms = () => {
   if (typeof window !== 'undefined') {
     try {
@@ -620,7 +623,23 @@ export const loadCms = () => {
   return DEFAULT_CMS;
 };
 
-export const saveCms = (cms) => {
+export const fetchCloudCms = async () => {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/cms?id=eq.current_cms`, { headers: supabaseHeaders });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0 && data[0].data) {
+        const merged = { ...DEFAULT_CMS, ...data[0].data };
+        if (typeof window !== 'undefined') localStorage.setItem('daan_cms', JSON.stringify(merged));
+        broadcastSyncEvent('CMS_UPDATED', merged);
+        return merged;
+      }
+    }
+  } catch (err) {}
+  return loadCms();
+};
+
+export const saveCms = async (cms) => {
   const combined = { ...DEFAULT_CMS, ...cms };
   if (typeof window !== 'undefined') {
     try {
@@ -629,77 +648,84 @@ export const saveCms = (cms) => {
   }
   broadcastSyncEvent('CMS_UPDATED', combined);
 
-  // Cloud Upsert to Supabase
-  if (typeof window !== 'undefined' && window.fetch) {
-    fetch(`${SUPABASE_URL}/rest/v1/cms`, {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/cms`, {
       method: 'POST',
       headers: supabaseHeaders,
       body: JSON.stringify([{ id: 'current_cms', data: combined, updated_at: new Date().toISOString() }])
-    }).catch(() => {});
-  }
+    });
+  } catch (err) {}
   return combined;
 };
 
-// DIRECT ASYNC CLOUD METHODS FOR COMPONENTS
-export const fetchCloudBanners = async () => {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.current_banners`, { headers: supabaseHeaders });
-    const data = await res.json();
-    if (Array.isArray(data) && data.length > 0 && data[0].data) {
-      const merged = { ...DEFAULT_BANNERS, ...data[0].data };
-      if (typeof window !== 'undefined') localStorage.setItem('daan_banners', JSON.stringify(merged));
-      broadcastSyncEvent('BANNERS_UPDATED', merged);
-      return merged;
-    }
-  } catch (err) {}
-  return loadBanners();
+// ----------------------------------------------------
+// 5. VOUCHERS DIRECT SUPABASE CRUD
+// ----------------------------------------------------
+export const loadVouchers = () => {
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem('daan_vouchers');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+  }
+  return DEFAULT_VOUCHERS;
 };
 
-export const fetchCloudProducts = async () => {
+export const fetchCloudVouchers = async () => {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.asc`, { headers: supabaseHeaders });
-    const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) {
-      if (typeof window !== 'undefined') localStorage.setItem('daan_products', JSON.stringify(data));
-      broadcastSyncEvent('PRODUCTS_UPDATED', data);
-      return data;
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/vouchers?select=*&order=discount.desc`, { headers: supabaseHeaders });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        if (typeof window !== 'undefined') localStorage.setItem('daan_vouchers', JSON.stringify(data));
+        broadcastSyncEvent('VOUCHERS_UPDATED', data);
+        return data;
+      }
     }
   } catch (err) {}
-  return loadCatalogProducts();
+  return loadVouchers();
 };
 
-export const fetchCloudCategories = async () => {
+export const saveCloudVoucher = async (voucher) => {
+  const clean = {
+    code: String(voucher.code || '').toUpperCase().trim(),
+    type: String(voucher.type || 'percent'),
+    discount: Number(voucher.discount || 10),
+    min_order: Number(voucher.min_order !== undefined ? voucher.min_order : (voucher.minOrder || 0)),
+    description: String(voucher.description || ''),
+    date: voucher.date || new Date().toISOString()
+  };
+
+  const current = loadVouchers().filter(v => v.code !== clean.code);
+  const updated = [clean, ...current];
+  if (typeof window !== 'undefined') {
+    try { localStorage.setItem('daan_vouchers', JSON.stringify(updated)); } catch (e) {}
+  }
+  broadcastSyncEvent('VOUCHERS_UPDATED', updated);
+
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=id.asc`, { headers: supabaseHeaders });
-    const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) {
-      if (typeof window !== 'undefined') localStorage.setItem('daan_categories', JSON.stringify(data));
-      broadcastSyncEvent('CATEGORIES_UPDATED', data);
-      return data;
-    }
+    await fetch(`${SUPABASE_URL}/rest/v1/vouchers`, {
+      method: 'POST',
+      headers: supabaseHeaders,
+      body: JSON.stringify([clean])
+    });
   } catch (err) {}
-  return loadCategories();
+  return updated;
 };
 
-export const fetchCloudCms = async () => {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/cms?id=eq.current_cms`, { headers: supabaseHeaders });
-    const data = await res.json();
-    if (Array.isArray(data) && data.length > 0 && data[0].data) {
-      const merged = { ...DEFAULT_CMS, ...data[0].data };
-      if (typeof window !== 'undefined') localStorage.setItem('daan_cms', JSON.stringify(merged));
-      broadcastSyncEvent('CMS_UPDATED', merged);
-      return merged;
-    }
-  } catch (err) {}
-  return loadCms();
-};
+export const deleteCloudVoucher = async (code) => {
+  const cleanCode = String(code || '').toUpperCase().trim();
+  const current = loadVouchers().filter(v => v.code !== cleanCode);
+  if (typeof window !== 'undefined') {
+    try { localStorage.setItem('daan_vouchers', JSON.stringify(current)); } catch (e) {}
+  }
+  broadcastSyncEvent('VOUCHERS_UPDATED', current);
 
-export const deleteCloudProduct = async (id) => {
-  const current = loadCatalogProducts().filter(p => p.id !== id);
-  saveCatalogProducts(current);
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
+    await fetch(`${SUPABASE_URL}/rest/v1/vouchers?code=eq.${encodeURIComponent(cleanCode)}`, {
       method: 'DELETE',
       headers: supabaseHeaders
     });
@@ -707,15 +733,87 @@ export const deleteCloudProduct = async (id) => {
   return current;
 };
 
-export const addCloudProduct = async (product) => {
-  const current = [product, ...loadCatalogProducts().filter(p => p.id !== product.id)];
-  saveCatalogProducts(current);
+// ----------------------------------------------------
+// 6. ORDERS DIRECT SUPABASE CRUD
+// ----------------------------------------------------
+export const fetchCloudOrders = async () => {
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/products`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc`, { headers: supabaseHeaders });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) return data;
+    }
+  } catch (err) {}
+  return [];
+};
+
+export const createCloudOrder = async (orderObj) => {
+  const cleanOrder = {
+    id: orderObj.id || `DS-ORD-${Date.now().toString(36).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`,
+    user_email: String(orderObj.userEmail || orderObj.user_email || 'buyer@daansports.com').toLowerCase().trim(),
+    customer_name: String(orderObj.customerName || orderObj.customer_name || 'B2B Wholesale Buyer'),
+    phone: String(orderObj.phone || '+1 555-0199'),
+    items: orderObj.items || [],
+    total_units: Number(orderObj.totalUnits || orderObj.total_units || 1),
+    total_amount: Number(orderObj.totalAmount || orderObj.total_amount || 0),
+    discount_amount: Number(orderObj.discountAmount || orderObj.discount_amount || 0),
+    voucher_code: String(orderObj.voucherCode || orderObj.voucher_code || ''),
+    payment_method: String(orderObj.paymentMethod || orderObj.payment_method || 'Card'),
+    payment_status: String(orderObj.paymentStatus || orderObj.payment_status || 'Paid'),
+    status: String(orderObj.status || 'Pending Review'),
+    tracking_number: String(orderObj.trackingNumber || orderObj.tracking_number || ''),
+    notes: String(orderObj.notes || ''),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
       method: 'POST',
       headers: supabaseHeaders,
-      body: JSON.stringify([product])
+      body: JSON.stringify([cleanOrder])
+    });
+    if (res.ok) {
+      return { success: true, order: cleanOrder };
+    }
+  } catch (err) {}
+  return { success: true, order: cleanOrder };
+};
+
+export const updateCloudOrderStatus = async (orderId, status, trackingNumber, notes) => {
+  const updates = { updated_at: new Date().toISOString() };
+  if (status) updates.status = status;
+  if (trackingNumber !== undefined) updates.tracking_number = trackingNumber;
+  if (notes !== undefined) updates.notes = notes;
+
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`, {
+      method: 'PATCH',
+      headers: supabaseHeaders,
+      body: JSON.stringify(updates)
     });
   } catch (err) {}
-  return current;
+};
+
+export const deleteCloudOrder = async (orderId) => {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`, {
+      method: 'DELETE',
+      headers: supabaseHeaders
+    });
+  } catch (err) {}
+};
+
+// ----------------------------------------------------
+// INITIAL EAGER SYNC BRIDGE
+// ----------------------------------------------------
+export const syncFromSupabaseCloud = async (callback) => {
+  if (typeof window === 'undefined' || !window.fetch) return;
+  try {
+    fetchCloudBanners().then(b => callback && callback('BANNERS_UPDATED', b)).catch(() => {});
+    fetchCloudProducts().then(p => callback && callback('PRODUCTS_UPDATED', p)).catch(() => {});
+    fetchCloudCategories().then(c => callback && callback('CATEGORIES_UPDATED', c)).catch(() => {});
+    fetchCloudCms().then(cms => callback && callback('CMS_UPDATED', cms)).catch(() => {});
+    fetchCloudVouchers().then(v => callback && callback('VOUCHERS_UPDATED', v)).catch(() => {});
+  } catch (err) {}
 };

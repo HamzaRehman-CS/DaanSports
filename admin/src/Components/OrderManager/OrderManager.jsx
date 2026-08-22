@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './OrderManager.css';
 import { API_URL } from '../../config';
+import { fetchCloudOrders, updateCloudOrderStatus, deleteCloudOrder } from '../../defaultCatalog';
 
 const OrderManager = () => {
   const [orders, setOrders] = useState([]);
@@ -9,9 +10,35 @@ const OrderManager = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
+      // 1. Fetch from Supabase
+      const cloudOrders = await fetchCloudOrders();
+      if (Array.isArray(cloudOrders) && cloudOrders.length > 0) {
+        const mapped = cloudOrders.map(o => ({
+          id: o.id,
+          createdAt: o.created_at,
+          customerName: o.customer_name,
+          discountAmount: o.discount_amount,
+          items: o.items,
+          notes: o.notes,
+          paymentMethod: o.payment_method,
+          paymentStatus: o.payment_status,
+          phone: o.phone,
+          status: o.status,
+          totalAmount: o.total_amount,
+          totalUnits: o.total_units,
+          trackingNumber: o.tracking_number,
+          userEmail: o.user_email,
+          voucherCode: o.voucher_code
+        }));
+        setOrders(mapped);
+        setLoading(false);
+        return;
+      }
+
+      // 2. Fallback to API_URL
       const res = await fetch(`${API_URL}/all-orders`);
       const data = await res.json();
-      setOrders(data);
+      setOrders(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Fetch Orders Error:", err);
     } finally {
@@ -25,21 +52,23 @@ const OrderManager = () => {
 
   const handleStatusChange = async (orderId, newStatus, currentTracking, currentNotes) => {
     try {
-      const res = await fetch(`${API_URL}/update-order-status`, {
-        method: "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId,
-          status: newStatus,
-          trackingNumber: currentTracking,
-          notes: currentNotes
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(`Order ${orderId} status updated to "${newStatus}"!`);
-        fetchOrders();
-      }
+      await updateCloudOrderStatus(orderId, newStatus, currentTracking, currentNotes);
+
+      try {
+        await fetch(`${API_URL}/update-order-status`, {
+          method: "POST",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId,
+            status: newStatus,
+            trackingNumber: currentTracking,
+            notes: currentNotes
+          })
+        });
+      } catch (err) {}
+
+      alert(`Order ${orderId} status updated to "${newStatus}"!`);
+      fetchOrders();
     } catch (err) {
       alert("Error: " + err.message);
     }
@@ -48,16 +77,18 @@ const OrderManager = () => {
   const handleCancelOrder = async (orderId) => {
     if (!window.confirm(`Are you sure you want to CANCEL order ${orderId}?`)) return;
     try {
-      const res = await fetch(`${API_URL}/cancel-order`, {
-        method: "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(`Order ${orderId} has been CANCELLED.`);
-        fetchOrders();
-      }
+      await updateCloudOrderStatus(orderId, 'Cancelled', undefined, 'Order cancelled by Admin');
+
+      try {
+        await fetch(`${API_URL}/cancel-order`, {
+          method: "POST",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId })
+        });
+      } catch (err) {}
+
+      alert(`Order ${orderId} has been CANCELLED.`);
+      fetchOrders();
     } catch (err) {
       alert("Error cancelling order: " + err.message);
     }
@@ -66,16 +97,18 @@ const OrderManager = () => {
   const handleDeleteOrder = async (orderId) => {
     if (!window.confirm(`⚠️ PERMANENT DELETE: Are you sure you want to delete order ${orderId} log to clear memory?`)) return;
     try {
-      const res = await fetch(`${API_URL}/delete-order`, {
-        method: "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(`Order record ${orderId} permanently deleted from memory/DB.`);
-        fetchOrders();
-      }
+      await deleteCloudOrder(orderId);
+
+      try {
+        await fetch(`${API_URL}/delete-order`, {
+          method: "POST",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId })
+        });
+      } catch (err) {}
+
+      alert(`Order record ${orderId} permanently deleted from Supabase Cloud DB.`);
+      fetchOrders();
     } catch (err) {
       alert("Error deleting order: " + err.message);
     }
@@ -83,23 +116,25 @@ const OrderManager = () => {
 
   const handleTrackingUpdate = async (orderId, currentStatus, newTracking, currentNotes) => {
     try {
-      const res = await fetch(`${API_URL}/update-order-status`, {
-        method: "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId,
-          status: currentStatus,
-          trackingNumber: newTracking,
-          notes: currentNotes
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(`Tracking & Notes saved for order ${orderId}!`);
-        fetchOrders();
-      }
+      await updateCloudOrderStatus(orderId, currentStatus, newTracking, currentNotes);
+
+      try {
+        await fetch(`${API_URL}/update-order-status`, {
+          method: "POST",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId,
+            status: currentStatus,
+            trackingNumber: newTracking,
+            notes: currentNotes
+          })
+        });
+      } catch (err) {}
+
+      alert(`Tracking & Notes saved for order ${orderId}!`);
+      fetchOrders();
     } catch (err) {
-      alert("Error updating tracking: " + err.message);
+      alert("Error saving tracking info: " + err.message);
     }
   };
 

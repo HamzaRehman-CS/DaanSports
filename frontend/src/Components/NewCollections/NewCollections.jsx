@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import './NewCollections.css'
 import Item from '../Item/Item'
 import { API_URL } from '../../config'
-import { loadCatalogProducts, subscribeToGlobalSync } from '../../Context/defaultCatalog'
+import { loadCatalogProducts, fetchCloudProducts, subscribeToGlobalSync } from '../../Context/defaultCatalog'
 
 const NewCollections = () => {
   const [new_collection, setNew_collection] = useState(() => {
@@ -10,24 +10,13 @@ const NewCollections = () => {
     return prods.slice(0, 8);
   });
 
-  const syncNewCollections = () => {
-    fetch(`${API_URL}/new-collection`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.length > 0) {
-          setNew_collection(data);
-        } else {
-          fetch(`${API_URL}/all-products`)
-            .then(r => r.json())
-            .then(all => {
-              if (Array.isArray(all) && all.length > 0) {
-                setNew_collection(all.slice(0, 8));
-              }
-            })
-            .catch(() => {});
-        }
-      })
-      .catch(() => {});
+  const syncNewCollections = async () => {
+    try {
+      const data = await fetchCloudProducts();
+      if (Array.isArray(data) && data.length > 0) {
+        setNew_collection(data.slice(0, 8));
+      }
+    } catch (err) {}
   };
 
   useEffect(() => {
@@ -39,7 +28,19 @@ const NewCollections = () => {
       }
     });
 
-    return () => unsubscribe();
+    const interval = setInterval(syncNewCollections, 3000);
+    const handleFocus = () => {
+      syncNewCollections();
+      const stored = loadCatalogProducts();
+      if (stored && stored.length > 0) setNew_collection(stored.slice(0, 8));
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      unsubscribe();
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   return (

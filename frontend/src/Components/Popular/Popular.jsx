@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import './Popular.css'
 import Item from '../Item/Item'
 import { API_URL } from '../../config'
-import { loadCatalogProducts, subscribeToGlobalSync } from '../../Context/defaultCatalog'
+import { loadCatalogProducts, fetchCloudProducts, subscribeToGlobalSync } from '../../Context/defaultCatalog'
 
 const Popular = () => {
   const [popularItems, setPopularItems] = useState(() => {
@@ -11,25 +11,14 @@ const Popular = () => {
     return tracksuits.length > 0 ? tracksuits.slice(0, 4) : prods.slice(0, 4);
   });
 
-  const syncPopular = () => {
-    fetch(`${API_URL}/popular-tracksuits`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.length > 0) {
-          setPopularItems(data);
-        } else {
-          fetch(`${API_URL}/all-products`)
-            .then(r => r.json())
-            .then(all => {
-              if (Array.isArray(all) && all.length > 0) {
-                const tracksuits = all.filter(p => (p.category || '').toLowerCase().includes('tracksuit'));
-                setPopularItems(tracksuits.length > 0 ? tracksuits.slice(0, 4) : all.slice(0, 4));
-              }
-            })
-            .catch(() => {});
-        }
-      })
-      .catch(() => {});
+  const syncPopular = async () => {
+    try {
+      const data = await fetchCloudProducts();
+      if (Array.isArray(data) && data.length > 0) {
+        const tracksuits = data.filter(p => (p.category || '').toLowerCase().includes('tracksuit'));
+        setPopularItems(tracksuits.length > 0 ? tracksuits.slice(0, 4) : data.slice(0, 4));
+      }
+    } catch (err) {}
   };
 
   useEffect(() => {
@@ -42,7 +31,22 @@ const Popular = () => {
       }
     });
 
-    return () => unsubscribe();
+    const interval = setInterval(syncPopular, 3000);
+    const handleFocus = () => {
+      syncPopular();
+      const stored = loadCatalogProducts();
+      if (stored && stored.length > 0) {
+        const tracksuits = stored.filter(p => (p.category || '').toLowerCase().includes('tracksuit'));
+        setPopularItems(tracksuits.length > 0 ? tracksuits.slice(0, 4) : stored.slice(0, 4));
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      unsubscribe();
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   return (

@@ -7,6 +7,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import './CategoryBoxShowcase.css';
 import { API_URL } from '../../config';
+import { loadCategories, fetchCloudCategories, subscribeToGlobalSync } from '../../Context/defaultCatalog';
 
 const defaultCategoriesData = [
   { id: 1, name: "T-SHIRTS", slug: "tshirts", link: "/tshirts", image: "https://images.unsplash.com/photo-1553775282-20af80779df7?q=80&w=1000&auto=format&fit=crop" },
@@ -20,49 +21,58 @@ const defaultCategoriesData = [
   { id: 9, name: "TROUSERS", slug: "trousers", link: "/trousers", image: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=1000&auto=format&fit=crop" }
 ];
 
+const mapCategories = (data) => {
+  if (!Array.isArray(data) || data.length === 0) return defaultCategoriesData;
+  return data.map((c, i) => ({
+    id: c.id || (i + 1),
+    name: (c.name || '').toUpperCase(),
+    slug: c.slug || (c.name || '').toLowerCase().replace(/\s+/g, '-'),
+    link: `/category/${c.slug || (c.name || '').toLowerCase().replace(/\s+/g, '-')}`,
+    image: c.banner || c.image || defaultCategoriesData[i % defaultCategoriesData.length].image
+  }));
+};
+
 export default function CategoryBoxShowcase({ initialCategories }) {
   const [categories, setCategories] = useState(() => {
     if (Array.isArray(initialCategories) && initialCategories.length > 0) {
-      return initialCategories.map(c => ({
-        id: c.id,
-        name: (c.name || '').toUpperCase(),
-        slug: c.slug || c.name.toLowerCase().replace(/\s+/g, '-'),
-        link: `/${c.slug || c.name.toLowerCase().replace(/\s+/g, '-')}`,
-        image: c.banner || c.image || defaultCategoriesData[0].image
-      }));
+      return mapCategories(initialCategories);
     }
-    return defaultCategoriesData;
+    const stored = loadCategories();
+    return mapCategories(stored);
   });
 
   const prevRef = useRef(null);
   const nextRef = useRef(null);
   const [swiperReady, setSwiperReady] = useState(false);
 
-  const fetchCategories = () => {
-    fetch(`${API_URL}/categories`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          const mapped = data.map((c, i) => ({
-            id: c.id || (i + 1),
-            name: (c.name || '').toUpperCase(),
-            slug: c.slug || c.name.toLowerCase().replace(/\s+/g, '-'),
-            link: `/category/${c.slug || c.name.toLowerCase().replace(/\s+/g, '-')}`,
-            image: c.banner || c.image || defaultCategoriesData[i % defaultCategoriesData.length].image
-          }));
-          setCategories(mapped);
-        }
-      })
-      .catch(() => {});
+  const fetchCategories = async () => {
+    try {
+      const data = await fetchCloudCategories();
+      if (Array.isArray(data) && data.length > 0) {
+        setCategories(mapCategories(data));
+      }
+    } catch (err) {}
   };
 
   useEffect(() => {
     fetchCategories();
-    const interval = setInterval(fetchCategories, 4000);
-    const handleFocus = () => fetchCategories();
+
+    const unsubscribe = subscribeToGlobalSync((type, payload) => {
+      if (type === 'CATEGORIES_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+        setCategories(mapCategories(payload));
+      }
+    });
+
+    const interval = setInterval(fetchCategories, 3000);
+    const handleFocus = () => {
+      fetchCategories();
+      const stored = loadCategories();
+      if (stored && stored.length > 0) setCategories(mapCategories(stored));
+    };
     window.addEventListener('focus', handleFocus);
 
     return () => {
+      unsubscribe();
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
     };

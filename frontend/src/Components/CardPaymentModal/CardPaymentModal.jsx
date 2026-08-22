@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, CreditCard, Lock, CheckCircle, ShieldAlert, Tag } from 'lucide-react';
 import { API_URL } from '../../config';
+import { createCloudOrder, fetchCloudVouchers } from '../../Context/defaultCatalog';
 
 
 const CardPaymentModal = ({
@@ -127,18 +128,27 @@ const CardPaymentModal = ({
         notes: notes || "Direct Card Authorized Wholesale Order"
       };
 
-      const res = await fetch(`${API_URL}/create-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderPayload)
-      });
-      const data = await res.json();
+      try {
+        const res = await fetch(`${API_URL}/create-order`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderPayload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (onSuccess) onSuccess(data.order);
+          onClose();
+          return;
+        }
+      } catch (err) {}
 
-      if (data.success) {
-        if (onSuccess) onSuccess(data.order);
+      // Direct Supabase Fallback
+      const directRes = await createCloudOrder(orderPayload);
+      if (directRes && directRes.success) {
+        if (onSuccess) onSuccess(directRes.order);
         onClose();
       } else {
-        setErrorMsg(data.error || "Order placement failed. Please try again.");
+        setErrorMsg("Order placement failed. Please try again.");
       }
     } catch (err) {
       setErrorMsg("Network error: " + err.message);

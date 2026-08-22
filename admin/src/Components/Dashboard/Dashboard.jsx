@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import { Link } from 'react-router-dom';
 import { API_URL } from '../../config';
+import { loadCatalogProducts, fetchCloudProducts, fetchCloudOrders, fetchCloudCategories, fetchCloudVouchers } from '../../defaultCatalog';
 
 const Dashboard = () => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState(() => loadCatalogProducts());
   const [orders, setOrders] = useState([]);
   const [categories, setCategories] = useState([]);
   const [vouchers, setVouchers] = useState([]);
@@ -12,10 +13,10 @@ const Dashboard = () => {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_URL}/all-products`).then(res => res.json()).catch(() => []),
-      fetch(`${API_URL}/all-orders`).then(res => res.json()).catch(() => []),
-      fetch(`${API_URL}/categories`).then(res => res.json()).catch(() => []),
-      fetch(`${API_URL}/vouchers`).then(res => res.json()).catch(() => [])
+      fetchCloudProducts().catch(() => loadCatalogProducts()),
+      fetchCloudOrders().catch(() => []),
+      fetchCloudCategories().catch(() => []),
+      fetchCloudVouchers().catch(() => [])
     ]).then(([prods, ords, cats, vous]) => {
       if (Array.isArray(prods)) setProducts(prods);
       if (Array.isArray(ords)) setOrders(ords);

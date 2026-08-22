@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './ProductList.css';
 import cross_icon from '../../assets/cross_icon.png';
 import { API_URL } from '../../config';
-import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudProducts, fetchCloudCategories, deleteCloudProduct } from '../../defaultCatalog';
+import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudProducts, fetchCloudCategories, updateCloudProduct, deleteCloudProduct } from '../../defaultCatalog';
 
 const ProductList = () => {
   const [allProducts, setAllProducts] = useState(() => loadCatalogProducts());
@@ -35,7 +35,7 @@ const ProductList = () => {
 
   useEffect(() => {
     fetchAllProducts();
-    const interval = setInterval(fetchAllProducts, 5000);
+    const interval = setInterval(fetchAllProducts, 4000);
     const handleFocus = () => fetchAllProducts();
     window.addEventListener('focus', handleFocus);
 
@@ -92,24 +92,21 @@ const ProductList = () => {
       sizes: sizesArr.map(s => typeof s === 'string' ? s.trim() : s).filter(Boolean)
     };
 
-    // 1. Update locally and broadcast immediately
-    const updated = allProducts.map(p => p.id === payload.id ? { ...p, ...payload } : p);
+    // 1. Direct Supabase Cloud update and broadcast
+    const updated = await updateCloudProduct(payload);
     setAllProducts(updated);
-    saveCatalogProducts(updated);
     setEditingProduct(null);
 
-    // 2. Sync to Backend API
+    // 2. Sync to Backend API if present
     try {
       await fetch(`${API_URL}/edit-product`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-    } catch (err) {
-      console.warn("Backend sync notice (saved locally):", err.message);
-    }
+    } catch (err) {}
 
-    alert(`Product "${payload.name}" updated and synced live!`);
+    alert(`Product "${payload.name}" updated and synced live across website!`);
   };
 
   const filteredProducts = allProducts.filter(p => {

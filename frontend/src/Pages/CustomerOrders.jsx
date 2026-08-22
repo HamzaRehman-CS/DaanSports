@@ -3,6 +3,7 @@ import { useUser } from '@clerk/clerk-react';
 import { Package, Clock, CheckCircle2, Truck, AlertCircle, Shield, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { API_URL } from '../config';
+import { SUPABASE_URL, supabaseHeaders } from '../Context/defaultCatalog';
 
 const CustomerOrders = () => {
   const { user, isLoaded, isSignedIn } = useUser();
@@ -22,6 +23,38 @@ const CustomerOrders = () => {
 
     setLoading(true);
     try {
+      // 1. Try Supabase direct query
+      const emailEncoded = encodeURIComponent(userEmail.toLowerCase().trim());
+      const supaRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?user_email=eq.${emailEncoded}&order=created_at.desc`, {
+        headers: supabaseHeaders
+      });
+      if (supaRes.ok) {
+        const supaData = await supaRes.json();
+        if (Array.isArray(supaData) && supaData.length > 0) {
+          const mapped = supaData.map(o => ({
+            id: o.id,
+            createdAt: o.created_at,
+            customerName: o.customer_name,
+            discountAmount: o.discount_amount,
+            items: o.items,
+            notes: o.notes,
+            paymentMethod: o.payment_method,
+            paymentStatus: o.payment_status,
+            phone: o.phone,
+            status: o.status,
+            totalAmount: o.total_amount,
+            totalUnits: o.total_units,
+            trackingNumber: o.tracking_number,
+            userEmail: o.user_email,
+            voucherCode: o.voucher_code
+          }));
+          setOrders(mapped);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // 2. Fallback to API_URL
       const res = await fetch(`${API_URL}/user-orders?email=${encodeURIComponent(userEmail)}`);
       const data = await res.json();
       setOrders(Array.isArray(data) ? data : []);

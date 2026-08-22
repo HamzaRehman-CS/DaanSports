@@ -5,6 +5,7 @@ import { Trash2, CreditCard, Tag, ArrowRight, ShieldCheck, FileText, ShoppingBag
 import CardPaymentModal from '../CardPaymentModal/CardPaymentModal';
 import { useNavigate, Link } from 'react-router-dom';
 import { API_URL } from '../../config';
+import { fetchCloudVouchers, createCloudOrder, loadVouchers } from '../../Context/defaultCatalog';
 
 const CartItems = () => {
   const { user, isSignedIn } = useUser();
@@ -19,17 +20,13 @@ const CartItems = () => {
   const [appliedVoucher, setAppliedVoucher] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [voucherMsg, setVoucherMsg] = useState({ type: '', text: '' });
-  const [availableVouchers, setAvailableVouchers] = useState([]);
+  const [availableVouchers, setAvailableVouchers] = useState(() => loadVouchers());
 
   React.useEffect(() => {
-    fetch(`${API_URL}/vouchers`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setAvailableVouchers(data);
-      })
-      .catch(err => console.error("Vouchers fetch error:", err));
+    fetchCloudVouchers().then(data => {
+      if (Array.isArray(data) && data.length > 0) setAvailableVouchers(data);
+    }).catch(() => {});
   }, []);
-
 
   const baseFreight = cartValue > 1000 ? 0 : (cartValue > 0 ? 150 : 0);
   const rawTotal = cartValue + baseFreight;
@@ -49,12 +46,34 @@ const CartItems = () => {
   const handleApplyVoucher = async () => {
     if (!voucherCodeInput.trim()) return;
     setVoucherMsg({ type: '', text: '' });
+    const code = voucherCodeInput.trim().toUpperCase();
+
+    // 1. Try local/cloud voucher check
+    const matchedVoucher = (availableVouchers || []).find(v => (v.code || '').toUpperCase() === code);
+    if (matchedVoucher) {
+      const minReq = Number(matchedVoucher.min_order !== undefined ? matchedVoucher.min_order : (matchedVoucher.minOrder || 0));
+      if (cartValue < minReq) {
+        setVoucherMsg({ type: 'error', text: `Minimum order of $${minReq} required for voucher "${code}".` });
+        return;
+      }
+      let disc = 0;
+      if (matchedVoucher.type === 'percent') {
+        disc = (cartValue * Number(matchedVoucher.discount)) / 100;
+      } else {
+        disc = Number(matchedVoucher.discount);
+      }
+      disc = Math.min(cartValue, disc);
+      setAppliedVoucher(matchedVoucher);
+      setDiscountAmount(disc);
+      setVoucherMsg({ type: 'success', text: `Voucher "${code}" applied! Discount -$${disc.toFixed(2)} USD` });
+      return;
+    }
 
     try {
       const res = await fetch(`${API_URL}/apply-voucher`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({ code: voucherCodeInput.trim(), subtotal: cartValue })
+        body: JSON.stringify({ code: code, subtotal: cartValue })
       });
       const data = await res.json();
 
@@ -66,7 +85,7 @@ const CartItems = () => {
         setVoucherMsg({ type: 'error', text: data.error || "Invalid voucher code." });
       }
     } catch (err) {
-      setVoucherMsg({ type: 'error', text: err.message });
+      setVoucherMsg({ type: 'error', text: "Invalid or inactive voucher code." });
     }
   };
 
@@ -94,17 +113,25 @@ const CartItems = () => {
         notes: "Pro-Forma Invoice Requested by Buyer"
       };
 
-      const res = await fetch(`${API_URL}/create-order`, {
-        method: "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify(orderPayload)
-      });
-      const data = await res.json();
+      try {
+        const res = await fetch(`${API_URL}/create-order`, {
+          method: "POST",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify(orderPayload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          navigate('/orders');
+          return;
+        }
+      } catch (err) {}
 
-      if (data.success) {
+      // Direct Supabase Fallback
+      const supaOrder = await createCloudOrder(orderPayload);
+      if (supaOrder && supaOrder.success) {
         navigate('/orders');
       } else {
-        alert("Error: " + (data.error || "Failed to place order"));
+        alert("Failed to submit order. Please try again.");
       }
     } catch (err) {
       alert("Network error: " + err.message);

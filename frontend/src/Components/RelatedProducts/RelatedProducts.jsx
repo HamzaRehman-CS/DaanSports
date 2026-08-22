@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './RelatedProducts.css';
 import Item from '../Item/Item';
 import { API_URL } from '../../config';
-import { loadCatalogProducts } from '../../Context/defaultCatalog';
+import { loadCatalogProducts, fetchCloudProducts } from '../../Context/defaultCatalog';
 
 const RelatedProducts = (props) => {
   const { product } = props;
@@ -17,8 +17,7 @@ const RelatedProducts = (props) => {
 
   useEffect(() => {
     if (product && product.category) {
-      fetch(`${API_URL}/all-products`)
-        .then(res => res.json())
+      fetchCloudProducts()
         .then(data => {
           if (Array.isArray(data) && data.length > 0) {
             const matched = data.filter(p => (p.category || '').toLowerCase() === (product.category || '').toLowerCase() && p.id !== product.id);

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import './VoucherManager.css';
 import { API_URL } from '../../config';
+import { loadVouchers, fetchCloudVouchers, saveCloudVoucher, deleteCloudVoucher } from '../../defaultCatalog';
 
 const VoucherManager = () => {
-  const [vouchers, setVouchers] = useState([]);
+  const [vouchers, setVouchers] = useState(() => loadVouchers());
   const [code, setCode] = useState('');
   const [type, setType] = useState('percent'); // 'percent' or 'fixed'
   const [discount, setDiscount] = useState(10);
@@ -12,11 +13,12 @@ const VoucherManager = () => {
 
   const fetchVouchers = async () => {
     try {
-      const res = await fetch(`${API_URL}/vouchers`);
-      const data = await res.json();
-      setVouchers(data);
+      const data = await fetchCloudVouchers();
+      if (Array.isArray(data)) {
+        setVouchers(data);
+      }
     } catch (err) {
-      console.error(err);
+      setVouchers(loadVouchers());
     }
   };
 
@@ -28,25 +30,30 @@ const VoucherManager = () => {
     e.preventDefault();
     if (!code.trim()) return alert("Please enter a voucher code.");
 
+    const newVoucher = {
+      code: code.toUpperCase().trim(),
+      type,
+      discount: Number(discount),
+      min_order: Number(minOrder),
+      description,
+      date: new Date().toISOString()
+    };
+
     try {
-      const res = await fetch(`${API_URL}/create-voucher`, {
-        method: "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({
-          code: code.toUpperCase().trim(),
-          type,
-          discount: Number(discount),
-          minOrder: Number(minOrder),
-          description
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(`Voucher "${data.voucher.code}" created successfully!`);
-        setCode('');
-        setDescription('');
-        fetchVouchers();
-      }
+      const updated = await saveCloudVoucher(newVoucher);
+      setVouchers(updated);
+
+      try {
+        await fetch(`${API_URL}/create-voucher`, {
+          method: "POST",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify(newVoucher)
+        });
+      } catch (err) {}
+
+      alert(`🎉 Voucher "${newVoucher.code}" created successfully & synced live!`);
+      setCode('');
+      setDescription('');
     } catch (err) {
       alert("Error creating voucher: " + err.message);
     }
@@ -56,16 +63,18 @@ const VoucherManager = () => {
     if (!window.confirm(`Delete voucher ${voucherCode}?`)) return;
 
     try {
-      const res = await fetch(`${API_URL}/delete-voucher`, {
-        method: "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({ code: voucherCode })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(`Voucher ${voucherCode} deleted.`);
-        fetchVouchers();
-      }
+      const updated = await deleteCloudVoucher(voucherCode);
+      setVouchers(updated);
+
+      try {
+        await fetch(`${API_URL}/delete-voucher`, {
+          method: "POST",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify({ code: voucherCode })
+        });
+      } catch (err) {}
+
+      alert(`🗑️ Voucher ${voucherCode} deleted and synced live.`);
     } catch (err) {
       alert("Error deleting voucher: " + err.message);
     }

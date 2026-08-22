@@ -757,24 +757,19 @@ const saveProductLive = async (productObj) => {
         }
         await safeSupabase(async (s) => {
             await s.from('products').upsert([{
-                id: productObj.id,
-                name: productObj.name,
-                category: productObj.category,
-                new_price: productObj.new_price,
-                old_price: productObj.old_price,
-                moq: productObj.moq,
-                description: productObj.description,
-                material: productObj.material,
-                gsm: productObj.gsm,
-                stitching: productObj.stitching,
-                customization: productObj.customization,
-                lead_time: productObj.leadTime,
-                colors: productObj.colors,
-                sizes: productObj.sizes,
-                stock: productObj.stock,
-                image: productObj.image,
-                images: productObj.images,
-                available: productObj.available !== false
+                id: Number(productObj.id),
+                name: String(productObj.name || ''),
+                category: String(productObj.category || 'Tracksuits'),
+                new_price: Number(productObj.new_price || 0),
+                old_price: Number(productObj.old_price || 0),
+                moq: Number(productObj.moq || 50),
+                description: String(productObj.description || ''),
+                colors: Array.isArray(productObj.colors) ? productObj.colors : (typeof productObj.colors === 'string' ? productObj.colors.split(',').map(c => c.trim()).filter(Boolean) : []),
+                sizes: Array.isArray(productObj.sizes) ? productObj.sizes : (typeof productObj.sizes === 'string' ? productObj.sizes.split(',').map(s => s.trim()).filter(Boolean) : ["S", "M", "L", "XL", "2XL"]),
+                image: String(productObj.image || ''),
+                images: Array.isArray(productObj.images) && productObj.images.length > 0 ? productObj.images : [String(productObj.image || '')],
+                available: productObj.available !== false,
+                date: productObj.date || new Date().toISOString()
             }]);
         });
     };

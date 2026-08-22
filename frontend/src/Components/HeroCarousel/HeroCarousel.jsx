@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, ChevronLeft, ChevronRight, ShieldCheck, Factory } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { API_URL } from '../../config';
-import { loadCms, subscribeToGlobalSync } from '../../Context/defaultCatalog';
+import { loadCms, fetchCloudCms, subscribeToGlobalSync } from '../../Context/defaultCatalog';
 
 const defaultHeroSlides = [
   {
@@ -59,64 +59,77 @@ const defaultHeroSlides = [
   }
 ];
 
+const parseSlidesData = (slidesArray) => {
+  if (!Array.isArray(slidesArray) || slidesArray.length === 0) return defaultHeroSlides;
+  return slidesArray.map((s, idx) => {
+    const rawTitle = s.titleLine1 && s.titleLine2 
+      ? `${s.titleLine1}\n${s.titleLine2}`
+      : (s.title || defaultHeroSlides[idx % defaultHeroSlides.length].title);
+
+    const lines = rawTitle.split(/<br\s*\/?>|\n/i);
+    const line1 = s.titleLine1 || lines[0] || "DRESS SHARP";
+    const line2 = s.titleLine2 || lines[1] || (lines.length > 1 ? lines.slice(1).join(' ') : "LIVE STRONG");
+
+    let image = s.bgImage || s.image || defaultHeroSlides[idx % defaultHeroSlides.length].bgImage;
+    if (image.includes("photo-1534438327276-14e5300c3a48")) {
+      image = "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=85&w=2000&auto=format&fit=crop";
+    }
+
+    return {
+      id: s.id || idx + 1,
+      titleLine1: String(line1).replace(/<[^>]*>?/gm, '').trim(),
+      titleLine2: String(line2).replace(/<[^>]*>?/gm, '').trim(),
+      subtitle: s.subtitle || s.description || "Premium quality apparel for every move you make.",
+      ctaText: s.ctaText || s.primaryCtaText || "SHOP NOW",
+      ctaLink: s.ctaLink || s.primaryCtaLink || "/category/all",
+      badgeText: s.badgeText || s.badgeTag || "DIRECT FACTORY WHOLESALE",
+      rightTagTop: s.rightTagTop || "NEW COLLECTION",
+      rightTagTopVal: s.rightTagTopVal || "2026",
+      rightTagBottom: s.rightTagBottom || "UP TO",
+      rightTagBottomVal: s.rightTagBottomVal || (s.priceText ? s.priceText : "30% OFF"),
+      bgImage: image
+    };
+  });
+};
+
 export default function HeroCarousel() {
-  const [slides, setSlides] = useState(defaultHeroSlides);
+  const [slides, setSlides] = useState(() => {
+    const initialCms = loadCms();
+    return parseSlidesData(initialCms?.heroSlides);
+  });
   const [activeIndex, setActiveIndex] = useState(0);
   const prevRef = useRef(null);
   const nextRef = useRef(null);
   const [swiperReady, setSwiperReady] = useState(false);
 
-  const fetchSlides = () => {
-    fetch(`${API_URL}/cms`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && Array.isArray(data.heroSlides) && data.heroSlides.length > 0) {
-          const parsed = data.heroSlides.map((s, idx) => {
-            const rawTitle = s.titleLine1 && s.titleLine2 
-              ? `${s.titleLine1}\n${s.titleLine2}`
-              : (s.title || defaultHeroSlides[idx % defaultHeroSlides.length].title);
-
-            const lines = rawTitle.split(/<br\s*\/?>|\n/i);
-            const line1 = s.titleLine1 || lines[0] || "DRESS SHARP";
-            const line2 = s.titleLine2 || lines[1] || (lines.length > 1 ? lines.slice(1).join(' ') : "LIVE STRONG");
-
-            let image = s.bgImage || s.image || defaultHeroSlides[idx % defaultHeroSlides.length].bgImage;
-            if (image.includes("photo-1534438327276-14e5300c3a48")) {
-              image = "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=85&w=2000&auto=format&fit=crop";
-            }
-
-            return {
-              id: s.id || idx + 1,
-              titleLine1: line1.replace(/<[^>]*>?/gm, '').trim(),
-              titleLine2: line2.replace(/<[^>]*>?/gm, '').trim(),
-              subtitle: s.subtitle || s.description || "Premium quality apparel for every move you make.",
-              ctaText: s.ctaText || s.primaryCtaText || "SHOP NOW",
-              ctaLink: s.ctaLink || s.primaryCtaLink || "/category/all",
-              badgeText: s.badgeText || s.badgeTag || "DIRECT FACTORY WHOLESALE",
-              rightTagTop: s.rightTagTop || "NEW COLLECTION",
-              rightTagTopVal: s.rightTagTopVal || "2026",
-              rightTagBottom: s.rightTagBottom || "UP TO",
-              rightTagBottomVal: s.rightTagBottomVal || (s.priceText ? s.priceText : "30% OFF"),
-              bgImage: image
-            };
-          });
-          setSlides(parsed);
-        }
-      })
-      .catch(() => {});
+  const fetchSlides = async () => {
+    try {
+      const data = await fetchCloudCms();
+      if (data && Array.isArray(data.heroSlides) && data.heroSlides.length > 0) {
+        setSlides(parseSlidesData(data.heroSlides));
+      }
+    } catch (err) {}
   };
 
   useEffect(() => {
     fetchSlides();
 
     const unsubscribe = subscribeToGlobalSync((type, payload) => {
-      if (type === 'CMS_UPDATED') {
-        fetchSlides();
+      if (type === 'CMS_UPDATED' && payload) {
+        if (Array.isArray(payload.heroSlides)) {
+          setSlides(parseSlidesData(payload.heroSlides));
+        } else {
+          fetchSlides();
+        }
       }
     });
 
-    const interval = setInterval(fetchSlides, 4000);
-    const handleFocus = () => fetchSlides();
+    const interval = setInterval(fetchSlides, 3000);
+    const handleFocus = () => {
+      fetchSlides();
+      const stored = loadCms();
+      if (stored?.heroSlides) setSlides(parseSlidesData(stored.heroSlides));
+    };
     window.addEventListener('focus', handleFocus);
 
     return () => {

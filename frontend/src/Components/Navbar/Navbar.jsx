@@ -5,7 +5,7 @@ import { ShopContext } from '../../Context/ShopContext';
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
 import { API_URL } from '../../config';
 import DsLogo from './DsLogo';
-import { loadCategories, saveCategories, loadCms, saveCms, subscribeToGlobalSync } from '../../Context/defaultCatalog';
+import { loadCategories, saveCategories, loadCms, saveCms, fetchCloudCategories, fetchCloudCms, subscribeToGlobalSync } from '../../Context/defaultCatalog';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -31,26 +31,19 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   }, [location]);
 
-  const fetchNavData = () => {
-    fetch(`${API_URL}/categories`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setCategories(data);
-          saveCategories(data);
-        }
-      })
-      .catch(() => {});
-
-    fetch(`${API_URL}/cms`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.announcementText) {
-          setAnnouncementText(data.announcementText);
-          saveCms(data);
-        }
-      })
-      .catch(() => {});
+  const fetchNavData = async () => {
+    try {
+      const [cats, cms] = await Promise.all([
+        fetchCloudCategories(),
+        fetchCloudCms()
+      ]);
+      if (Array.isArray(cats) && cats.length > 0) {
+        setCategories(cats);
+      }
+      if (cms && cms.announcementText) {
+        setAnnouncementText(cms.announcementText);
+      }
+    } catch (err) {}
   };
 
   useEffect(() => {

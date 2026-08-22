@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './CategoriesMarquee.css';
 import { Link } from 'react-router-dom';
 import { API_URL } from '../../config';
+import { loadCategories, fetchCloudCategories, subscribeToGlobalSync } from '../../Context/defaultCatalog';
 
 const defaultCategories = [
   { name: "Tracksuits & Joggers", link: "/tracksuits", icon: "⚡" },
@@ -12,23 +13,52 @@ const defaultCategories = [
   { name: "Custom Trousers", link: "/trousers", icon: "👖" }
 ];
 
+const mapMarquee = (cats) => {
+  if (!Array.isArray(cats) || cats.length === 0) return defaultCategories;
+  return cats.map(c => ({
+    name: c.name,
+    link: `/category/${c.slug || (c.name || '').toLowerCase()}`,
+    icon: "⚡"
+  }));
+};
+
 const CategoriesMarquee = () => {
-  const [marqueeList, setMarqueeList] = useState(defaultCategories);
+  const [marqueeList, setMarqueeList] = useState(() => {
+    const stored = loadCategories();
+    return mapMarquee(stored);
+  });
+
+  const fetchCategories = async () => {
+    try {
+      const data = await fetchCloudCategories();
+      if (Array.isArray(data) && data.length > 0) {
+        setMarqueeList(mapMarquee(data));
+      }
+    } catch (err) {}
+  };
 
   useEffect(() => {
-    fetch(`${API_URL}/categories`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          const formatted = data.map(c => ({
-            name: c.name,
-            link: `/category/${c.slug || c.name.toLowerCase()}`,
-            icon: "⚡"
-          }));
-          setMarqueeList(formatted);
-        }
-      })
-      .catch(err => console.error("Categories fetch error:", err));
+    fetchCategories();
+
+    const unsubscribe = subscribeToGlobalSync((type, payload) => {
+      if (type === 'CATEGORIES_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+        setMarqueeList(mapMarquee(payload));
+      }
+    });
+
+    const interval = setInterval(fetchCategories, 4000);
+    const handleFocus = () => {
+      fetchCategories();
+      const stored = loadCategories();
+      if (stored && stored.length > 0) setMarqueeList(mapMarquee(stored));
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      unsubscribe();
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const itemsToRender = marqueeList.concat(marqueeList);

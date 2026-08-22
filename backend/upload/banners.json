@@ -1,11 +1,11 @@
 {
   "tallVertical": {
     "category": "Tracksuits",
-    "title": "PERFORMANCE COMPRESSION PRO 2026",
-    "subtitle": "Custom combed fleece engineered for champions worldwide.",
+    "title": "FLAGSHIP TEAM TRACKSUITS",
+    "subtitle": "Custom 330 GSM combed fleece & interlock sets engineered for elite athletics & custom private labels.",
     "badge": "FLAGSHIP SPEC",
     "ctaText": "Explore Tracksuits",
-    "bgImage": "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=1200&auto=format&fit=crop"
+    "bgImage": "https://ldohfbqsmjuqvtbnxmbk.supabase.co/storage/v1/object/public/images/upload_1787386958701_fdqm1a.jpeg"
   },
   "wideFeature": {
     "category": "Sweatshirts",
@@ -55,11 +55,5 @@
     "bgImage": "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=2070&auto=format&fit=crop",
     "discountPercent": 15
   },
-  "customBanners": [],
-  "topSellers": {
-    "title": "TOP SELLERS — FLAGSHIP EDITION",
-    "subtitle": "Handpicked Performance Gear & High-Volume Custom Apparel",
-    "badge": "BESTSELLER SELECTION",
-    "bgImage": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=2070&auto=format&fit=crop"
-  }
+  "customBanners": []
 }

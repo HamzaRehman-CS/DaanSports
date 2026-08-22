@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './CategoryManager.css';
 import { API_URL } from '../../config';
-import { loadCategories, saveCategories, fetchCloudCategories } from '../../defaultCatalog';
+import { loadCategories, saveCategories, fetchCloudCategories, deleteCloudCategory, uploadCloudImage } from '../../defaultCatalog';
 
 const CategoryManager = () => {
   const [categories, setCategories] = useState(() => loadCategories());
@@ -44,38 +44,15 @@ const CategoryManager = () => {
     if (!file) return;
     setUploading(true);
     try {
-      const form = new FormData();
-      form.append('product', file);
-      const res = await fetch(`${API_URL}/upload`, {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: form
-      });
-      const data = await res.json();
-      if (data.success) {
-        if (isEdit) {
-          setEditFormData(prev => ({ ...prev, banner: data.image_url }));
-        } else {
-          setFormData(prev => ({ ...prev, banner: data.image_url }));
-        }
-        alert(`📷 Category banner uploaded!`);
+      const publicUrl = await uploadCloudImage(file);
+      if (isEdit) {
+        setEditFormData(prev => ({ ...prev, banner: publicUrl }));
       } else {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          if (isEdit) setEditFormData(prev => ({ ...prev, banner: e.target.result }));
-          else setFormData(prev => ({ ...prev, banner: e.target.result }));
-          alert(`📷 Category banner loaded!`);
-        };
-        reader.readAsDataURL(file);
+        setFormData(prev => ({ ...prev, banner: publicUrl }));
       }
+      alert(`📷 Category banner uploaded to Supabase Cloud!`);
     } catch (err) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (isEdit) setEditFormData(prev => ({ ...prev, banner: e.target.result }));
-        else setFormData(prev => ({ ...prev, banner: e.target.result }));
-        alert(`📷 Category banner loaded!`);
-      };
-      reader.readAsDataURL(file);
+      alert(`Error uploading image: ${err.message}`);
     } finally {
       setUploading(false);
     }
@@ -163,10 +140,8 @@ const CategoryManager = () => {
   const handleDeleteCategory = async (id, name) => {
     if (!window.confirm(`Are you sure you want to delete category "${name}"?`)) return;
 
-    const current = loadCategories();
-    const updated = current.filter(c => c.id !== id);
+    const updated = await deleteCloudCategory(id);
     setCategories(updated);
-    saveCategories(updated);
 
     try {
       await fetch(`${API_URL}/delete-category`, {
@@ -174,9 +149,7 @@ const CategoryManager = () => {
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({ id })
       });
-    } catch (err) {
-      console.warn("Backend sync notice (saved locally):", err.message);
-    }
+    } catch (err) {}
 
     alert(`🗑️ Category "${name}" deleted and synced live.`);
   };

@@ -8,57 +8,57 @@ const Sidebar = () => {
   return (
     <div className='admin-sidebar'>
       <div className="sidebar-menu">
-        <Link to={'/admin/dashboard'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/admin' || location.pathname === '/admin/' || location.pathname === '/admin/dashboard' ? 'active' : ''}`}>
+        <Link to={'/dashboard'} style={{ textDecoration: "none" }}>
+          <div className={`sidebar-item ${location.pathname === '/' || location.pathname === '/dashboard' ? 'active' : ''}`}>
             <span className="sidebar-icon">📊</span>
             <p>Dashboard & Metrics</p>
           </div>
         </Link>
 
-        <Link to={'/admin/list-product'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/admin/list-product' ? 'active' : ''}`}>
+        <Link to={'/list-product'} style={{ textDecoration: "none" }}>
+          <div className={`sidebar-item ${location.pathname === '/list-product' ? 'active' : ''}`}>
             <span className="sidebar-icon">📦</span>
             <p>Products & Specs</p>
           </div>
         </Link>
 
-        <Link to={'/admin/add-product'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/admin/add-product' ? 'active' : ''}`}>
+        <Link to={'/add-product'} style={{ textDecoration: "none" }}>
+          <div className={`sidebar-item ${location.pathname === '/add-product' ? 'active' : ''}`}>
             <span className="sidebar-icon">➕</span>
             <p>Add New Product</p>
           </div>
         </Link>
         
-        <Link to={'/admin/categories'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/admin/categories' ? 'active' : ''}`}>
+        <Link to={'/categories'} style={{ textDecoration: "none" }}>
+          <div className={`sidebar-item ${location.pathname === '/categories' ? 'active' : ''}`}>
             <span className="sidebar-icon">🏷️</span>
             <p>Categories & Banners</p>
           </div>
         </Link>
 
-        <Link to={'/admin/banners'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/admin/banners' ? 'active' : ''}`}>
+        <Link to={'/banners'} style={{ textDecoration: "none" }}>
+          <div className={`sidebar-item ${location.pathname === '/banners' ? 'active' : ''}`}>
             <span className="sidebar-icon">🖼️</span>
             <p>Top Sellers Banners</p>
           </div>
         </Link>
 
-        <Link to={'/admin/orders'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/admin/orders' ? 'active' : ''}`}>
+        <Link to={'/orders'} style={{ textDecoration: "none" }}>
+          <div className={`sidebar-item ${location.pathname === '/orders' ? 'active' : ''}`}>
             <span className="sidebar-icon">🚚</span>
             <p>Customer Orders</p>
           </div>
         </Link>
 
-        <Link to={'/admin/vouchers'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/admin/vouchers' ? 'active' : ''}`}>
+        <Link to={'/vouchers'} style={{ textDecoration: "none" }}>
+          <div className={`sidebar-item ${location.pathname === '/vouchers' ? 'active' : ''}`}>
             <span className="sidebar-icon">🎫</span>
             <p>Promo Vouchers</p>
           </div>
         </Link>
 
-        <Link to={'/admin/cms'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/admin/cms' ? 'active' : ''}`}>
+        <Link to={'/cms'} style={{ textDecoration: "none" }}>
+          <div className={`sidebar-item ${location.pathname === '/cms' ? 'active' : ''}`}>
             <span className="sidebar-icon">🎨</span>
             <p>Site CMS</p>
           </div>

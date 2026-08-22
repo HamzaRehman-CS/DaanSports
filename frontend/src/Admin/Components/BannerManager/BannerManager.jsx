@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './BannerManager.css';
 import { API_URL } from '../../config';
-import { loadBanners, saveBanners, loadCategories, saveCategories, fetchCloudBanners, fetchCloudCategories } from '../../defaultCatalog';
+import { loadBanners, saveBanners, loadCategories, saveCategories, fetchCloudBanners, fetchCloudCategories, uploadCloudImage } from '../../defaultCatalog';
 
 const defaultBannersState = loadBanners();
 
@@ -39,48 +39,15 @@ const BannerManager = () => {
     const uploadKey = customIndex !== null ? `custom_${customIndex}` : sectionKey;
     setUploadingSection(uploadKey);
     try {
-      const form = new FormData();
-      form.append('product', file);
-      const res = await fetch(`${API_URL}/upload`, {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: form
-      });
-      const data = await res.json();
-      if (data.success) {
-        if (customIndex !== null) {
-          updateCustomBanner(customIndex, 'bgImage', data.image_url);
-        } else {
-          updateBannerSection(sectionKey, 'bgImage', data.image_url);
-        }
-        alert(`📷 Banner image uploaded successfully!`);
+      const publicUrl = await uploadCloudImage(file);
+      if (customIndex !== null) {
+        updateCustomBanner(customIndex, 'bgImage', publicUrl);
       } else {
-        // Fallback: Convert to Base64/DataURL so user upload works even without backend upload service
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const dataUrl = e.target.result;
-          if (customIndex !== null) {
-            updateCustomBanner(customIndex, 'bgImage', dataUrl);
-          } else {
-            updateBannerSection(sectionKey, 'bgImage', dataUrl);
-          }
-          alert(`📷 Banner image loaded successfully!`);
-        };
-        reader.readAsDataURL(file);
+        updateBannerSection(sectionKey, 'bgImage', publicUrl);
       }
+      alert(`📷 Image uploaded to Supabase Storage & updated! Click "Save & Publish" to go live.`);
     } catch (err) {
-      // Fallback: Convert to Base64/DataURL so user upload works
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const dataUrl = e.target.result;
-        if (customIndex !== null) {
-          updateCustomBanner(customIndex, 'bgImage', dataUrl);
-        } else {
-          updateBannerSection(sectionKey, 'bgImage', dataUrl);
-        }
-        alert(`📷 Banner image loaded successfully!`);
-      };
-      reader.readAsDataURL(file);
+      alert(`Upload error: ${err.message}`);
     } finally {
       setUploadingSection(null);
     }
@@ -88,29 +55,29 @@ const BannerManager = () => {
 
   const handleSaveBanners = async (e) => {
     if (e) e.preventDefault();
-    setSaveStatus('Saving...');
+    setSaveStatus('Saving to Supabase Cloud Database...');
 
-    // 1. Save locally and broadcast to all website tabs immediately (<1ms)
-    saveBanners(banners);
-
-    // 2. Sync to Backend API
     try {
-      const res = await fetch(`${API_URL}/update-promotional-banners`, {
-        method: "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify(banners)
-      });
-      const data = await res.json();
-      if (data && data.success) {
-        console.log("Backend API confirmed banner update");
-      }
+      // 1. Save directly to Supabase Cloud & broadcast
+      await saveBanners(banners);
+
+      // 2. Sync to Backend API
+      try {
+        await fetch(`${API_URL}/update-promotional-banners`, {
+          method: "POST",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify(banners)
+        });
+      } catch (err) {}
+
+      setSaveStatus('✅ Saved & Synced Live to Supabase Cloud Database!');
+      alert("🎉 Promotional Banners & Posters Saved & Synced Live to Main Website!");
     } catch (err) {
-      console.warn("Backend API sync notice (saved locally & broadcast live):", err.message);
+      setSaveStatus('⚠️ Error: ' + err.message);
+      alert("Error saving banners: " + err.message);
     }
 
-    setSaveStatus('Saved!');
-    alert("🎉 Promotional Banners & Posters Saved & Synced Live to Main Website!");
-    setTimeout(() => setSaveStatus(''), 3000);
+    setTimeout(() => setSaveStatus(''), 4000);
   };
 
   const updateBannerSection = (sectionKey, field, value) => {
@@ -164,7 +131,7 @@ const BannerManager = () => {
           <h2>Banner & Poster Studio</h2>
           <p>Configure all promotional posters, Bento grid tiles, and stretched category sections on the live storefront.</p>
         </div>
-        <div className="header-actions" style={{ display: 'flex', gap: '10px' }}>
+        <div className="header-actions" style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
           <button 
             type="button" 
             onClick={() => setActiveTab('bento')}
@@ -188,6 +155,14 @@ const BannerManager = () => {
             style={{ backgroundColor: activeTab === 'custom' ? '#dc2626' : '#27272a' }}
           >
             ✨ Custom Sections ({banners.customBanners?.length || 0})
+          </button>
+          <button
+            type="button"
+            onClick={handleSaveBanners}
+            className="save-banners-btn"
+            style={{ padding: '8px 18px', fontSize: '13px', backgroundColor: '#16a34a' }}
+          >
+            💾 Save & Publish Live
           </button>
         </div>
       </div>

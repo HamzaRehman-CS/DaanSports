@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './SiteManager.css';
 import { API_URL } from '../../config';
-import { loadCms, saveCms, fetchCloudCms } from '../../defaultCatalog';
+import { loadCms, saveCms, fetchCloudCms, uploadCloudImage } from '../../defaultCatalog';
 
 const SiteManager = () => {
   const [cms, setCms] = useState(() => loadCms());
@@ -40,21 +40,10 @@ const SiteManager = () => {
     if (!file) return;
     setUploadingIndex(index);
     try {
-      const formData = new FormData();
-      formData.append('product', file);
-      const res = await fetch(`${API_URL}/upload`, {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: formData
-      });
-      const data = await res.json();
-      if (data.success) {
-        handleSlideChange(index, 'bgImage', data.image_url);
-        setSaveMessage(`📷 Slide ${index + 1} background image uploaded! Remember to click "Save & Publish".`);
-        setTimeout(() => setSaveMessage(null), 4000);
-      } else {
-        alert("Upload error: " + (data.error || "Failed to upload image"));
-      }
+      const publicUrl = await uploadCloudImage(file);
+      handleSlideChange(index, 'bgImage', publicUrl);
+      setSaveMessage(`📷 Slide ${index + 1} background image uploaded to Supabase Cloud! Remember to click "Save & Publish".`);
+      setTimeout(() => setSaveMessage(null), 4000);
     } catch (err) {
       alert("Error uploading image: " + err.message);
     } finally {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './AddProduct.css';
 import upload_area from '../../assets/upload_area.svg';
 import { API_URL } from '../../config';
-import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudCategories, addCloudProduct } from '../../defaultCatalog';
+import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudCategories, addCloudProduct, uploadCloudImage } from '../../defaultCatalog';
 
 const AddProduct = () => {
   const [primaryImage, setPrimaryImage] = useState(null);
@@ -51,15 +51,6 @@ const AddProduct = () => {
     }
   };
 
-  const readFileAsDataUrl = (file) => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.onerror = () => resolve("https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80");
-      reader.readAsDataURL(file);
-    });
-  };
-
   const Add_Product = async () => {
     if (!productDetails.name || !productDetails.new_price) {
       alert("Please fill in the product title and bulk unit price.");
@@ -71,22 +62,9 @@ const AddProduct = () => {
       
       if (primaryImage) {
         try {
-          let primaryFormData = new FormData();
-          primaryFormData.append('product', primaryImage);
-
-          let uploadRes = await fetch(`${API_URL}/upload`, {
-            method: 'POST',
-            headers: { Accept: 'application/json' },
-            body: primaryFormData
-          });
-          let uploadData = await uploadRes.json();
-          if (uploadData && uploadData.success && uploadData.image_url) {
-            primaryUrl = uploadData.image_url;
-          } else {
-            primaryUrl = await readFileAsDataUrl(primaryImage);
-          }
+          primaryUrl = await uploadCloudImage(primaryImage);
         } catch (e) {
-          primaryUrl = await readFileAsDataUrl(primaryImage);
+          console.warn("Primary image upload notice:", e);
         }
       }
 

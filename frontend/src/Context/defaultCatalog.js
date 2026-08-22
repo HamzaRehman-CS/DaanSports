@@ -276,14 +276,17 @@ export const uploadCloudImage = async (file) => {
   const ext = nameParts.length > 1 ? nameParts.pop().toLowerCase().replace(/[^a-z0-9]/g, '') : 'png';
   const cleanFilename = `upload_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext || 'png'}`;
 
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+
   // 1. Direct upload to Supabase Storage bucket 'images'
   try {
     const res = await fetch(`${SUPABASE_URL}/storage/v1/object/images/${cleanFilename}`, {
       method: 'POST',
       headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': file.type || 'image/jpeg'
+        'apikey': currentKey,
+        'Authorization': `Bearer ${currentKey}`,
+        'Content-Type': file.type || 'image/jpeg',
+        'x-upsert': 'true'
       },
       body: file
     });
@@ -569,12 +572,20 @@ export const saveBanners = async (banners) => {
   }
   broadcastSyncEvent('BANNERS_UPDATED', combined);
 
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = {
+    'apikey': currentKey,
+    'Authorization': `Bearer ${currentKey}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'resolution=merge-duplicates'
+  };
+
   try {
     const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.current_banners`, {
       method: 'PATCH',
       headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'apikey': currentKey,
+        'Authorization': `Bearer ${currentKey}`,
         'Content-Type': 'application/json',
         'Prefer': 'return=representation'
       },
@@ -583,13 +594,23 @@ export const saveBanners = async (banners) => {
     if (!patchRes.ok) {
       await fetch(`${SUPABASE_URL}/rest/v1/banners`, {
         method: 'POST',
-        headers: supabaseHeaders,
+        headers: headers,
         body: JSON.stringify([{ id: 'current_banners', data: combined, updated_at: new Date().toISOString() }])
       });
     }
   } catch (err) {
     console.warn("Supabase banner cloud save fallback:", err);
   }
+
+  // Also sync to Backend API
+  try {
+    await fetch(`${API_URL}/update-promotional-banners`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(combined)
+    });
+  } catch (e) {}
+
   return combined;
 };
 

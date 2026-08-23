@@ -94,8 +94,8 @@ const SiteManager = () => {
     setSaving(true);
     setSaveMessage(null);
 
-    // 1. Save locally and broadcast to website immediately (<1ms)
-    saveCms(cms);
+    // 1. Save directly to Supabase Cloud & broadcast to website immediately
+    await saveCms(cms);
 
     // 2. Sync to Backend API
     try {

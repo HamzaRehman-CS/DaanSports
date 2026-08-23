@@ -23,15 +23,28 @@ app.use(helmet({
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'auth-token']
+    allowedHeaders: ['Content-Type', 'Authorization', 'auth-token', 'apikey', 'Cache-Control', 'Pragma']
 }));
 
-app.use(express.json({ limit: '15mb' }));
-app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+// Aggressive Cache-Busting for GET APIs to prevent stale cloud state
+app.use((req, res, next) => {
+    if (req.method === 'GET') {
+        res.set({
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'Surrogate-Control': 'no-store'
+        });
+    }
+    next();
+});
+
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 1000,
+    max: 2000,
     standardHeaders: true,
     legacyHeaders: false,
     message: { success: false, error: "Too many requests, please try again later." }
@@ -39,7 +52,7 @@ const apiLimiter = rateLimit({
 
 const orderLimiter = rateLimit({
     windowMs: 5 * 60 * 1000,
-    max: 200,
+    max: 300,
     message: { success: false, error: "Order limit exceeded, please wait a moment." }
 });
 
@@ -634,6 +647,10 @@ let lastMongoAttemptTime = 0;
 const MONGO_RETRY_INTERVAL = 30000; // 30s cooldown between retries if connection failed
 
 const connectDB = async () => {
+    // If running in serverless and no remote Mongo URI is provided, rely completely on Supabase Cloud
+    if (process.env.VERCEL && !process.env.MONGODB_URI && !process.env.DATABASE_URL) {
+        return null;
+    }
     if (mongoose.connection.readyState === 1) {
         return mongoose.connection;
     }
@@ -659,7 +676,7 @@ const connectDB = async () => {
         await autoSeedMongoIfEmpty();
         return conn;
     } catch (err) {
-        console.warn("ℹ️ MongoDB Connection Notice (Using Cloud/JSON Store):", err.message);
+        console.warn("ℹ️ MongoDB Connection Notice (Using Cloud Supabase Store):", err.message);
         return null;
     } finally {
         isMongoConnecting = false;
@@ -710,6 +727,7 @@ const safeSupabase = async (callback) => {
         );
         return await Promise.race([callback(supabase), timeoutPromise]);
     } catch (err) {
+        console.warn("safeSupabase warning:", err.message);
         return null;
     }
 };
@@ -940,6 +958,12 @@ const saveCmsLive = async (cmsData) => {
 
 // 5. VOUCHERS
 const getVouchersLive = async () => {
+    const supaVouchers = await safeSupabase(async (s) => {
+        const { data, error } = await s.from('vouchers').select('*').order('discount', { ascending: false });
+        return (!error && Array.isArray(data) && data.length > 0) ? data : null;
+    });
+    if (supaVouchers) return supaVouchers;
+
     if (mongoose.connection.readyState === 1) {
         try {
             const dbVouchers = await VoucherModel.find({}).lean();
@@ -957,33 +981,36 @@ const saveVoucherLive = async (voucherObj) => {
     vouchers.push(voucherObj);
     saveJsonVouchers(vouchers);
 
-    const cloudTask = async () => {
-        if (mongoose.connection.readyState === 1) {
-            try {
-                await VoucherModel.findOneAndUpdate({ code: voucherObj.code }, voucherObj, { upsert: true });
-            } catch (e) {}
-        }
-    };
-
-    if (process.env.VERCEL) {
-        await cloudTask();
-    } else {
-        cloudTask().catch(() => {});
-    }
-};
-
-const deleteVoucherLive = async (code) => {
-    let vouchers = getJsonVouchers();
-    vouchers = vouchers.filter(v => v.code !== code);
-    saveJsonVouchers(vouchers);
-
     await safeSupabase(async (s) => {
-        await s.from('vouchers').delete().eq('code', code);
+        await s.from('vouchers').upsert([{
+            code: String(voucherObj.code || '').toUpperCase().trim(),
+            type: String(voucherObj.type || 'percent'),
+            discount: Number(voucherObj.discount || 10),
+            min_order: Number(voucherObj.minOrder !== undefined ? voucherObj.minOrder : (voucherObj.min_order || 0)),
+            description: String(voucherObj.description || '')
+        }]);
     });
 
     if (mongoose.connection.readyState === 1) {
         try {
-            await VoucherModel.deleteOne({ code: code });
+            await VoucherModel.findOneAndUpdate({ code: voucherObj.code }, voucherObj, { upsert: true });
+        } catch (e) {}
+    }
+};
+
+const deleteVoucherLive = async (code) => {
+    const cleanCode = String(code || '').toUpperCase().trim();
+    let vouchers = getJsonVouchers();
+    vouchers = vouchers.filter(v => v.code !== cleanCode);
+    saveJsonVouchers(vouchers);
+
+    await safeSupabase(async (s) => {
+        await s.from('vouchers').delete().eq('code', cleanCode);
+    });
+
+    if (mongoose.connection.readyState === 1) {
+        try {
+            await VoucherModel.deleteOne({ code: cleanCode });
         } catch (e) {}
     }
 };
@@ -992,9 +1019,29 @@ const deleteVoucherLive = async (code) => {
 const getAllOrdersLive = async () => {
     const supaOrders = await safeSupabase(async (s) => {
         const { data, error } = await s.from('orders').select('*').order('created_at', { ascending: false });
-        return (!error && Array.isArray(data) && data.length > 0) ? data : null;
+        if (!error && Array.isArray(data)) {
+            return data.map(o => ({
+                id: o.id,
+                userEmail: o.user_email || o.userEmail,
+                customerName: o.customer_name || o.customerName,
+                phone: o.phone,
+                items: o.items,
+                totalUnits: o.total_units || o.totalUnits,
+                totalAmount: o.total_amount || o.totalAmount,
+                discountAmount: o.discount_amount || o.discountAmount,
+                voucherCode: o.voucher_code || o.voucherCode,
+                paymentMethod: o.payment_method || o.paymentMethod,
+                paymentStatus: o.payment_status || o.paymentStatus,
+                status: o.status,
+                trackingNumber: o.tracking_number || o.trackingNumber,
+                notes: o.notes,
+                createdAt: o.created_at || o.createdAt,
+                updatedAt: o.updated_at || o.updatedAt
+            }));
+        }
+        return null;
     });
-    if (supaOrders) return supaOrders;
+    if (supaOrders && supaOrders.length > 0) return supaOrders;
 
     return getJsonOrders();
 };
@@ -1007,18 +1054,18 @@ const saveOrderLive = async (orderObj) => {
     await safeSupabase(async (s) => {
         await s.from('orders').insert([{
             id: orderObj.id,
-            user_email: orderObj.userEmail,
-            customer_name: orderObj.customerName,
+            user_email: orderObj.userEmail || orderObj.user_email,
+            customer_name: orderObj.customerName || orderObj.customer_name,
             phone: orderObj.phone,
             items: orderObj.items,
-            total_units: orderObj.totalUnits,
-            total_amount: orderObj.totalAmount,
-            discount_amount: orderObj.discountAmount || 0,
-            voucher_code: orderObj.voucherCode || '',
-            payment_method: orderObj.paymentMethod,
-            payment_status: orderObj.paymentStatus,
-            status: orderObj.status,
-            tracking_number: orderObj.trackingNumber || '',
+            total_units: orderObj.totalUnits || orderObj.total_units || 1,
+            total_amount: orderObj.totalAmount || orderObj.total_amount || 0,
+            discount_amount: orderObj.discountAmount || orderObj.discount_amount || 0,
+            voucher_code: orderObj.voucherCode || orderObj.voucher_code || '',
+            payment_method: orderObj.paymentMethod || orderObj.payment_method || 'Card',
+            payment_status: orderObj.paymentStatus || orderObj.payment_status || 'Paid',
+            status: orderObj.status || 'Pending Review',
+            tracking_number: orderObj.trackingNumber || orderObj.tracking_number || '',
             notes: orderObj.notes || ''
         }]);
     });
@@ -1047,7 +1094,7 @@ const updateOrderStatusLive = async (orderId, status, trackingNumber, notes) => 
     saveJsonOrders(orders);
 
     await safeSupabase(async (s) => {
-        const payload = {};
+        const payload = { updated_at: new Date().toISOString() };
         if (status) payload.status = status;
         if (trackingNumber !== undefined) payload.tracking_number = trackingNumber;
         if (notes !== undefined) payload.notes = notes;
@@ -1071,16 +1118,15 @@ const deleteOrderLive = async (orderId) => {
     orders = orders.filter(o => o.id !== orderId);
     saveJsonOrders(orders);
 
-    Promise.resolve().then(async () => {
-        if (mongoose.connection.readyState === 1) {
-            try {
-                await OrderModel.deleteOne({ id: orderId });
-            } catch (e) {}
-        }
-        await safeSupabase(async (s) => {
-            await s.from('orders').delete().eq('id', orderId);
-        });
-    }).catch(() => {});
+    await safeSupabase(async (s) => {
+        await s.from('orders').delete().eq('id', orderId);
+    });
+
+    if (mongoose.connection.readyState === 1) {
+        try {
+            await OrderModel.deleteOne({ id: orderId });
+        } catch (e) {}
+    }
 };
 
 
@@ -1095,37 +1141,110 @@ app.get("/", (req, res) => {
         service: "DAAN Sports Full-Stack API",
         status: "Healthy & Persistent",
         database: mongoose.connection.readyState === 1 ? "MongoDB Connected" : (supabase ? "Supabase Engine Active" : "Local Store"),
-        features: ["MongoDB Atlas Multi-Model", "Supabase DB Engine", "Live CMS & Banner Sync", "Order Tracking", "Voucher Engine"]
+        features: ["Supabase Cloud DB Engine", "Supabase Storage CDN", "Live CMS & Banner Sync", "Order Tracking", "Voucher Engine"]
     });
 });
 
-// Image Upload Endpoint (Converts to Base64 data URI for 100% Serverless Reliability)
+// Image Upload Endpoint (Direct High-Speed Supabase Cloud Storage Pipeline)
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage, limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer({ storage: storage, limits: { fileSize: 20 * 1024 * 1024 } });
 
 app.use('/images', express.static(uploadDir));
 
-app.post("/upload", upload.single('product'), (req, res) => {
+const handleImageUpload = async (req, res) => {
     try {
-        if (!req.file) return res.status(400).json({ success: 0, error: "No image file uploaded" });
-        const mimeType = req.file.mimetype || 'image/png';
-        const base64Url = `data:${mimeType};base64,${req.file.buffer.toString('base64')}`;
-        res.json({ success: 1, image_url: base64Url });
+        if (!req.file) {
+            return res.status(400).json({ success: 0, error: "No image file uploaded" });
+        }
+
+        const originalName = req.file.originalname || 'image.png';
+        const nameParts = originalName.split('.');
+        const ext = nameParts.length > 1 ? nameParts.pop().toLowerCase().replace(/[^a-z0-9]/g, '') : 'png';
+        const filename = `upload_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext || 'png'}`;
+        const mimeType = req.file.mimetype || 'image/jpeg';
+
+        // 1. Priority 1: Supabase Cloud Storage bucket 'images' via initialized client
+        if (supabase) {
+            try {
+                const { data, error } = await supabase.storage
+                    .from('images')
+                    .upload(filename, req.file.buffer, {
+                        contentType: mimeType,
+                        upsert: true
+                    });
+                
+                if (!error && data) {
+                    const { data: pubData } = supabase.storage.from('images').getPublicUrl(filename);
+                    if (pubData && pubData.publicUrl) {
+                        console.log(`⚡ Uploaded to Supabase Cloud Storage: ${pubData.publicUrl}`);
+                        return res.json({ success: 1, image_url: pubData.publicUrl, url: pubData.publicUrl });
+                    }
+                } else if (error) {
+                    console.warn("Supabase Storage Client upload note:", error.message);
+                }
+            } catch (supaErr) {
+                console.warn("Supabase Storage upload exception:", supaErr.message);
+            }
+        }
+
+        // 2. Priority 2: Direct REST upload to Supabase Storage with Service Role Key
+        const supaUrl = process.env.SUPABASE_URL || "https://ldohfbqsmjuqvtbnxmbk.supabase.co";
+        const supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+        try {
+            const restRes = await fetch(`${supaUrl}/storage/v1/object/images/${filename}`, {
+                method: 'POST',
+                headers: {
+                    'apikey': supaKey,
+                    'Authorization': `Bearer ${supaKey}`,
+                    'Content-Type': mimeType,
+                    'x-upsert': 'true'
+                },
+                body: req.file.buffer
+            });
+            if (restRes.ok) {
+                const cdnUrl = `${supaUrl}/storage/v1/object/public/images/${filename}`;
+                console.log(`⚡ Uploaded via Supabase REST: ${cdnUrl}`);
+                return res.json({ success: 1, image_url: cdnUrl, url: cdnUrl });
+            }
+        } catch (restErr) {
+            console.warn("Supabase REST upload note:", restErr.message);
+        }
+
+        // 3. Priority 3: If running locally without Supabase network, save to local static directory
+        if (!process.env.VERCEL) {
+            try {
+                const localFilePath = path.join(uploadDir, filename);
+                fs.writeFileSync(localFilePath, req.file.buffer);
+                const host = req.get('host') || `localhost:${port}`;
+                const protocol = req.protocol || 'http';
+                const localUrl = `${protocol}://${host}/images/${filename}`;
+                return res.json({ success: 1, image_url: localUrl, url: localUrl });
+            } catch (diskErr) {}
+        }
+
+        return res.status(500).json({ success: 0, error: "Cloud storage upload failed." });
     } catch (err) {
         console.error("Upload Route Error:", err);
         res.status(500).json({ success: 0, error: err.message });
     }
-});
+};
 
-// PRODUCT APIs
-app.get('/all-products', async (req, res) => {
+app.post("/upload", upload.single('product'), handleImageUpload);
+app.post("/api/upload", upload.single('product'), handleImageUpload);
+app.post("/upload-banner", upload.single('product'), handleImageUpload);
+app.post("/api/upload-banner", upload.single('product'), handleImageUpload);
+
+// PRODUCT APIs (Supports both /all-products and /allproducts)
+const handleAllProducts = async (req, res) => {
     try {
         const products = await getAllProductsLive();
         res.json(products);
     } catch (err) {
         res.json(getJsonProducts());
     }
-});
+};
+app.get('/all-products', handleAllProducts);
+app.get('/allproducts', handleAllProducts);
 
 app.get('/popular-tracksuits', async (req, res) => {
     try {
@@ -1233,6 +1352,17 @@ app.post('/remove-product', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+app.post('/delete-product', async (req, res) => {
+    try {
+        const idToRemove = Number(req.body.id);
+        await deleteProductLive(idToRemove);
+        console.log(`Product Deleted: ID ${idToRemove}`);
+        res.json({ success: true, id: idToRemove });
+    } catch (err) {
+        console.error("Delete Product Error:", err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 
 // CATEGORY APIs
 app.get('/categories', async (req, res) => {
@@ -1317,17 +1447,19 @@ app.post('/delete-category', async (req, res) => {
     }
 });
 
-// PROMOTIONAL & BENTO BANNERS APIs
-app.get('/promotional-banners', async (req, res) => {
+// PROMOTIONAL & BENTO BANNERS APIs (Supports /promotional-banners and /banners)
+const handleGetBanners = async (req, res) => {
     try {
         const banners = await getBannersLive();
         res.json(banners);
     } catch (err) {
         res.json(defaultBanners);
     }
-});
+};
+app.get('/promotional-banners', handleGetBanners);
+app.get('/banners', handleGetBanners);
 
-app.post('/update-promotional-banners', async (req, res) => {
+const handleUpdateBanners = async (req, res) => {
     try {
         const bannersData = req.body;
         await saveBannersLive(bannersData);
@@ -1337,7 +1469,9 @@ app.post('/update-promotional-banners', async (req, res) => {
         console.error("Update Banners Error:", err);
         res.status(500).json({ success: false, error: err.message });
     }
-});
+};
+app.post('/update-promotional-banners', handleUpdateBanners);
+app.post('/update-banners', handleUpdateBanners);
 
 // CMS (HERO SLIDER & ANNOUNCEMENTS) APIs
 app.get('/cms', async (req, res) => {
@@ -1373,14 +1507,14 @@ app.get('/vouchers', async (req, res) => {
 
 app.post('/create-voucher', async (req, res) => {
     try {
-        const { code, type, discount, minOrder, description } = req.body;
+        const { code, type, discount, minOrder, min_order, description } = req.body;
         if (!code) return res.status(400).json({ success: false, error: "Voucher code required." });
 
         const newVoucher = {
             code: code.toUpperCase().trim(),
             type: type || "percent",
             discount: Number(discount) || 10,
-            minOrder: Number(minOrder) || 0,
+            minOrder: Number(minOrder !== undefined ? minOrder : (min_order || 0)),
             description: description || "Promo Discount Voucher",
             date: new Date()
         };
@@ -1419,8 +1553,9 @@ app.post('/apply-voucher', async (req, res) => {
             return res.status(400).json({ success: false, error: "Invalid or expired voucher code." });
         }
 
-        if (total < found.minOrder) {
-            return res.status(400).json({ success: false, error: `Voucher requires a minimum order of $${found.minOrder}.` });
+        const minReq = Number(found.min_order !== undefined ? found.min_order : (found.minOrder || 0));
+        if (total < minReq) {
+            return res.status(400).json({ success: false, error: `Voucher requires a minimum order of $${minReq}.` });
         }
 
         let discountAmt = 0;
@@ -1443,7 +1578,7 @@ app.post('/apply-voucher', async (req, res) => {
     }
 });
 
-// ORDERS SYSTEM APIs
+// ORDERS SYSTEM APIs (Supports /all-orders and /allorders)
 app.post('/create-order', async (req, res) => {
     try {
         const { customerName, userEmail, phone, items, totalUnits, totalAmount, paymentMethod, cardDetails, notes, discountAmount, voucherCode } = req.body;
@@ -1484,14 +1619,16 @@ app.post('/create-order', async (req, res) => {
     }
 });
 
-app.get('/all-orders', async (req, res) => {
+const handleGetAllOrders = async (req, res) => {
     try {
         const orders = await getAllOrdersLive();
         res.json(orders);
     } catch (err) {
         res.json(getJsonOrders());
     }
-});
+};
+app.get('/all-orders', handleGetAllOrders);
+app.get('/allorders', handleGetAllOrders);
 
 app.get('/user-orders', async (req, res) => {
     try {

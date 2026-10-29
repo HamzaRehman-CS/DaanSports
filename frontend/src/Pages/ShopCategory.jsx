@@ -39,8 +39,8 @@ const ShopCategory = (props) => {
         fetchCloudProducts(),
         fetchCloudCategories()
       ]);
-      if (Array.isArray(prods) && prods.length > 0) setFallbackProducts(prods);
-      if (Array.isArray(cats) && cats.length > 0) {
+      if (Array.isArray(prods)) setFallbackProducts(prods);
+      if (Array.isArray(cats)) {
         const found = cats.find(c => 
           (c.slug || '').toLowerCase() === targetCategoryRaw.toLowerCase() || 
           (c.name || '').toLowerCase() === targetCategoryRaw.toLowerCase()
@@ -54,9 +54,9 @@ const ShopCategory = (props) => {
     syncData();
 
     const unsubscribe = subscribeToGlobalSync((type, payload) => {
-      if (type === 'PRODUCTS_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+      if (type === 'PRODUCTS_UPDATED' && Array.isArray(payload)) {
         setFallbackProducts(payload);
-      } else if (type === 'CATEGORIES_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+      } else if (type === 'CATEGORIES_UPDATED' && Array.isArray(payload)) {
         const found = payload.find(c => 
           (c.slug || '').toLowerCase() === targetCategoryRaw.toLowerCase() || 
           (c.name || '').toLowerCase() === targetCategoryRaw.toLowerCase()
@@ -69,7 +69,7 @@ const ShopCategory = (props) => {
     const handleFocus = () => {
       syncData();
       const storedP = loadCatalogProducts();
-      if (storedP && storedP.length > 0) setFallbackProducts(storedP);
+      if (Array.isArray(storedP)) setFallbackProducts(storedP);
       const storedC = loadCategories();
       const found = (storedC || []).find(c => 
         (c.slug || '').toLowerCase() === targetCategoryRaw.toLowerCase() || 
@@ -87,8 +87,8 @@ const ShopCategory = (props) => {
   }, [targetCategoryRaw]);
 
   const activeProducts = useMemo(() => {
-    if (Array.isArray(all_product) && all_product.length > 0) return all_product;
-    if (Array.isArray(fallbackProducts) && fallbackProducts.length > 0) return fallbackProducts;
+    if (Array.isArray(all_product)) return all_product;
+    if (Array.isArray(fallbackProducts)) return fallbackProducts;
     return loadCatalogProducts();
   }, [all_product, fallbackProducts]);
 

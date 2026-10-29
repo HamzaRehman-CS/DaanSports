@@ -1,59 +1,55 @@
 {
   "tallVertical": {
-    "category": "Tracksuits",
-    "title": "FLAGSHIP TEAM TRACKSUITS",
-    "subtitle": "Custom 330 GSM combed fleece & interlock sets engineered for elite athletics & custom private labels.",
     "badge": "FLAGSHIP SPEC",
+    "title": "FLAGSHIP TEAM TRACKSUITS",
+    "bgImage": "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=1200&auto=format&fit=crop",
     "ctaText": "Explore Tracksuits",
-    "bgImage": "https://ldohfbqsmjuqvtbnxmbk.supabase.co/storage/v1/object/public/images/upload_1787386958701_fdqm1a.jpeg"
+    "category": "Tracksuits",
+    "subtitle": "Custom 330 GSM combed fleece & interlock sets engineered for elite athletics & custom private labels."
   },
   "wideFeature": {
-    "category": "Sweatshirts",
-    "title": "HEAVYWEIGHT 350 GSM HOODIES",
-    "subtitle": "100% French Terry pullovers & drop-shoulder streetwear cuts ready for 3D embroidery and puff prints.",
-    "discountText": "15% BULK DISCOUNT",
-    "badge": "HIGH-DENSITY EMBROIDERY",
-    "ctaText": "View Hoodies",
-    "bgImage": "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1600&auto=format&fit=crop"
+    "badge": "STREETWEAR BLANKS",
+    "title": "350 GSM FRENCH TERRY HOODIES",
+    "bgImage": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=1200&auto=format&fit=crop",
+    "ctaText": "View Heavyweight Hoodies",
+    "category": "Hoodies",
+    "subtitle": "Wholesale streetwear blanks ready for high-density puff printing, silicone badging & custom private labeling."
   },
   "compactA": {
-    "category": "Trousers",
-    "title": "Tri-Blend Athletic Joggers",
-    "subtitle": "Reinforced zipper pockets & ribbed cuffs",
-    "discountText": "10% OFF SPECIAL",
-    "ctaText": "Shop Joggers",
-    "bgImage": "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=1000&auto=format&fit=crop"
+    "badge": "PRO ATHLETICS",
+    "title": "COMPRESSION GEAR",
+    "bgImage": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800&auto=format&fit=crop",
+    "ctaText": "Shop Activewear",
+    "category": "Activewear",
+    "subtitle": "4-way stretch moisture-wicking sets."
   },
   "compactB": {
-    "category": "Activewear",
-    "title": "Pro Compression & Active Sets",
-    "subtitle": "Sweat-wicking 4-way performance stretch",
-    "discountText": "PRO SPEC",
-    "ctaText": "Shop Activewear",
-    "bgImage": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1000&auto=format&fit=crop"
+    "badge": "WEATHERPROOF",
+    "title": "SOFTSHELL OUTERWEAR",
+    "bgImage": "https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=800&auto=format&fit=crop",
+    "ctaText": "Explore Jackets",
+    "category": "Jackets",
+    "subtitle": "Waterproof ripstop team jackets & vests."
   },
   "oemStrip": {
-    "title": "DIRECT OEM / ODM PRIVATE LABEL MANUFACTURING",
-    "subtitle": "Full custom labeling, silicone tags, custom GSM weaving, and express airway cargo delivery worldwide.",
-    "badge": "ISO 9001 CERTIFIED",
-    "ctaText": "Request Tech-Pack Quote",
-    "bgImage": "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=2000&auto=format&fit=crop"
+    "title": "FULL OEM & PRIVATE LABEL APPAREL MANUFACTURING",
+    "bgImage": "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=1600&auto=format&fit=crop",
+    "ctaText": "Contact Factory Representative",
+    "subtitle": "Custom woven damask tags, custom polybags, embossed metal aglets & express DDP door-to-door cargo."
   },
   "promoSection1": {
-    "category": "Trousers",
-    "title": "TROUSERS & JOGGERS — 10% OFF",
-    "discountText": "WHOLESALE BULK SPECIAL OFFER",
-    "subtitle": "Heavyweight 330 GSM combed cotton fleece & tri-blend warm-up joggers",
-    "bgImage": "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=2070&auto=format&fit=crop",
-    "discountPercent": 10
+    "badge": "EXPORT CERTIFIED",
+    "title": "GLOBAL B2B EXPORT STANDARDS",
+    "bgImage": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?q=80&w=1200&auto=format&fit=crop",
+    "ctaText": "Review Certifications",
+    "subtitle": "Certified ISO 9001 and OEKO-TEX eco-friendly dyes."
   },
   "promoSection2": {
-    "category": "Sweatshirts",
-    "title": "HEAVYWEIGHT HOODIES COLLECTION",
-    "discountText": "HIGH-DENSITY EMBROIDERY READY",
-    "subtitle": "350 GSM French Terry pullovers and drop-shoulder streetwear cuts",
-    "bgImage": "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=2070&auto=format&fit=crop",
-    "discountPercent": 15
+    "badge": "IN-HOUSE FACTORY",
+    "title": "CUSTOM 3D EMBROIDERY & SCREEN PRINTING",
+    "bgImage": "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=1200&auto=format&fit=crop",
+    "ctaText": "Explore Customization Options",
+    "subtitle": "High precision Japanese machinery delivering 0.1mm stitch clarity on heavyweight fabrics."
   },
   "customBanners": []
 }

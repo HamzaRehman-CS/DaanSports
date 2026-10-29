@@ -745,16 +745,11 @@ const safeSupabase = async (callback) => {
 const getAllProductsLive = async () => {
     if (neonClient && neonClient.sql) {
         const neonProducts = await neonClient.getNeonProducts();
-        if (Array.isArray(neonProducts) && neonProducts.length > 0) {
+        if (neonProducts !== null && Array.isArray(neonProducts)) {
+            saveJsonProducts(neonProducts);
             return neonProducts;
         }
     }
-
-    const supaProducts = await safeSupabase(async (s) => {
-        const { data, error } = await s.from('products').select('*').order('id', { ascending: true });
-        return (!error && Array.isArray(data) && data.length > 0) ? data : null;
-    });
-    if (supaProducts) return supaProducts;
 
     if (mongoose.connection.readyState === 1) {
         try {
@@ -768,42 +763,27 @@ const getAllProductsLive = async () => {
 };
 
 const saveProductLive = async (productObj) => {
+    const numId = Number(productObj.id);
+    const cleanProd = { ...productObj, id: numId };
+
     const currentList = getJsonProducts();
-    const existingIdx = currentList.findIndex(p => p.id === productObj.id);
+    const existingIdx = currentList.findIndex(p => Number(p.id) === numId);
     if (existingIdx >= 0) {
-        currentList[existingIdx] = productObj;
+        currentList[existingIdx] = cleanProd;
     } else {
-        currentList.push(productObj);
+        currentList.push(cleanProd);
     }
     saveJsonProducts(currentList);
 
     if (neonClient && neonClient.sql) {
-        await neonClient.saveNeonProduct(productObj);
+        await neonClient.saveNeonProduct(cleanProd);
     }
-
-    await safeSupabase(async (s) => {
-        await s.from('products').upsert([{
-            id: Number(productObj.id),
-            name: String(productObj.name || ''),
-            category: String(productObj.category || 'Tracksuits'),
-            new_price: Number(productObj.new_price || 0),
-            old_price: Number(productObj.old_price || 0),
-            moq: Number(productObj.moq || 50),
-            description: String(productObj.description || ''),
-            colors: Array.isArray(productObj.colors) ? productObj.colors : (typeof productObj.colors === 'string' ? productObj.colors.split(',').map(c => c.trim()).filter(Boolean) : []),
-            sizes: Array.isArray(productObj.sizes) ? productObj.sizes : (typeof productObj.sizes === 'string' ? productObj.sizes.split(',').map(s => s.trim()).filter(Boolean) : ["S", "M", "L", "XL", "2XL"]),
-            image: String(productObj.image || ''),
-            images: Array.isArray(productObj.images) && productObj.images.length > 0 ? productObj.images : [String(productObj.image || '')],
-            available: productObj.available !== false,
-            date: productObj.date || new Date().toISOString()
-        }]);
-    });
 
     if (mongoose.connection.readyState === 1) {
         try {
             await ProductModel.findOneAndUpdate(
-                { id: productObj.id },
-                productObj,
+                { id: numId },
+                cleanProd,
                 { upsert: true, new: true }
             );
         } catch (e) {}
@@ -811,21 +791,18 @@ const saveProductLive = async (productObj) => {
 };
 
 const deleteProductLive = async (prodId) => {
+    const numId = Number(prodId);
     let currentList = getJsonProducts();
-    currentList = currentList.filter(p => p.id !== prodId);
+    currentList = currentList.filter(p => Number(p.id) !== numId);
     saveJsonProducts(currentList);
 
     if (neonClient && neonClient.sql) {
-        await neonClient.deleteNeonProduct(prodId);
+        await neonClient.deleteNeonProduct(numId);
     }
-
-    await safeSupabase(async (s) => {
-        await s.from('products').delete().eq('id', prodId);
-    });
 
     if (mongoose.connection.readyState === 1) {
         try {
-            await ProductModel.deleteOne({ id: prodId });
+            await ProductModel.deleteOne({ id: numId });
         } catch (e) {}
     }
 };
@@ -834,16 +811,11 @@ const deleteProductLive = async (prodId) => {
 const getCategoriesLive = async () => {
     if (neonClient && neonClient.sql) {
         const neonCats = await neonClient.getNeonCategories();
-        if (Array.isArray(neonCats) && neonCats.length > 0) {
+        if (neonCats !== null && Array.isArray(neonCats)) {
+            saveJsonCategories(neonCats);
             return neonCats;
         }
     }
-
-    const supaCats = await safeSupabase(async (s) => {
-        const { data, error } = await s.from('categories').select('*').order('id', { ascending: true });
-        return (!error && Array.isArray(data) && data.length > 0) ? data : null;
-    });
-    if (supaCats) return supaCats;
 
     if (mongoose.connection.readyState === 1) {
         try {
@@ -863,37 +835,28 @@ const saveCategoriesLive = async (categoriesList) => {
         await neonClient.saveNeonCategories(categoriesList);
     }
 
-    await safeSupabase(async (s) => {
-        for (const cat of categoriesList) {
-            await s.from('categories').upsert([cat]);
-        }
-    });
-
     if (mongoose.connection.readyState === 1) {
         try {
             for (const cat of categoriesList) {
-                await CategoryModel.findOneAndUpdate({ id: cat.id }, cat, { upsert: true });
+                await CategoryModel.findOneAndUpdate({ id: Number(cat.id) }, cat, { upsert: true });
             }
         } catch (e) {}
     }
 };
 
 const deleteCategoryLive = async (catId) => {
+    const numId = Number(catId);
     let currentList = getJsonCategories();
-    currentList = currentList.filter(c => c.id !== catId);
+    currentList = currentList.filter(c => Number(c.id) !== numId);
     saveJsonCategories(currentList);
 
     if (neonClient && neonClient.sql) {
-        await neonClient.sql`DELETE FROM categories WHERE id = ${Number(catId)};`.catch(() => {});
+        await neonClient.sql`DELETE FROM categories WHERE id = ${numId};`.catch(() => {});
     }
-
-    await safeSupabase(async (s) => {
-        await s.from('categories').delete().eq('id', catId);
-    });
 
     if (mongoose.connection.readyState === 1) {
         try {
-            await CategoryModel.deleteOne({ id: catId });
+            await CategoryModel.deleteOne({ id: numId });
         } catch (e) {}
     }
 };
@@ -902,24 +865,16 @@ const deleteCategoryLive = async (catId) => {
 const getBannersLive = async () => {
     if (neonClient && neonClient.sql) {
         const neonBanners = await neonClient.getNeonBanners();
-        if (neonBanners && Object.keys(neonBanners).length > 0) {
-            return { ...defaultBanners, ...neonBanners };
+        if (neonBanners && typeof neonBanners === 'object' && Object.keys(neonBanners).length > 0) {
+            return neonBanners;
         }
-    }
-
-    const supaBanners = await safeSupabase(async (s) => {
-        const { data, error } = await s.from('banners').select('data').eq('id', 'current_banners').single();
-        return (!error && data && data.data) ? data.data : null;
-    });
-    if (supaBanners && Object.keys(supaBanners).length > 0) {
-        return { ...defaultBanners, ...supaBanners };
     }
 
     if (mongoose.connection.readyState === 1) {
         try {
             const bannerDoc = await BannerModel.findOne({ key: 'current_banners' }).lean();
             if (bannerDoc && bannerDoc.data && Object.keys(bannerDoc.data).length > 0) {
-                return { ...defaultBanners, ...bannerDoc.data };
+                return bannerDoc.data;
             }
         } catch (e) {}
     }
@@ -927,22 +882,17 @@ const getBannersLive = async () => {
 };
 
 const saveBannersLive = async (bannersData) => {
-    const combined = { ...defaultBanners, ...bannersData };
-    saveJsonBanners(combined);
+    saveJsonBanners(bannersData);
 
     if (neonClient && neonClient.sql) {
-        await neonClient.saveNeonBanners(combined);
+        await neonClient.saveNeonBanners(bannersData);
     }
-
-    await safeSupabase(async (s) => {
-        await s.from('banners').upsert([{ id: 'current_banners', data: combined, updated_at: new Date().toISOString() }]);
-    });
 
     if (mongoose.connection.readyState === 1) {
         try {
             await BannerModel.findOneAndUpdate(
                 { key: 'current_banners' },
-                { key: 'current_banners', data: combined, updatedAt: new Date() },
+                { key: 'current_banners', data: bannersData, updatedAt: new Date() },
                 { upsert: true }
             );
         } catch (e) {}
@@ -956,20 +906,11 @@ const getCmsLive = async () => {
         if (neonCms && (neonCms.slides?.length > 0 || neonCms.announcementBar)) {
             return {
                 announcementText: neonCms.announcementBar || defaultCmsData.announcementText,
-                heroSlides: (Array.isArray(neonCms.slides) && neonCms.slides.length > 0) ? neonCms.slides : defaultCmsData.heroSlides
+                heroSlides: (Array.isArray(neonCms.slides) && neonCms.slides.length > 0) ? neonCms.slides : defaultCmsData.heroSlides,
+                siteTitle: neonCms.siteTitle || '',
+                siteTagline: neonCms.siteTagline || ''
             };
         }
-    }
-
-    const supaCms = await safeSupabase(async (s) => {
-        const { data, error } = await s.from('cms').select('data').eq('id', 'current_cms').single();
-        return (!error && data && data.data) ? data.data : null;
-    });
-    if (supaCms) {
-        return {
-            announcementText: supaCms.announcementText || defaultCmsData.announcementText,
-            heroSlides: (supaCms.heroSlides && supaCms.heroSlides.length > 0) ? supaCms.heroSlides : defaultCmsData.heroSlides
-        };
     }
 
     if (mongoose.connection.readyState === 1) {
@@ -1000,10 +941,6 @@ const saveCmsLive = async (cmsData) => {
         });
     }
 
-    await safeSupabase(async (s) => {
-        await s.from('cms').upsert([{ id: 'current_cms', data: combined, updated_at: new Date().toISOString() }]);
-    });
-
     if (mongoose.connection.readyState === 1) {
         try {
             await CmsModel.findOneAndUpdate(
@@ -1019,16 +956,11 @@ const saveCmsLive = async (cmsData) => {
 const getVouchersLive = async () => {
     if (neonClient && neonClient.sql) {
         const neonVouchers = await neonClient.getNeonVouchers();
-        if (Array.isArray(neonVouchers) && neonVouchers.length > 0) {
+        if (neonVouchers !== null && Array.isArray(neonVouchers)) {
+            saveJsonVouchers(neonVouchers);
             return neonVouchers;
         }
     }
-
-    const supaVouchers = await safeSupabase(async (s) => {
-        const { data, error } = await s.from('vouchers').select('*').order('discount', { ascending: false });
-        return (!error && Array.isArray(data) && data.length > 0) ? data : null;
-    });
-    if (supaVouchers) return supaVouchers;
 
     if (mongoose.connection.readyState === 1) {
         try {
@@ -1043,23 +975,13 @@ const getVouchersLive = async () => {
 
 const saveVoucherLive = async (voucherObj) => {
     let vouchers = getJsonVouchers();
-    vouchers = vouchers.filter(v => v.code !== voucherObj.code);
+    vouchers = vouchers.filter(v => (v.code || '').toUpperCase().trim() !== (voucherObj.code || '').toUpperCase().trim());
     vouchers.push(voucherObj);
     saveJsonVouchers(vouchers);
 
     if (neonClient && neonClient.sql) {
         await neonClient.saveNeonVoucher(voucherObj);
     }
-
-    await safeSupabase(async (s) => {
-        await s.from('vouchers').upsert([{
-            code: String(voucherObj.code || '').toUpperCase().trim(),
-            type: String(voucherObj.type || 'percent'),
-            discount: Number(voucherObj.discount || 10),
-            min_order: Number(voucherObj.minOrder !== undefined ? voucherObj.minOrder : (voucherObj.min_order || 0)),
-            description: String(voucherObj.description || '')
-        }]);
-    });
 
     if (mongoose.connection.readyState === 1) {
         try {
@@ -1071,16 +993,12 @@ const saveVoucherLive = async (voucherObj) => {
 const deleteVoucherLive = async (code) => {
     const cleanCode = String(code || '').toUpperCase().trim();
     let vouchers = getJsonVouchers();
-    vouchers = vouchers.filter(v => v.code !== cleanCode);
+    vouchers = vouchers.filter(v => (v.code || '').toUpperCase().trim() !== cleanCode);
     saveJsonVouchers(vouchers);
 
     if (neonClient && neonClient.sql) {
         await neonClient.deleteNeonVoucher(cleanCode);
     }
-
-    await safeSupabase(async (s) => {
-        await s.from('vouchers').delete().eq('code', cleanCode);
-    });
 
     if (mongoose.connection.readyState === 1) {
         try {
@@ -1093,36 +1011,11 @@ const deleteVoucherLive = async (code) => {
 const getAllOrdersLive = async () => {
     if (neonClient && neonClient.sql) {
         const neonOrders = await neonClient.getNeonOrders();
-        if (Array.isArray(neonOrders)) {
+        if (neonOrders !== null && Array.isArray(neonOrders)) {
+            saveJsonOrders(neonOrders);
             return neonOrders;
         }
     }
-
-    const supaOrders = await safeSupabase(async (s) => {
-        const { data, error } = await s.from('orders').select('*').order('created_at', { ascending: false });
-        if (!error && Array.isArray(data)) {
-            return data.map(o => ({
-                id: o.id,
-                userEmail: o.user_email || o.userEmail,
-                customerName: o.customer_name || o.customerName,
-                phone: o.phone,
-                items: o.items,
-                totalUnits: o.total_units || o.totalUnits,
-                totalAmount: o.total_amount || o.totalAmount,
-                discountAmount: o.discount_amount || o.discountAmount,
-                voucherCode: o.voucher_code || o.voucherCode,
-                paymentMethod: o.payment_method || o.paymentMethod,
-                paymentStatus: o.payment_status || o.paymentStatus,
-                status: o.status,
-                trackingNumber: o.tracking_number || o.trackingNumber,
-                notes: o.notes,
-                createdAt: o.created_at || o.createdAt,
-                updatedAt: o.updated_at || o.updatedAt
-            }));
-        }
-        return null;
-    });
-    if (supaOrders && supaOrders.length > 0) return supaOrders;
 
     return getJsonOrders();
 };

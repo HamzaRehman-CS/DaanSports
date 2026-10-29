@@ -11,10 +11,10 @@ import VoucherManager from '../../Components/VoucherManager/VoucherManager';
 import CategoryManager from '../../Components/CategoryManager/CategoryManager';
 import BannerManager from '../../Components/BannerManager/BannerManager';
 
-const Admin = () => {
+const Admin = ({ sidebarOpen, onCloseSidebar }) => {
   return (
     <div className='admin'>
-      <Sidebar/>
+      <Sidebar isOpen={sidebarOpen} onClose={onCloseSidebar} />
       <main className="admin-main-container">
         <Routes>
           <Route path='/' element={<Dashboard/>}/>

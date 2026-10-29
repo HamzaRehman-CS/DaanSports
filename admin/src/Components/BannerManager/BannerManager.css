@@ -409,3 +409,27 @@
   font-style: italic;
 }
 
+@media (max-width: 768px) {
+  .banner-manager-b2b {
+    padding: 16px;
+  }
+  .banner-manager-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .bento-editors-grid {
+    grid-template-columns: 1fr;
+  }
+  .banner-card {
+    padding: 14px;
+  }
+  .upload-input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .file-upload-btn-custom {
+    width: 100%;
+  }
+}
+

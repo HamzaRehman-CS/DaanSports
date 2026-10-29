@@ -122,8 +122,31 @@
 }
 
 @media (max-width: 768px) {
+  .order-manager-b2b {
+    padding: 16px;
+  }
+  .order-manager-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .order-card-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .admin-order-actions-top {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
   .order-details-grid {
     grid-template-columns: 1fr;
+  }
+  .order-summary-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 

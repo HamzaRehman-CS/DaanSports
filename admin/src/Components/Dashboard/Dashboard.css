@@ -236,3 +236,25 @@
   color: #64748b;
   font-size: 14px;
 }
+
+@media (max-width: 768px) {
+  .admin-dashboard-b2b {
+    padding: 16px;
+  }
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .dashboard-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .orders-mini-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .orders-mini-table table {
+    min-width: 500px;
+  }
+}

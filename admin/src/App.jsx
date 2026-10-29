@@ -4,7 +4,7 @@ import Admin from './Pages/Admin/Admin';
 import AdminLogin from './Components/Auth/AdminLogin';
 import { API_URL } from './config';
 
-const App = () => {
+const AdminApp = () => {
   const [adminUser, setAdminUser] = useState(() => {
     try {
       const stored = localStorage.getItem('daan_admin_user');
@@ -23,7 +23,6 @@ const App = () => {
       return;
     }
 
-    // Verify token with backend
     fetch(`${API_URL}/api/auth/me`, {
       headers: {
         'auth-token': token,
@@ -36,9 +35,7 @@ const App = () => {
           setAdminUser(data.user);
         }
       })
-      .catch(() => {
-        // Keep stored user if offline / local network
-      })
+      .catch(() => {})
       .finally(() => {
         setLoading(false);
       });
@@ -87,12 +84,22 @@ const App = () => {
     return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
   }
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div>
-      <Navbar user={adminUser} onLogout={handleLogout} />
-      <Admin />
+    <div className="daan-admin-portal-root">
+      <Navbar 
+        user={adminUser} 
+        onLogout={handleLogout} 
+        onToggleSidebar={() => setSidebarOpen(prev => !prev)}
+        sidebarOpen={sidebarOpen}
+      />
+      <Admin 
+        sidebarOpen={sidebarOpen} 
+        onCloseSidebar={() => setSidebarOpen(false)} 
+      />
     </div>
   );
 };
 
-export default App;
+export default AdminApp;

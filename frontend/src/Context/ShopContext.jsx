@@ -19,7 +19,7 @@ const ShopContextProvider = (props) => {
     const fetchProducts = useCallback(async () => {
         try {
             const data = await fetchCloudProducts();
-            if (Array.isArray(data) && data.length > 0) {
+            if (Array.isArray(data)) {
                 setAll_Product(data);
             }
         } catch (err) {}
@@ -30,7 +30,7 @@ const ShopContextProvider = (props) => {
 
         // 1. Instant cross-tab sync when Admin publishes products
         const unsubscribe = subscribeToGlobalSync((type, payload) => {
-            if (type === 'PRODUCTS_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+            if (type === 'PRODUCTS_UPDATED' && Array.isArray(payload)) {
                 setAll_Product(payload);
             }
         });
@@ -44,13 +44,13 @@ const ShopContextProvider = (props) => {
         const handleFocus = () => {
             fetchProducts();
             const stored = loadCatalogProducts();
-            if (stored && stored.length > 0) setAll_Product(stored);
+            if (Array.isArray(stored)) setAll_Product(stored);
         };
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
                 fetchProducts();
                 const stored = loadCatalogProducts();
-                if (stored && stored.length > 0) setAll_Product(stored);
+                if (Array.isArray(stored)) setAll_Product(stored);
             }
         };
 

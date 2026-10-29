@@ -37,7 +37,7 @@ const Navbar = () => {
         fetchCloudCategories(),
         fetchCloudCms()
       ]);
-      if (Array.isArray(cats) && cats.length > 0) {
+      if (Array.isArray(cats)) {
         setCategories(cats);
       }
       if (cms && cms.announcementText) {
@@ -51,7 +51,7 @@ const Navbar = () => {
 
     // 1. Instant cross-tab real-time sync with Admin Portal
     const unsubscribe = subscribeToGlobalSync((type, payload) => {
-      if (type === 'CATEGORIES_UPDATED' && Array.isArray(payload) && payload.length > 0) {
+      if (type === 'CATEGORIES_UPDATED' && Array.isArray(payload)) {
         setCategories(payload);
       } else if (type === 'CMS_UPDATED' && payload && payload.announcementText) {
         setAnnouncementText(payload.announcementText);
@@ -65,7 +65,7 @@ const Navbar = () => {
     const handleFocus = () => {
       fetchNavData();
       const storedCats = loadCategories();
-      if (storedCats && storedCats.length > 0) setCategories(storedCats);
+      if (Array.isArray(storedCats)) setCategories(storedCats);
       const storedCms = loadCms();
       if (storedCms?.announcementText) setAnnouncementText(storedCms.announcementText);
     };
@@ -282,20 +282,20 @@ const Navbar = () => {
           </form>
 
           <div className="flex flex-col gap-4 text-base font-bold uppercase tracking-wider">
-            <Link to="/" className="text-white border-b border-white/10 pb-3">Home</Link>
-            <Link to="/category/all" className="text-zinc-300 border-b border-white/10 pb-3">Shop All</Link>
+            <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-white border-b border-white/10 pb-3">Home</Link>
+            <Link to="/category/all" onClick={() => setMobileMenuOpen(false)} className="text-zinc-300 border-b border-white/10 pb-3">Shop All</Link>
             <div className="text-zinc-400 text-xs font-bold uppercase tracking-widest text-[#dc2626] pt-1">Categories</div>
             {categories.map((cat) => (
-              <Link key={cat.id} to={`/category/${cat.slug || cat.name.toLowerCase()}`} className="text-zinc-300 hover:text-white text-sm pl-2 border-b border-white/5 pb-2 flex justify-between items-center">
+              <Link key={cat.id} to={`/category/${cat.slug || cat.name.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} className="text-zinc-300 hover:text-white text-sm pl-2 border-b border-white/5 pb-2 flex justify-between items-center">
                 <span>{cat.name}</span>
                 <ArrowRight size={14} className="text-[#dc2626]" />
               </Link>
             ))}
-            <Link to="/category/hoodies" className="text-zinc-300 border-b border-white/10 pb-3">New Arrivals</Link>
-            <Link to="/category/tracksuits" className="text-zinc-300 border-b border-white/10 pb-3">Best Sellers</Link>
-            <Link to="/about" className="text-zinc-300 border-b border-white/10 pb-3">About Us</Link>
-            <Link to="/contact" className="text-zinc-300 border-b border-white/10 pb-3">Contact</Link>
-            <Link to="/orders" className="text-zinc-300 border-b border-white/10 pb-3">Track Orders 🚚</Link>
+            <Link to="/category/hoodies" onClick={() => setMobileMenuOpen(false)} className="text-zinc-300 border-b border-white/10 pb-3">New Arrivals</Link>
+            <Link to="/category/tracksuits" onClick={() => setMobileMenuOpen(false)} className="text-zinc-300 border-b border-white/10 pb-3">Best Sellers</Link>
+            <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="text-zinc-300 border-b border-white/10 pb-3">About Us</Link>
+            <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="text-zinc-300 border-b border-white/10 pb-3">Contact</Link>
+            <Link to="/orders" onClick={() => setMobileMenuOpen(false)} className="text-zinc-300 border-b border-white/10 pb-3">Track Orders 🚚</Link>
           </div>
         </div>
       )}

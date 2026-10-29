@@ -1,12 +1,20 @@
 import React from 'react';
 import './Navbar.css';
 import DsLogo from './DsLogo';
-import { LogOut, ExternalLink, ShieldCheck } from 'lucide-react';
+import { LogOut, ExternalLink, ShieldCheck, Menu, X } from 'lucide-react';
 
-const Navbar = ({ user, onLogout }) => {
+const Navbar = ({ user, onLogout, onToggleSidebar, sidebarOpen }) => {
   return (
     <header className='admin-navbar'>
       <div className="admin-nav-brand">
+        <button
+          type="button"
+          className="admin-mobile-toggle"
+          onClick={onToggleSidebar}
+          aria-label="Toggle navigation menu"
+        >
+          {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
         <DsLogo />
         <div className="brand-text">
           <h1>DAAN SPORTS B2B</h1>

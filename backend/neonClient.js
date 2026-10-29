@@ -31,16 +31,16 @@ const safeQuery = async (queryFn) => {
 const getNeonProducts = async () => {
   return safeQuery(async (db) => {
     const rows = await db`SELECT * FROM products ORDER BY id ASC;`;
-    if (!rows || rows.length === 0) return null;
+    if (!rows) return null;
     return rows.map(r => ({
       ...r,
       id: Number(r.id),
       new_price: Number(r.new_price || 0),
       old_price: Number(r.old_price || 0),
       moq: Number(r.moq || 50),
-      colors: Array.isArray(r.colors) ? r.colors : (r.colors ? JSON.parse(r.colors) : []),
-      sizes: Array.isArray(r.sizes) ? r.sizes : (r.sizes ? JSON.parse(r.sizes) : []),
-      images: Array.isArray(r.images) ? r.images : (r.images ? JSON.parse(r.images) : [])
+      colors: Array.isArray(r.colors) ? r.colors : (r.colors ? (typeof r.colors === 'string' && r.colors.startsWith('[') ? JSON.parse(r.colors) : [r.colors]) : []),
+      sizes: Array.isArray(r.sizes) ? r.sizes : (r.sizes ? (typeof r.sizes === 'string' && r.sizes.startsWith('[') ? JSON.parse(r.sizes) : [r.sizes]) : []),
+      images: Array.isArray(r.images) ? r.images : (r.images ? (typeof r.images === 'string' && r.images.startsWith('[') ? JSON.parse(r.images) : [r.images]) : [])
     }));
   });
 };
@@ -98,11 +98,11 @@ const deleteNeonProduct = async (id) => {
 const getNeonCategories = async () => {
   return safeQuery(async (db) => {
     const rows = await db`SELECT * FROM categories ORDER BY id ASC;`;
-    if (!rows || rows.length === 0) return null;
+    if (!rows) return null;
     return rows.map(r => ({
       ...r,
       id: Number(r.id),
-      subcategories: Array.isArray(r.subcategories) ? r.subcategories : (r.subcategories ? JSON.parse(r.subcategories) : [])
+      subcategories: Array.isArray(r.subcategories) ? r.subcategories : (r.subcategories ? (typeof r.subcategories === 'string' && r.subcategories.startsWith('[') ? JSON.parse(r.subcategories) : [r.subcategories]) : [])
     }));
   });
 };
@@ -241,7 +241,7 @@ const saveNeonCms = async (c) => {
 const getNeonVouchers = async () => {
   return safeQuery(async (db) => {
     const rows = await db`SELECT * FROM vouchers WHERE active = TRUE ORDER BY created_at DESC;`;
-    if (!rows || rows.length === 0) return null;
+    if (!rows) return null;
     return rows.map(r => ({
       code: r.code,
       discount: Number(r.discount_percent || 0),

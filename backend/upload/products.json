@@ -1,8 +1,49 @@
 [
   {
+    "id": 1,
+    "name": "Pro Tech Fleece Full-Zip Tracksuit Set",
+    "category": "Tracksuits",
+    "image": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80"
+    ],
+    "new_price": 24.5,
+    "old_price": 45,
+    "moq": 50,
+    "description": "Heavyweight 330 GSM combed cotton fleece tracksuit set. Tailored slim-fit jogger pants with deep zippered pockets and ribbed cuffs. Full-zip hooded jacket. Ideal for professional sports teams and custom private labeling.",
+    "colors": [
+      "Black",
+      "Navy Blue",
+      "Heather Gray",
+      "Crimson Red"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "materials": [
+      "80% Combed Cotton / 20% Polyester"
+    ],
+    "customization": [
+      "3D Embroidery",
+      "Screen Printing",
+      "Woven Damask Tags"
+    ],
+    "available": true,
+    "created_at": "2026-10-29T15:01:42.063Z"
+  },
+  {
     "id": 2,
     "name": "Heavyweight Oversized Streetwear Hoodie",
     "category": "Sweatshirts",
+    "image": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80"
+    ],
     "new_price": 18.9,
     "old_price": 36,
     "moq": 50,
@@ -21,17 +62,25 @@
       "2XL",
       "3XL"
     ],
-    "stock": 3500,
-    "image": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80"
-    ]
+    "materials": [
+      "100% French Terry Cotton"
+    ],
+    "customization": [
+      "Puff Print",
+      "High-Density Screen Print",
+      "Rubber Badges"
+    ],
+    "available": true,
+    "created_at": "2026-10-29T15:01:42.268Z"
   },
   {
     "id": 3,
     "name": "Seamless Quick-Dry Performance Compression Set",
     "category": "Activewear",
+    "image": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80"
+    ],
     "new_price": 16.5,
     "old_price": 32,
     "moq": 100,
@@ -47,17 +96,24 @@
       "L",
       "XL"
     ],
-    "stock": 6000,
-    "image": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80"
-    ]
+    "materials": [
+      "85% Polyester / 15% Spandex"
+    ],
+    "customization": [
+      "Heat Transfer Logos",
+      "Reflective Prints"
+    ],
+    "available": true,
+    "created_at": "2026-10-29T15:01:42.479Z"
   },
   {
     "id": 4,
     "name": "Custom Team Athletic Jersey & Training Tee",
     "category": "T-Shirts",
+    "image": "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80"
+    ],
     "new_price": 9.8,
     "old_price": 22,
     "moq": 50,
@@ -75,16 +131,24 @@
       "XL",
       "2XL"
     ],
-    "stock": 10000,
-    "image": "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80"
-    ]
+    "materials": [
+      "100% Micro-Mesh Interlock Polyester"
+    ],
+    "customization": [
+      "All-Over Sublimation",
+      "Player Numbers & Crests"
+    ],
+    "available": true,
+    "created_at": "2026-10-29T15:01:42.689Z"
   },
   {
     "id": 5,
     "name": "Weatherproof Softshell Team Padded Jacket",
-    "category": "Outerwear",
+    "category": "Jackets",
+    "image": "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80"
+    ],
     "new_price": 29.9,
     "old_price": 60,
     "moq": 50,
@@ -100,16 +164,25 @@
       "XL",
       "2XL"
     ],
-    "stock": 2000,
-    "image": "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80"
-    ]
+    "materials": [
+      "Waterproof Softshell Polyester Shell"
+    ],
+    "customization": [
+      "Silicon Badges",
+      "Zipper Pullers",
+      "Woven Labels"
+    ],
+    "available": true,
+    "created_at": "2026-10-29T15:01:42.888Z"
   },
   {
     "id": 6,
     "name": "Classic Tri-Blend Athletic Warm-Up Track Pants",
-    "category": "Tracksuits",
+    "category": "Trousers",
+    "image": "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=800&q=80"
+    ],
     "new_price": 14.2,
     "old_price": 28,
     "moq": 50,
@@ -126,63 +199,66 @@
       "XL",
       "2XL"
     ],
-    "stock": 4500,
-    "image": "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=800&q=80"
-    ]
+    "materials": [
+      "70% Cotton / 30% Polyester Fleece"
+    ],
+    "customization": [
+      "Custom Side Stripe Taping & Screen Print"
+    ],
+    "available": true,
+    "created_at": "2026-10-29T15:01:43.194Z"
   },
   {
     "id": 7,
-    "name": "Hamza Rehman",
-    "image": "http://localhost:4000/images/product_1786091231518.jpg",
+    "name": "Pro Dry-Fit Pique Golf & Team Polo Shirt",
+    "category": "Polo Shirts",
+    "image": "https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?auto=format&fit=crop&w=800&q=80",
     "images": [
-      "http://localhost:4000/images/product_1786091231518.jpg"
+      "https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?auto=format&fit=crop&w=800&q=80"
     ],
-    "category": "Tracksuits",
-    "new_price": 11000,
-    "old_price": 12000,
-    "description": "High-grade 300 GSM fleece fabric. Moisture-wicking, anti-pilling, reinforced stitching. Custom OEM/ODM logo printing and private labeling available.",
+    "new_price": 13.5,
+    "old_price": 26,
     "moq": 50,
+    "description": "Premium breathable pique knit polo with anti-curl ribbed collar and 3-button placket. Engineered for corporate teamwear, golf clubs, and custom chest logo embroidery.",
     "colors": [
       "Black",
-      "Navy Blue",
-      "Heather Gray",
-      "Crimson Red"
+      "Charcoal Gray",
+      "Navy",
+      "White"
     ],
     "sizes": [
       "S",
       "M",
       "L",
       "XL",
-      "2XL"
+      "2XL",
+      "3XL"
     ],
-    "stock": 4998,
-    "date": "2026-08-07T08:27:11.532Z",
-    "available": true
+    "materials": [
+      "65% Combed Cotton / 35% Poly Pique"
+    ],
+    "customization": [
+      "High-Density Chest Embroidery & Custom Buttons"
+    ],
+    "available": true,
+    "created_at": "2026-10-29T15:01:43.394Z"
   },
   {
     "id": 8,
-    "name": "Daan Sports",
-    "image": "http://localhost:4000/images/product_1786168035435_WhatsAppImage2026-06-26at8.20.06AM.jpeg",
+    "name": "Heavyweight 350 GSM Streetwear Pullover Hoodie",
+    "category": "Hoodies",
+    "image": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80",
     "images": [
-      "http://localhost:4000/images/product_1786168035435_WhatsAppImage2026-06-26at8.20.06AM.jpeg"
+      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80"
     ],
-    "category": "Tracksuits",
-    "new_price": 11000,
-    "old_price": 12000,
-    "description": "High-grade combed fleece fabric. Moisture-wicking, anti-pilling, reinforced stitching. Custom OEM/ODM logo printing and private labeling available.",
-    "material": "80% Combed Cotton / 20% Polyester",
-    "gsm": "330 GSM Heavyweight",
-    "stitching": "Double-Needle Flatlock Seams",
-    "customization": "3D Embroidery, Screen Print, Woven Damask Tags",
-    "leadTime": "12 - 15 Business Days",
+    "new_price": 19.5,
+    "old_price": 38,
     "moq": 50,
+    "description": "Heavyweight 350 GSM French Terry cotton hoodie with kangaroo pocket and double-layer hood. Premium streetwear boxy cut ready for custom puff print and embroidery.",
     "colors": [
-      "Black",
-      "Navy Blue",
-      "Heather Gray",
-      "Crimson Red"
+      "Jet Black",
+      "Sand Beige",
+      "Slate Gray"
     ],
     "sizes": [
       "S",
@@ -191,8 +267,15 @@
       "XL",
       "2XL"
     ],
-    "stock": 5000,
-    "date": "2026-08-08T05:47:15.916Z",
-    "available": true
+    "materials": [
+      "100% French Terry Cotton"
+    ],
+    "customization": [
+      "Puff Print",
+      "Screen Print",
+      "Custom Neck Tape"
+    ],
+    "available": true,
+    "created_at": "2026-10-29T15:01:43.607Z"
   }
 ]

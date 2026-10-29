@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './ProductList.css';
 import cross_icon from '../../assets/cross_icon.png';
 import { API_URL } from '../../config';
-import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudProducts, fetchCloudCategories, updateCloudProduct, deleteCloudProduct, uploadCloudImage } from '../../defaultCatalog';
+import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudProducts, fetchCloudCategories, updateCloudProduct, deleteCloudProduct, uploadCloudImage, subscribeToGlobalSync } from '../../defaultCatalog';
 
 const ProductList = () => {
   const [allProducts, setAllProducts] = useState(() => loadCatalogProducts());
@@ -21,25 +21,35 @@ const ProductList = () => {
         fetchCloudProducts(),
         fetchCloudCategories()
       ]);
-      if (Array.isArray(prods) && prods.length > 0) {
+      if (Array.isArray(prods)) {
         setAllProducts(prods);
       }
-      if (Array.isArray(cats) && cats.length > 0) {
+      if (Array.isArray(cats)) {
         setCategories(cats);
       }
     } catch (err) {
       const stored = loadCatalogProducts();
-      if (stored && stored.length > 0) setAllProducts(stored);
+      if (stored) setAllProducts(stored);
     }
   };
 
   useEffect(() => {
     fetchAllProducts();
+
+    const unsubscribe = subscribeToGlobalSync((type, payload) => {
+      if (type === 'PRODUCTS_UPDATED' && Array.isArray(payload)) {
+        setAllProducts(payload);
+      } else if (type === 'CATEGORIES_UPDATED' && Array.isArray(payload)) {
+        setCategories(payload);
+      }
+    });
+
     const interval = setInterval(fetchAllProducts, 4000);
     const handleFocus = () => fetchAllProducts();
     window.addEventListener('focus', handleFocus);
 
     return () => {
+      unsubscribe();
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
     };

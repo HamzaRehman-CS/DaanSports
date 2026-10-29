@@ -27,7 +27,7 @@ const Shop = () => {
         fetchCloudCategories()
       ]);
       if (cloudBanners) setPromotionalBanners(cloudBanners);
-      if (Array.isArray(cloudCategories) && cloudCategories.length > 0) setCategories(cloudCategories);
+      if (Array.isArray(cloudCategories)) setCategories(cloudCategories);
     } catch (err) {}
   };
 
@@ -52,7 +52,7 @@ const Shop = () => {
       const storedB = loadBanners();
       if (storedB) setPromotionalBanners(storedB);
       const storedC = loadCategories();
-      if (storedC && storedC.length > 0) setCategories(storedC);
+      if (Array.isArray(storedC)) setCategories(storedC);
     };
     window.addEventListener('focus', handleFocus);
 

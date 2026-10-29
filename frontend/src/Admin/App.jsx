@@ -84,10 +84,20 @@ const AdminApp = () => {
     return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
   }
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="daan-admin-portal-root">
-      <Navbar user={adminUser} onLogout={handleLogout} />
-      <Admin />
+      <Navbar 
+        user={adminUser} 
+        onLogout={handleLogout} 
+        onToggleSidebar={() => setSidebarOpen(prev => !prev)}
+        sidebarOpen={sidebarOpen}
+      />
+      <Admin 
+        sidebarOpen={sidebarOpen} 
+        onCloseSidebar={() => setSidebarOpen(false)} 
+      />
     </div>
   );
 };

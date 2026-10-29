@@ -75,13 +75,16 @@
 
 .product-table-wrapper {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
+  width: 100%;
 }
 
 .products-table-header {
   display: grid;
   grid-template-columns: 80px 2.5fr 1fr 1fr 1fr 1fr 60px;
+  min-width: 820px;
   align-items: center;
   background: #f8fafc;
   padding: 16px 20px;
@@ -101,6 +104,7 @@
 .products-table-row {
   display: grid;
   grid-template-columns: 80px 2.5fr 1fr 1fr 1fr 1fr 60px;
+  min-width: 820px;
   align-items: center;
   padding: 14px 20px;
   border-bottom: 1px solid #f1f5f9;
@@ -146,4 +150,24 @@
 
 .remove-btn-icon:hover {
   opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .product-list-b2b {
+    padding: 16px;
+  }
+  .product-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .product-filters-bar {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .product-search-input,
+  .product-category-filter {
+    width: 100%;
+    min-width: 100%;
+  }
 }

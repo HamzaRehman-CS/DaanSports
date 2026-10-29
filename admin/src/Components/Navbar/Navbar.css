@@ -150,14 +150,58 @@
   border-color: #ef4444;
 }
 
+.admin-mobile-toggle {
+  display: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f8fafc;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-right: 6px;
+}
+
+.admin-mobile-toggle:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 1024px) {
+  .admin-mobile-toggle {
+    display: inline-flex;
+  }
+}
+
 @media (max-width: 768px) {
   .admin-navbar {
     padding: 0 16px;
+    height: 65px;
+  }
+  .brand-text h1 {
+    font-size: 14px;
+  }
+  .brand-text span {
+    display: none;
   }
   .online-indicator {
     display: none;
   }
   .admin-profile-chip {
     display: none;
+  }
+  .nav-storefront-link span {
+    display: none;
+  }
+  .nav-storefront-link {
+    padding: 8px;
+  }
+  .admin-logout-btn span {
+    display: none;
+  }
+  .admin-logout-btn {
+    padding: 8px;
   }
 }

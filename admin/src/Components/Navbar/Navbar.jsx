@@ -1,12 +1,20 @@
 import React from 'react';
 import './Navbar.css';
 import DsLogo from './DsLogo';
-import { LogOut, ExternalLink, ShieldCheck } from 'lucide-react';
+import { LogOut, ExternalLink, ShieldCheck, Menu, X } from 'lucide-react';
 
-const Navbar = ({ user, onLogout }) => {
+const Navbar = ({ user, onLogout, onToggleSidebar, sidebarOpen }) => {
   return (
     <header className='admin-navbar'>
       <div className="admin-nav-brand">
+        <button
+          type="button"
+          className="admin-mobile-toggle"
+          onClick={onToggleSidebar}
+          aria-label="Toggle navigation menu"
+        >
+          {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
         <DsLogo />
         <div className="brand-text">
           <h1>DAAN SPORTS B2B</h1>
@@ -16,11 +24,9 @@ const Navbar = ({ user, onLogout }) => {
 
       <div className="admin-nav-actions">
         <a 
-          href="http://localhost:3001" 
-          target="_blank" 
-          rel="noopener noreferrer" 
+          href="/" 
           className="nav-storefront-link"
-          title="Open live customer storefront in new tab"
+          title="Open live customer storefront"
         >
           <span>Live Storefront</span>
           <ExternalLink size={14} />
@@ -35,7 +41,7 @@ const Navbar = ({ user, onLogout }) => {
           <ShieldCheck size={16} className="admin-chip-icon" />
           <div className="admin-chip-info">
             <span className="admin-name">{user?.name || 'Administrator'}</span>
-            <span className="admin-email">{user?.email || 'admin@daansports.com'}</span>
+            <span className="admin-email">{user?.email || 'admin'}</span>
           </div>
         </div>
 

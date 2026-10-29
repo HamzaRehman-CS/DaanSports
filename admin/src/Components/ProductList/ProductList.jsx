@@ -1,69 +1,55 @@
 import React, { useEffect, useState } from 'react';
 import './ProductList.css';
-import { Edit3, Trash2, Search, CheckCircle2, AlertCircle, RefreshCw, Plus, X, UploadCloud, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import cross_icon from '../../assets/cross_icon.png';
 import { API_URL } from '../../config';
-import {
-  loadCatalogProducts,
-  saveCatalogProducts,
-  loadCategories,
-  saveCategories,
-  fetchCloudProducts,
-  fetchCloudCategories,
-  updateCloudProduct,
-  deleteCloudProduct,
-  uploadCloudImage
-} from '../../defaultCatalog';
+import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudProducts, fetchCloudCategories, updateCloudProduct, deleteCloudProduct, uploadCloudImage, subscribeToGlobalSync } from '../../defaultCatalog';
 
 const ProductList = () => {
   const [allProducts, setAllProducts] = useState(() => loadCatalogProducts());
   const [categories, setCategories] = useState(() => loadCategories());
   const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
-
-  // Non-blocking Toast Notification
-  const [toast, setToast] = useState(null);
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3500);
-  };
 
   // Edit Modal State
   const [editingProduct, setEditingProduct] = useState(null);
   const [editFormData, setEditFormData] = useState({});
-  const [savingEdit, setSavingEdit] = useState(false);
 
-  const fetchAllProducts = async (manual = false) => {
-    if (manual) setRefreshing(true);
+  const fetchAllProducts = async () => {
     try {
       const [prods, cats] = await Promise.all([
         fetchCloudProducts(),
         fetchCloudCategories()
       ]);
-      if (Array.isArray(prods) && prods.length > 0) {
+      if (Array.isArray(prods)) {
         setAllProducts(prods);
       }
-      if (Array.isArray(cats) && cats.length > 0) {
+      if (Array.isArray(cats)) {
         setCategories(cats);
       }
-      if (manual) showToast("Wholesale inventory re-synchronized with live server", "success");
     } catch (err) {
       const stored = loadCatalogProducts();
-      if (stored && stored.length > 0) setAllProducts(stored);
-    } finally {
-      if (manual) setRefreshing(false);
+      if (stored) setAllProducts(stored);
     }
   };
 
   useEffect(() => {
     fetchAllProducts();
-    const interval = setInterval(fetchAllProducts, 5000);
+
+    const unsubscribe = subscribeToGlobalSync((type, payload) => {
+      if (type === 'PRODUCTS_UPDATED' && Array.isArray(payload)) {
+        setAllProducts(payload);
+      } else if (type === 'CATEGORIES_UPDATED' && Array.isArray(payload)) {
+        setCategories(payload);
+      }
+    });
+
+    const interval = setInterval(fetchAllProducts, 4000);
     const handleFocus = () => fetchAllProducts();
     window.addEventListener('focus', handleFocus);
 
     return () => {
+      unsubscribe();
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
     };
@@ -73,13 +59,9 @@ const ProductList = () => {
     if (!window.confirm(`Are you sure you want to remove "${name}" from wholesale inventory?`)) {
       return;
     }
-    try {
-      const updated = await deleteCloudProduct(id);
-      setAllProducts(updated);
-      showToast(`Product "${name}" removed. Live storefront updated!`, 'success');
-    } catch (err) {
-      showToast(`Error removing product: ${err.message}`, 'error');
-    }
+    const updated = await deleteCloudProduct(id);
+    setAllProducts(updated);
+    alert(`Product "${name}" removed successfully from Cloud Database!`);
   };
 
   const openEditModal = (product) => {
@@ -106,33 +88,35 @@ const ProductList = () => {
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
-    setSavingEdit(true);
+    const colorsArr = Array.isArray(editFormData.colors)
+      ? editFormData.colors
+      : (typeof editFormData.colors === 'string' ? editFormData.colors.split(',') : []);
+    
+    const sizesArr = Array.isArray(editFormData.sizes)
+      ? editFormData.sizes
+      : (typeof editFormData.sizes === 'string' ? editFormData.sizes.split(',') : []);
+
+    const payload = {
+      ...editFormData,
+      colors: colorsArr.map(c => typeof c === 'string' ? c.trim() : c).filter(Boolean),
+      sizes: sizesArr.map(s => typeof s === 'string' ? s.trim() : s).filter(Boolean)
+    };
+
+    // 1. Direct Supabase Cloud update and broadcast
+    const updated = await updateCloudProduct(payload);
+    setAllProducts(updated);
+    setEditingProduct(null);
+
+    // 2. Sync to Backend API if present
     try {
-      const colorsArr = Array.isArray(editFormData.colors)
-        ? editFormData.colors
-        : (typeof editFormData.colors === 'string' ? editFormData.colors.split(',') : []);
-      
-      const sizesArr = Array.isArray(editFormData.sizes)
-        ? editFormData.sizes
-        : (typeof editFormData.sizes === 'string' ? editFormData.sizes.split(',') : []);
+      await fetch(`${API_URL}/edit-product`, {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {}
 
-      const payload = {
-        ...editFormData,
-        colors: colorsArr.map(c => typeof c === 'string' ? c.trim() : c).filter(Boolean),
-        sizes: sizesArr.map(s => typeof s === 'string' ? s.trim() : s).filter(Boolean)
-      };
-
-      // Direct local backend update + cross-tab broadcast
-      const updated = await updateCloudProduct(payload);
-      setAllProducts(updated);
-      setEditingProduct(null);
-
-      showToast(`"${payload.name}" updated! Changes live on storefront.`, 'success');
-    } catch (err) {
-      showToast(`Save failed: ${err.message}`, 'error');
-    } finally {
-      setSavingEdit(false);
-    }
+    alert(`Product "${payload.name}" updated and synced live across website!`);
   };
 
   const filteredProducts = allProducts.filter(p => {
@@ -143,115 +127,50 @@ const ProductList = () => {
 
   return (
     <div className='product-list-b2b'>
-      {/* Toast Banner */}
-      {toast && (
-        <div style={{
-          position: 'fixed',
-          top: '20px',
-          right: '20px',
-          backgroundColor: toast.type === 'error' ? '#ef4444' : '#10b981',
-          color: '#ffffff',
-          padding: '12px 20px',
-          borderRadius: '8px',
-          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          zIndex: 9999,
-          fontSize: '13px',
-          fontWeight: '600',
-          animation: 'slideInRight 0.25s ease-out'
-        }}>
-          {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
-          <span>{toast.message}</span>
-        </div>
-      )}
-
       <div className="product-list-header">
         <div>
           <h2>Wholesale Products Catalog</h2>
-          <p>Live inventory specifications, wholesale tiers, fabric formulations, and instant storefront synchronization.</p>
+          <p>Manage DAAN Sports bulk apparel inventory, edit descriptions, pricing, and live site offerings.</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <button
-            onClick={() => fetchAllProducts(true)}
-            disabled={refreshing}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#1e293b',
-              color: '#94a3b8',
-              border: '1px solid #334155',
-              padding: '8px 14px',
-              borderRadius: '7px',
-              fontSize: '12px',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}
-          >
-            <RefreshCw size={13} className={refreshing ? 'spin-icon' : ''} />
-            {refreshing ? 'Syncing...' : 'Sync Live'}
-          </button>
-          <Link
-            to="/add-product"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#dc2626',
-              color: '#ffffff',
-              padding: '8px 16px',
-              borderRadius: '7px',
-              fontSize: '12px',
-              fontWeight: '600',
-              textDecoration: 'none'
-            }}
-          >
-            <Plus size={14} /> Add Product
-          </Link>
-          <div className="product-count-badge">
-            Showing: <span>{filteredProducts.length} / {allProducts.length}</span>
-          </div>
+        <div className="product-count-badge">
+          Showing: <span>{filteredProducts.length} / {allProducts.length}</span>
         </div>
       </div>
 
       {/* Filter Controls Bar */}
-      <div style={{ display: 'flex', gap: '14px', marginBottom: '20px', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: '240px', position: 'relative' }}>
-          <Search size={15} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
-          <input 
-            type="text"
-            placeholder="Search wholesale product catalog..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              backgroundColor: '#1e293b',
-              border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: '8px',
-              padding: '9px 16px 9px 36px',
-              color: '#fff',
-              fontSize: '13px',
-              outline: 'none'
-            }}
-          />
-        </div>
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
+        <input 
+          type="text"
+          placeholder="🔍 Search product by title..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            flex: 1,
+            minWidth: '220px',
+            backgroundColor: '#1e293b',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: '8px',
+            padding: '10px 16px',
+            color: '#fff',
+            fontSize: '13px',
+            outline: 'none'
+          }}
+        />
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
           style={{
             backgroundColor: '#1e293b',
-            border: '1px solid rgba(255,255,255,0.12)',
+            border: '1px solid rgba(255,255,255,0.15)',
             borderRadius: '8px',
-            padding: '9px 16px',
+            padding: '10px 16px',
             color: '#fff',
             fontSize: '13px',
             outline: 'none',
             cursor: 'pointer'
           }}
         >
-          <option value="ALL">All Categories ({allProducts.length})</option>
+          <option value="ALL">All Categories</option>
           {categories.map(c => (
             <option key={c.id} value={c.name}>{c.name}</option>
           ))}
@@ -263,20 +182,20 @@ const ProductList = () => {
       ) : filteredProducts.length === 0 ? (
         <div className="empty-catalog-state">
           <p>No matching products found in catalog.</p>
-          <Link to="/add-product" className="add-first-btn">
-            <Plus size={14} /> Add Your First Product
-          </Link>
+          {allProducts.length === 0 && (
+            <a href="/add-product" className="add-first-btn">Add Your First Product</a>
+          )}
         </div>
       ) : (
         <div className="product-table-wrapper">
           <div className="products-table-header">
             <p>Product</p>
-            <p>Title & Specs</p>
+            <p>Title & Description</p>
             <p>Category</p>
-            <p>MOQ</p>
+            <p>MOQ (Pcs)</p>
             <p>Bulk Price</p>
-            <p style={{ textAlign: 'center' }}>Edit</p>
-            <p style={{ textAlign: 'center' }}>Remove</p>
+            <p>Edit / Action</p>
+            <p>Remove</p>
           </div>
 
           <div className="products-table-rows">
@@ -287,12 +206,10 @@ const ProductList = () => {
                     <img className='product-list-producticon' src={product.image} alt={product.name} />
                   </div>
                   <div className="product-title-cell">
-                    <strong style={{ color: '#f8fafc', fontSize: '14px' }}>{product.name}</strong>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '3px' }}>
-                      <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-                        ID #{product.id} • {product.gsm || '330 GSM'} • {product.material ? product.material.substring(0, 24) : 'Combed Fleece'}
-                      </span>
-                    </div>
+                    <strong>{product.name}</strong>
+                    {product.description && (
+                      <span className="product-desc-preview">{product.description.substring(0, 60)}...</span>
+                    )}
                   </div>
                   <div>
                     <span className="category-pill">{product.category}</span>
@@ -304,7 +221,7 @@ const ProductList = () => {
                     <strong className="price-tag">${product.new_price}</strong>
                     {product.old_price && <span className="old-price-tag">${product.old_price}</span>}
                   </div>
-                  <div style={{ textAlign: 'center' }}>
+                  <div>
                     <button
                       onClick={() => openEditModal(product)}
                       className="edit-action-btn"
@@ -314,35 +231,21 @@ const ProductList = () => {
                         border: '1px solid #334155',
                         padding: '6px 12px',
                         borderRadius: '6px',
-                        fontWeight: '600',
+                        fontWeight: 'bold',
                         cursor: 'pointer',
-                        fontSize: '12px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px'
+                        fontSize: '12px'
                       }}
                     >
-                      <Edit3 size={13} /> Edit
+                      ✏️ Edit Specs
                     </button>
                   </div>
-                  <div style={{ textAlign: 'center' }}>
+                  <div>
                     <button
                       onClick={() => removeProduct(product.id, product.name)}
                       className="delete-action-btn"
                       title="Remove Product"
-                      style={{
-                        backgroundColor: 'rgba(239, 68, 68, 0.12)',
-                        color: '#ef4444',
-                        border: '1px solid rgba(239, 68, 68, 0.3)',
-                        padding: '7px',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
                     >
-                      <Trash2 size={15} />
+                      <img src={cross_icon} alt="Delete" />
                     </button>
                   </div>
                 </div>
@@ -355,48 +258,37 @@ const ProductList = () => {
       {/* Edit Product Modal */}
       {editingProduct && (
         <div className="modal-overlay-b2b" style={{
-          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px'
+          position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justify: 'center', zIndex: 1000, padding: '20px'
         }}>
           <div style={{
-            backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '12px',
-            width: '100%', maxWidth: '720px', maxHeight: '90vh', overflowY: 'auto', padding: '26px', color: '#fff',
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.7)'
+            backgroundColor: '#18181b', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px',
+            width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', padding: '24px', color: '#fff'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '14px', marginBottom: '18px' }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#f8fafc' }}>
-                  Edit Wholesale Product Specifications
-                </h3>
-                <span style={{ fontSize: '12px', color: '#94a3b8' }}>ID #{editFormData.id} • Updates sync live to store</span>
-              </div>
-              <button
-                onClick={() => setEditingProduct(null)}
-                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex' }}
-              >
-                <X size={20} />
-              </button>
+            <div style={{ display: 'flex', justify: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', pb: '12px', mb: '16px' }}>
+              <h3 style={{ margin: 0, fontFamily: 'serif', fontStyle: 'italic', fontSize: '20px' }}>Edit Wholesale Product Specs #{editFormData.id}</h3>
+              <button onClick={() => setEditingProduct(null)} style={{ background: 'none', border: 'none', color: '#a1a1aa', fontSize: '20px', cursor: 'pointer' }}>✕</button>
             </div>
 
             <form onSubmit={handleSaveEdit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#94a3b8' }}>Product Title *</label>
+                <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>Product Title *</label>
                 <input
                   type="text"
                   required
                   value={editFormData.name}
                   onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                  style={{ width: '100%', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '9px 12px', borderRadius: '6px', fontSize: '13px' }}
+                  style={{ width: '100%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#94a3b8' }}>Category</label>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>Category</label>
                   <select
                     value={editFormData.category}
                     onChange={(e) => setEditFormData({ ...editFormData, category: e.target.value })}
-                    style={{ width: '100%', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '9px 12px', borderRadius: '6px', fontSize: '13px' }}
+                    style={{ width: '100%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
                   >
                     {Array.from(new Set([
                       ...categories.map(c => c.name),
@@ -407,91 +299,90 @@ const ProductList = () => {
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#94a3b8' }}>Bulk Price ($)</label>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>Bulk Price ($)</label>
                   <input
                     type="number"
                     step="0.01"
-                    required
                     value={editFormData.new_price}
                     onChange={(e) => setEditFormData({ ...editFormData, new_price: e.target.value })}
-                    style={{ width: '100%', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '9px 12px', borderRadius: '6px', fontSize: '13px' }}
+                    style={{ width: '100%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#94a3b8' }}>MOQ (Pcs)</label>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>MOQ (Pcs)</label>
                   <input
                     type="number"
                     value={editFormData.moq}
                     onChange={(e) => setEditFormData({ ...editFormData, moq: e.target.value })}
-                    style={{ width: '100%', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '9px 12px', borderRadius: '6px', fontSize: '13px' }}
+                    style={{ width: '100%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#94a3b8' }}>Full Description *</label>
+                <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>Full Description *</label>
                 <textarea
-                  rows={3}
+                  rows={4}
                   required
                   value={editFormData.description}
                   onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-                  style={{ width: '100%', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '9px 12px', borderRadius: '6px', fontSize: '13px', resize: 'vertical' }}
+                  style={{ width: '100%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px', resize: 'vertical' }}
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#94a3b8' }}>Material Composition</label>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>Material</label>
                   <input
                     type="text"
                     value={editFormData.material}
                     onChange={(e) => setEditFormData({ ...editFormData, material: e.target.value })}
-                    style={{ width: '100%', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '9px 12px', borderRadius: '6px', fontSize: '13px' }}
+                    style={{ width: '100%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#94a3b8' }}>GSM Weight</label>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>GSM Weight</label>
                   <input
                     type="text"
                     value={editFormData.gsm}
                     onChange={(e) => setEditFormData({ ...editFormData, gsm: e.target.value })}
-                    style={{ width: '100%', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '9px 12px', borderRadius: '6px', fontSize: '13px' }}
+                    style={{ width: '100%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
                   />
                 </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#94a3b8' }}>Colors (Comma Separated)</label>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>Colors (Comma Separated)</label>
                   <input
                     type="text"
                     value={editFormData.colors}
                     onChange={(e) => setEditFormData({ ...editFormData, colors: e.target.value })}
-                    style={{ width: '100%', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '9px 12px', borderRadius: '6px', fontSize: '13px' }}
+                    style={{ width: '100%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#94a3b8' }}>Sizes (Comma Separated)</label>
+                  <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>Sizes (Comma Separated)</label>
                   <input
                     type="text"
                     value={editFormData.sizes}
                     onChange={(e) => setEditFormData({ ...editFormData, sizes: e.target.value })}
-                    style={{ width: '100%', background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '9px 12px', borderRadius: '6px', fontSize: '13px' }}
+                    style={{ width: '100%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#94a3b8' }}>Product Image URL</label>
+                <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>Product Image</label>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <input
                     type="text"
                     value={editFormData.image}
                     onChange={(e) => setEditFormData({ ...editFormData, image: e.target.value })}
-                    style={{ flex: 1, background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '9px 12px', borderRadius: '6px', fontSize: '13px' }}
+                    style={{ flex: 1, background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
                   />
-                  <label style={{ background: '#334155', color: '#fff', padding: '9px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <UploadCloud size={14} /> Upload
+                  <label style={{ background: '#27272a', color: '#fff', padding: '8px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    📷 Upload
                     <input
                       type="file"
                       accept="image/*"
@@ -501,47 +392,31 @@ const ProductList = () => {
                         try {
                           const publicUrl = await uploadCloudImage(e.target.files[0]);
                           setEditFormData(prev => ({ ...prev, image: publicUrl }));
-                          showToast("Product image uploaded successfully!", "success");
+                          alert("📷 Product image uploaded to Supabase Storage!");
                         } catch (err) {
-                          showToast("Upload notice: " + err.message, "error");
+                          alert("Upload error: " + err.message);
                         }
                       }}
                     />
                   </label>
+                </div>
+                <div style={{ marginTop: '8px', fontSize: '12px', color: '#93c5fd', background: 'rgba(37,99,235,0.18)', border: '1px solid #3b82f6', padding: '8px 12px', borderRadius: '6px', lineHeight: '1.5' }}>
+                  📐 <strong>Recommended Dimensions:</strong> 800 × 800 px (1:1 Square) or 800 × 1000 px (4:5 Crop) | Max 5MB | WebP, JPG, PNG
+                  <div style={{ fontSize: '11px', color: '#60a5fa', marginTop: '2px', fontStyle: 'italic' }}>💡 Tip: High-resolution apparel photo with centered framing.</div>
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
                 <button
                   type="submit"
-                  disabled={savingEdit}
-                  style={{
-                    flex: 1,
-                    backgroundColor: '#dc2626',
-                    color: '#fff',
-                    border: 'none',
-                    padding: '12px',
-                    borderRadius: '7px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    fontSize: '13px'
-                  }}
+                  style={{ flex: 1, backgroundColor: '#dc2626', color: '#fff', border: 'none', padding: '12px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
                 >
-                  {savingEdit ? 'Saving Changes...' : 'Save & Sync Live 💾'}
+                  Save Changes 💾
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditingProduct(null)}
-                  style={{
-                    backgroundColor: '#334155',
-                    color: '#fff',
-                    border: 'none',
-                    padding: '12px 20px',
-                    borderRadius: '7px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    fontSize: '13px'
-                  }}
+                  style={{ backgroundColor: '#27272a', color: '#fff', border: 'none', padding: '12px 20px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
@@ -550,6 +425,7 @@ const ProductList = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

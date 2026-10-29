@@ -198,7 +198,7 @@
 
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: 20px;
 }
 
@@ -321,4 +321,21 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .category-manager-b2b {
+    padding: 16px;
+  }
+  .category-manager-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .add-cat-card {
+    padding: 16px;
+  }
+  .categories-grid {
+    grid-template-columns: 1fr;
+  }
 }

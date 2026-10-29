@@ -1,75 +1,58 @@
 import React from 'react';
 import './Sidebar.css';
 import { Link, useLocation } from 'react-router-dom';
+import { 
+  LayoutDashboard, 
+  Package, 
+  PlusCircle, 
+  Layers, 
+  Image, 
+  ShoppingBag, 
+  Ticket, 
+  Sliders,
+  CheckCircle2
+} from 'lucide-react';
 
 const Sidebar = () => {
   const location = useLocation();
 
+  const navItems = [
+    { path: '/dashboard', altPath: '/', label: 'Dashboard & Metrics', icon: LayoutDashboard },
+    { path: '/list-product', label: 'Products & Specs', icon: Package },
+    { path: '/add-product', label: 'Add New Product', icon: PlusCircle },
+    { path: '/categories', label: 'Categories & Banners', icon: Layers },
+    { path: '/banners', label: 'Top Sellers Banners', icon: Image },
+    { path: '/orders', label: 'Customer Orders', icon: ShoppingBag },
+    { path: '/vouchers', label: 'Promo Vouchers', icon: Ticket },
+    { path: '/cms', label: 'Site CMS & Carousel', icon: Sliders },
+  ];
+
   return (
-    <div className='admin-sidebar'>
+    <aside className='admin-sidebar'>
       <div className="sidebar-menu">
-        <Link to={'/dashboard'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/' || location.pathname === '/dashboard' ? 'active' : ''}`}>
-            <span className="sidebar-icon">📊</span>
-            <p>Dashboard & Metrics</p>
-          </div>
-        </Link>
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path || (item.altPath && location.pathname === item.altPath);
 
-        <Link to={'/list-product'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/list-product' ? 'active' : ''}`}>
-            <span className="sidebar-icon">📦</span>
-            <p>Products & Specs</p>
-          </div>
-        </Link>
-
-        <Link to={'/add-product'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/add-product' ? 'active' : ''}`}>
-            <span className="sidebar-icon">➕</span>
-            <p>Add New Product</p>
-          </div>
-        </Link>
-        
-        <Link to={'/categories'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/categories' ? 'active' : ''}`}>
-            <span className="sidebar-icon">🏷️</span>
-            <p>Categories & Banners</p>
-          </div>
-        </Link>
-
-        <Link to={'/banners'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/banners' ? 'active' : ''}`}>
-            <span className="sidebar-icon">🖼️</span>
-            <p>Top Sellers Banners</p>
-          </div>
-        </Link>
-
-        <Link to={'/orders'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/orders' ? 'active' : ''}`}>
-            <span className="sidebar-icon">🚚</span>
-            <p>Customer Orders</p>
-          </div>
-        </Link>
-
-        <Link to={'/vouchers'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/vouchers' ? 'active' : ''}`}>
-            <span className="sidebar-icon">🎫</span>
-            <p>Promo Vouchers</p>
-          </div>
-        </Link>
-
-        <Link to={'/cms'} style={{ textDecoration: "none" }}>
-          <div className={`sidebar-item ${location.pathname === '/cms' ? 'active' : ''}`}>
-            <span className="sidebar-icon">🎨</span>
-            <p>Site CMS</p>
-          </div>
-        </Link>
+          return (
+            <Link key={item.path} to={item.path} style={{ textDecoration: "none" }}>
+              <div className={`sidebar-item ${isActive ? 'active' : ''}`}>
+                <Icon size={18} className="sidebar-icon-svg" />
+                <p>{item.label}</p>
+              </div>
+            </Link>
+          );
+        })}
       </div>
 
       <div className="sidebar-info-card">
-        <h4>DAAN B2B Engine</h4>
-        <p>Live order sync, category banners & product editor active.</p>
+        <div className="sidebar-card-header">
+          <CheckCircle2 size={16} className="text-emerald-500" />
+          <h4>Neon Live Engine</h4>
+        </div>
+        <p>Instant two-way sync: Changes update the storefront immediately.</p>
       </div>
-    </div>
+    </aside>
   );
 };
 

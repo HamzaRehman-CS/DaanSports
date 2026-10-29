@@ -1,34 +1,5 @@
 [
   {
-    "id": 1,
-    "name": "Pro Tech Fleece Full-Zip Tracksuit Set",
-    "category": "Tracksuits",
-    "new_price": 24.5,
-    "old_price": 45,
-    "moq": 50,
-    "description": "Heavyweight 330 GSM combed cotton fleece tracksuit set. Tailored slim-fit jogger pants with deep zippered pockets and ribbed cuffs. Full-zip hooded jacket. Ideal for professional sports teams and custom private labeling.",
-    "colors": [
-      "Black",
-      "Navy Blue",
-      "Heather Gray",
-      "Crimson Red"
-    ],
-    "sizes": [
-      "S",
-      "M",
-      "L",
-      "XL",
-      "2XL"
-    ],
-    "stock": 5000,
-    "image": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?auto=format&fit=crop&w=800&q=80"
-    ]
-  },
-  {
     "id": 2,
     "name": "Heavyweight Oversized Streetwear Hoodie",
     "category": "Sweatshirts",
@@ -223,37 +194,5 @@
     "stock": 5000,
     "date": "2026-08-08T05:47:15.916Z",
     "available": true
-  },
-  {
-    "id": 9,
-    "name": "Updated Worldwide Fleece Tracksuit Set (Global Sync)",
-    "image": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80"
-    ],
-    "category": "Tracksuits",
-    "new_price": 29.99,
-    "old_price": 38.987,
-    "moq": 50,
-    "description": "",
-    "material": "80% Combed Cotton / 20% Polyester",
-    "gsm": "330 GSM",
-    "stitching": "Double-Needle Flatlock Reinforced",
-    "customization": "Custom Printing & Labels Available",
-    "leadTime": "12 - 15 Business Days",
-    "colors": [
-      "Black",
-      "Gold"
-    ],
-    "sizes": [
-      "S",
-      "M",
-      "L",
-      "XL",
-      "2XL"
-    ],
-    "stock": 1000,
-    "available": true,
-    "date": "2026-08-21T11:32:53.702Z"
   }
 ]

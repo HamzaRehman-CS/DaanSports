@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import './VoucherManager.css';
+import { Tag, Trash2, Plus, Ticket } from 'lucide-react';
 import { API_URL } from '../../config';
 import { loadVouchers, fetchCloudVouchers, saveCloudVoucher, deleteCloudVoucher } from '../../defaultCatalog';
+import { Toast, useToast } from '../Toast/Toast';
 
 const VoucherManager = () => {
   const [vouchers, setVouchers] = useState(() => loadVouchers());
@@ -10,6 +12,7 @@ const VoucherManager = () => {
   const [discount, setDiscount] = useState(10);
   const [minOrder, setMinOrder] = useState(0);
   const [description, setDescription] = useState('');
+  const { toast, showToast, hideToast } = useToast();
 
   const fetchVouchers = async () => {
     try {
@@ -28,7 +31,10 @@ const VoucherManager = () => {
 
   const handleCreateVoucher = async (e) => {
     e.preventDefault();
-    if (!code.trim()) return alert("Please enter a voucher code.");
+    if (!code.trim()) {
+      showToast("Please enter a voucher code.", "error");
+      return;
+    }
 
     const newVoucher = {
       code: code.toUpperCase().trim(),
@@ -51,11 +57,11 @@ const VoucherManager = () => {
         });
       } catch (err) {}
 
-      alert(`🎉 Voucher "${newVoucher.code}" created successfully & synced live!`);
+      showToast(`🎉 Voucher "${newVoucher.code}" created and synced live!`, "success");
       setCode('');
       setDescription('');
     } catch (err) {
-      alert("Error creating voucher: " + err.message);
+      showToast("Error creating voucher: " + err.message, "error");
     }
   };
 
@@ -74,24 +80,28 @@ const VoucherManager = () => {
         });
       } catch (err) {}
 
-      alert(`🗑️ Voucher ${voucherCode} deleted and synced live.`);
+      showToast(`🗑️ Voucher "${voucherCode}" removed and synced live.`, "info");
     } catch (err) {
-      alert("Error deleting voucher: " + err.message);
+      showToast("Error deleting voucher: " + err.message, "error");
     }
   };
 
   return (
     <div className="voucher-manager-b2b">
+      <Toast toast={toast} onClose={hideToast} />
+
       <div className="voucher-header">
-        <h2>Discount Voucher & Coupon Manager</h2>
-        <p>Issue promo discount codes for customers to apply during cart checkout.</p>
+        <div>
+          <h2>Discount Voucher & Coupon Manager</h2>
+          <p>Issue promo discount codes for customers to apply during cart checkout with instant storefront validation.</p>
+        </div>
       </div>
 
       <div className="voucher-content-grid">
         
         {/* Create Voucher Form */}
         <form onSubmit={handleCreateVoucher} className="voucher-form-card">
-          <h3>Issue New Promo Voucher</h3>
+          <h3><Ticket size={17} style={{ verticalAlign: 'middle', marginRight: '6px' }} /> Issue New Promo Voucher</h3>
 
           <div className="form-group">
             <label>Voucher Code (e.g. GOCART20)</label>
@@ -162,13 +172,15 @@ const VoucherManager = () => {
                 <div key={i} className="voucher-chip-card">
                   <div className="voucher-code-header">
                     <span className="code-tag">{v.code}</span>
-                    <button onClick={() => handleDeleteVoucher(v.code)} className="del-btn">✕</button>
+                    <button onClick={() => handleDeleteVoucher(v.code)} className="del-btn" title="Delete Voucher">
+                      <Trash2 size={13} />
+                    </button>
                   </div>
                   <div className="voucher-details">
                     <p className="discount-heading">
                       {v.type === 'percent' ? `${v.discount}% OFF` : `$${v.discount} OFF`}
                     </p>
-                    <p className="min-order-note">Min Order: ${v.minOrder}</p>
+                    <p className="min-order-note">Min Order: ${v.minOrder !== undefined ? v.minOrder : (v.min_order || 0)}</p>
                     {v.description && <p className="voucher-desc">"{v.description}"</p>}
                   </div>
                 </div>

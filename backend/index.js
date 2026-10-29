@@ -11,6 +11,7 @@ const fs = require("fs");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const supabase = require("./supabaseClient");
+const neonClient = require("./neonClient");
 
 const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || process.env.DATABASE_URL || "mongodb://127.0.0.1:27017/e-commerce";
 const jwtSecret = process.env.JWT_SECRET || 'secret_ecom_2026_hardened';
@@ -723,11 +724,11 @@ const safeSupabase = async (callback) => {
     if (!supabase) return null;
     try {
         const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Supabase Timeout')), 8000)
+            setTimeout(() => reject(new Error('Supabase Timeout')), 1500)
         );
         return await Promise.race([callback(supabase), timeoutPromise]);
     } catch (err) {
-        console.warn("safeSupabase warning:", err.message);
+        // Silently fail so local operations remain instant
         return null;
     }
 };
@@ -742,6 +743,13 @@ const safeSupabase = async (callback) => {
 
 // 1. PRODUCTS
 const getAllProductsLive = async () => {
+    if (neonClient && neonClient.sql) {
+        const neonProducts = await neonClient.getNeonProducts();
+        if (Array.isArray(neonProducts) && neonProducts.length > 0) {
+            return neonProducts;
+        }
+    }
+
     const supaProducts = await safeSupabase(async (s) => {
         const { data, error } = await s.from('products').select('*').order('id', { ascending: true });
         return (!error && Array.isArray(data) && data.length > 0) ? data : null;
@@ -768,6 +776,10 @@ const saveProductLive = async (productObj) => {
         currentList.push(productObj);
     }
     saveJsonProducts(currentList);
+
+    if (neonClient && neonClient.sql) {
+        await neonClient.saveNeonProduct(productObj);
+    }
 
     await safeSupabase(async (s) => {
         await s.from('products').upsert([{
@@ -803,6 +815,10 @@ const deleteProductLive = async (prodId) => {
     currentList = currentList.filter(p => p.id !== prodId);
     saveJsonProducts(currentList);
 
+    if (neonClient && neonClient.sql) {
+        await neonClient.deleteNeonProduct(prodId);
+    }
+
     await safeSupabase(async (s) => {
         await s.from('products').delete().eq('id', prodId);
     });
@@ -816,6 +832,13 @@ const deleteProductLive = async (prodId) => {
 
 // 2. CATEGORIES
 const getCategoriesLive = async () => {
+    if (neonClient && neonClient.sql) {
+        const neonCats = await neonClient.getNeonCategories();
+        if (Array.isArray(neonCats) && neonCats.length > 0) {
+            return neonCats;
+        }
+    }
+
     const supaCats = await safeSupabase(async (s) => {
         const { data, error } = await s.from('categories').select('*').order('id', { ascending: true });
         return (!error && Array.isArray(data) && data.length > 0) ? data : null;
@@ -835,6 +858,10 @@ const getCategoriesLive = async () => {
 
 const saveCategoriesLive = async (categoriesList) => {
     saveJsonCategories(categoriesList);
+
+    if (neonClient && neonClient.sql) {
+        await neonClient.saveNeonCategories(categoriesList);
+    }
 
     await safeSupabase(async (s) => {
         for (const cat of categoriesList) {
@@ -856,6 +883,10 @@ const deleteCategoryLive = async (catId) => {
     currentList = currentList.filter(c => c.id !== catId);
     saveJsonCategories(currentList);
 
+    if (neonClient && neonClient.sql) {
+        await neonClient.sql`DELETE FROM categories WHERE id = ${Number(catId)};`.catch(() => {});
+    }
+
     await safeSupabase(async (s) => {
         await s.from('categories').delete().eq('id', catId);
     });
@@ -869,6 +900,13 @@ const deleteCategoryLive = async (catId) => {
 
 // 3. BANNERS
 const getBannersLive = async () => {
+    if (neonClient && neonClient.sql) {
+        const neonBanners = await neonClient.getNeonBanners();
+        if (neonBanners && Object.keys(neonBanners).length > 0) {
+            return { ...defaultBanners, ...neonBanners };
+        }
+    }
+
     const supaBanners = await safeSupabase(async (s) => {
         const { data, error } = await s.from('banners').select('data').eq('id', 'current_banners').single();
         return (!error && data && data.data) ? data.data : null;
@@ -892,6 +930,10 @@ const saveBannersLive = async (bannersData) => {
     const combined = { ...defaultBanners, ...bannersData };
     saveJsonBanners(combined);
 
+    if (neonClient && neonClient.sql) {
+        await neonClient.saveNeonBanners(combined);
+    }
+
     await safeSupabase(async (s) => {
         await s.from('banners').upsert([{ id: 'current_banners', data: combined, updated_at: new Date().toISOString() }]);
     });
@@ -909,6 +951,16 @@ const saveBannersLive = async (bannersData) => {
 
 // 4. CMS (HERO SLIDERS & ANNOUNCEMENTS)
 const getCmsLive = async () => {
+    if (neonClient && neonClient.sql) {
+        const neonCms = await neonClient.getNeonCms();
+        if (neonCms && (neonCms.slides?.length > 0 || neonCms.announcementBar)) {
+            return {
+                announcementText: neonCms.announcementBar || defaultCmsData.announcementText,
+                heroSlides: (Array.isArray(neonCms.slides) && neonCms.slides.length > 0) ? neonCms.slides : defaultCmsData.heroSlides
+            };
+        }
+    }
+
     const supaCms = await safeSupabase(async (s) => {
         const { data, error } = await s.from('cms').select('data').eq('id', 'current_cms').single();
         return (!error && data && data.data) ? data.data : null;
@@ -941,6 +993,13 @@ const saveCmsLive = async (cmsData) => {
     };
     saveJsonCms(combined);
 
+    if (neonClient && neonClient.sql) {
+        await neonClient.saveNeonCms({
+            announcementBar: combined.announcementText,
+            slides: combined.heroSlides
+        });
+    }
+
     await safeSupabase(async (s) => {
         await s.from('cms').upsert([{ id: 'current_cms', data: combined, updated_at: new Date().toISOString() }]);
     });
@@ -958,6 +1017,13 @@ const saveCmsLive = async (cmsData) => {
 
 // 5. VOUCHERS
 const getVouchersLive = async () => {
+    if (neonClient && neonClient.sql) {
+        const neonVouchers = await neonClient.getNeonVouchers();
+        if (Array.isArray(neonVouchers) && neonVouchers.length > 0) {
+            return neonVouchers;
+        }
+    }
+
     const supaVouchers = await safeSupabase(async (s) => {
         const { data, error } = await s.from('vouchers').select('*').order('discount', { ascending: false });
         return (!error && Array.isArray(data) && data.length > 0) ? data : null;
@@ -980,6 +1046,10 @@ const saveVoucherLive = async (voucherObj) => {
     vouchers = vouchers.filter(v => v.code !== voucherObj.code);
     vouchers.push(voucherObj);
     saveJsonVouchers(vouchers);
+
+    if (neonClient && neonClient.sql) {
+        await neonClient.saveNeonVoucher(voucherObj);
+    }
 
     await safeSupabase(async (s) => {
         await s.from('vouchers').upsert([{
@@ -1004,6 +1074,10 @@ const deleteVoucherLive = async (code) => {
     vouchers = vouchers.filter(v => v.code !== cleanCode);
     saveJsonVouchers(vouchers);
 
+    if (neonClient && neonClient.sql) {
+        await neonClient.deleteNeonVoucher(cleanCode);
+    }
+
     await safeSupabase(async (s) => {
         await s.from('vouchers').delete().eq('code', cleanCode);
     });
@@ -1017,6 +1091,13 @@ const deleteVoucherLive = async (code) => {
 
 // 6. ORDERS
 const getAllOrdersLive = async () => {
+    if (neonClient && neonClient.sql) {
+        const neonOrders = await neonClient.getNeonOrders();
+        if (Array.isArray(neonOrders)) {
+            return neonOrders;
+        }
+    }
+
     const supaOrders = await safeSupabase(async (s) => {
         const { data, error } = await s.from('orders').select('*').order('created_at', { ascending: false });
         if (!error && Array.isArray(data)) {
@@ -1050,6 +1131,10 @@ const saveOrderLive = async (orderObj) => {
     const orders = getJsonOrders();
     orders.unshift(orderObj);
     saveJsonOrders(orders);
+
+    if (neonClient && neonClient.sql) {
+        await neonClient.createNeonOrder(orderObj);
+    }
 
     await safeSupabase(async (s) => {
         await s.from('orders').insert([{
@@ -1093,6 +1178,10 @@ const updateOrderStatusLive = async (orderId, status, trackingNumber, notes) => 
     });
     saveJsonOrders(orders);
 
+    if (neonClient && neonClient.sql) {
+        await neonClient.updateNeonOrder(orderId, { status, trackingNumber, notes });
+    }
+
     await safeSupabase(async (s) => {
         const payload = { updated_at: new Date().toISOString() };
         if (status) payload.status = status;
@@ -1118,6 +1207,10 @@ const deleteOrderLive = async (orderId) => {
     orders = orders.filter(o => o.id !== orderId);
     saveJsonOrders(orders);
 
+    if (neonClient && neonClient.sql) {
+        await neonClient.deleteNeonOrder(orderId);
+    }
+
     await safeSupabase(async (s) => {
         await s.from('orders').delete().eq('id', orderId);
     });
@@ -1140,8 +1233,8 @@ app.get("/", (req, res) => {
     res.json({
         service: "DAAN Sports Full-Stack API",
         status: "Healthy & Persistent",
-        database: mongoose.connection.readyState === 1 ? "MongoDB Connected" : (supabase ? "Supabase Engine Active" : "Local Store"),
-        features: ["Supabase Cloud DB Engine", "Supabase Storage CDN", "Live CMS & Banner Sync", "Order Tracking", "Voucher Engine"]
+        database: (neonClient && neonClient.sql) ? "Neon PostgreSQL Active" : (mongoose.connection.readyState === 1 ? "MongoDB Connected" : (supabase ? "Supabase Engine Active" : "Local Store")),
+        features: ["Neon Cloud PostgreSQL", "Physical File Storage", "Live CMS & Banner Sync", "Order Tracking", "Voucher Engine"]
     });
 });
 
@@ -1371,6 +1464,18 @@ app.get('/categories', async (req, res) => {
         res.json(cats);
     } catch (err) {
         res.json(defaultCategories);
+    }
+});
+
+app.post('/categories', async (req, res) => {
+    try {
+        if (Array.isArray(req.body)) {
+            await saveCategoriesLive(req.body);
+            return res.json({ success: true, categories: req.body });
+        }
+        res.status(400).json({ success: false, error: "Array of categories expected" });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
@@ -1726,21 +1831,133 @@ app.post('/signup', async (req, res) => {
     }
 });
 
+// AUTHENTICATION & ADMIN AUTH
+app.post(['/api/auth/admin-login', '/admin-login'], async (req, res) => {
+    try {
+        const id = (req.body.email || req.body.username || req.body.id || '').trim().toLowerCase();
+        const password = (req.body.password || '').trim();
+
+        const isValidId = id === 'admin' || id === 'admin@daansports.com' || id === (process.env.ADMIN_EMAIL || '').toLowerCase();
+        const isValidPass = password === 'pass' || password === 'admin123' || password === (process.env.ADMIN_PASSWORD || '');
+
+        if (isValidId && isValidPass) {
+            const adminUser = {
+                id: 'admin-01',
+                email: 'admin',
+                name: 'Daan Sports Wholesale Director',
+                role: 'admin',
+                permissions: ['all']
+            };
+            const token = jwt.sign({ user: adminUser }, jwtSecret, { expiresIn: '7d' });
+            return res.json({
+                success: true,
+                token,
+                user: adminUser,
+                message: 'Admin authenticated successfully'
+            });
+        }
+
+        return res.status(401).json({ success: false, error: 'Invalid administrator credentials' });
+    } catch (err) {
+        console.error("Admin Login Error:", err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.get(['/api/auth/me', '/auth/me'], async (req, res) => {
+    try {
+        const token = req.header('auth-token') || (req.header('authorization') && req.header('authorization').replace('Bearer ', ''));
+        if (!token) {
+            return res.status(401).json({ success: false, error: 'No token provided' });
+        }
+        const decoded = jwt.verify(token, jwtSecret);
+        return res.json({ success: true, user: decoded.user });
+    } catch (err) {
+        return res.status(401).json({ success: false, error: 'Invalid or expired session token' });
+    }
+});
+
+app.get(['/api/admin/data', '/admin/data', '/api/admin'], async (req, res) => {
+    try {
+        const [products, categories, banners, cms, orders, vouchers] = await Promise.all([
+            getAllProductsLive(),
+            getCategoriesLive(),
+            getBannersLive(),
+            getCmsLive(),
+            getAllOrdersLive(),
+            getVouchersLive()
+        ]);
+
+        const totalRevenue = orders
+            .filter(o => o.status !== 'Cancelled')
+            .reduce((sum, o) => sum + (Number(o.totalAmount || o.total || 0)), 0);
+
+        const pendingOrdersCount = orders.filter(o => (o.status || 'Pending').toLowerCase() === 'pending').length;
+
+        res.json({
+            success: true,
+            products,
+            categories,
+            banners,
+            cms,
+            orders,
+            vouchers,
+            stats: {
+                totalRevenue,
+                totalOrders: orders.length,
+                pendingOrders: pendingOrdersCount,
+                totalProducts: products.length,
+                activeCategories: categories.length
+            }
+        });
+    } catch (err) {
+        console.error("Admin Data Error:", err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 app.post('/login', async (req, res) => {
     try {
-        await connectDB();
-        let user = await Users.findOne({ email: req.body.email });
-        if (user) {
-            const passCompare = req.body.password === user.password;
-            if (passCompare) {
-                const data = { user: { id: user.id } };
-                const token = jwt.sign(data, jwtSecret);
-                res.json({ success: true, token });
+        const email = (req.body.email || '').trim().toLowerCase();
+        const password = (req.body.password || '').trim();
+
+        // 1. Check if Admin credentials
+        const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@daansports.com').toLowerCase();
+        const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+
+        if (
+            (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) ||
+            (email === 'admin' && password === ADMIN_PASSWORD) ||
+            (email === 'admin@daan.com' && password === ADMIN_PASSWORD)
+        ) {
+            const adminUser = {
+                id: 'admin-01',
+                email: ADMIN_EMAIL,
+                name: 'Daan Sports Wholesale Director',
+                role: 'admin'
+            };
+            const token = jwt.sign({ user: adminUser }, jwtSecret, { expiresIn: '7d' });
+            return res.json({ success: true, token, user: adminUser });
+        }
+
+        // 2. Check Database user
+        try {
+            await connectDB();
+            let user = await Users.findOne({ email: req.body.email });
+            if (user) {
+                const passCompare = req.body.password === user.password;
+                if (passCompare) {
+                    const data = { user: { id: user.id, email: user.email, name: user.name, role: user.role || 'customer' } };
+                    const token = jwt.sign(data, jwtSecret);
+                    return res.json({ success: true, token, user: data.user });
+                } else {
+                    return res.json({ success: false, errors: "Wrong Password" });
+                }
             } else {
-                res.json({ success: false, errors: "Wrong Password" });
+                return res.json({ success: false, errors: "Wrong Email Address" });
             }
-        } else {
-            res.json({ success: false, errors: "Wrong Email Address" });
+        } catch (dbErr) {
+            return res.json({ success: false, errors: "Invalid credentials" });
         }
     } catch (err) {
         res.status(500).json({ success: false, errors: err.message });

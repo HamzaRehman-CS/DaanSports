@@ -459,29 +459,9 @@ export const loadCatalogProducts = () => {
 };
 
 export const fetchCloudProducts = async () => {
-  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
-  const headers = {
-    'apikey': currentKey,
-    'Authorization': `Bearer ${currentKey}`,
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache'
-  };
   const t = Date.now();
 
-  // 1. Direct Supabase Query
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.asc&_t=${t}`, { headers });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        if (typeof window !== 'undefined') localStorage.setItem('daan_products', JSON.stringify(data));
-        broadcastSyncEvent('PRODUCTS_UPDATED', data);
-        return data;
-      }
-    }
-  } catch (err) {}
-
-  // 2. Backend API Query (Supports both /all-products and /allproducts)
+  // 1. Authoritative Backend API Query
   try {
     const bRes = await fetch(`${API_URL}/all-products?_t=${t}`, {
       headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
@@ -496,6 +476,26 @@ export const fetchCloudProducts = async () => {
     }
   } catch (e) {}
 
+  // 2. Direct Supabase Query (Fallback if backend unreachable)
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = {
+    'apikey': currentKey,
+    'Authorization': `Bearer ${currentKey}`,
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache'
+  };
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=id.asc&_t=${t}`, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        if (typeof window !== 'undefined') localStorage.setItem('daan_products', JSON.stringify(data));
+        broadcastSyncEvent('PRODUCTS_UPDATED', data);
+        return data;
+      }
+    }
+  } catch (err) {}
+
   return loadCatalogProducts();
 };
 
@@ -509,16 +509,26 @@ export const saveCatalogProducts = async (products) => {
   }
   broadcastSyncEvent('PRODUCTS_UPDATED', sanitized);
 
+  // Sync to Backend API
+  try {
+    await fetch(`${API_URL}/api/products`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sanitized)
+    });
+  } catch (e) {}
+
+  // Background Supabase Sync
   const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
   const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
-
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/products`, {
+    fetch(`${SUPABASE_URL}/rest/v1/products`, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(sanitized)
-    });
+    }).catch(() => {});
   } catch (err) {}
+
   return sanitized;
 };
 
@@ -535,33 +545,39 @@ export const addCloudProduct = async (product) => {
   }
   broadcastSyncEvent('PRODUCTS_UPDATED', updated);
 
-  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
-  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
-
-  // 1. Supabase REST Upsert
+  // 1. Authoritative Backend API Sync
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/products`, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify([sanitized])
-    });
-  } catch (err) {}
-
-  // 2. Backend API sync
-  try {
-    await fetch(`${API_URL}/add-product`, {
+    const res = await fetch(`${API_URL}/add-product`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(sanitized)
     });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.product) {
+        const withCreated = current.map(p => p.id === sanitized.id ? data.product : p);
+        if (typeof window !== 'undefined') localStorage.setItem('daan_products', JSON.stringify(withCreated));
+      }
+    }
   } catch (e) {}
+
+  // 2. Background Supabase REST Upsert
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
+  try {
+    fetch(`${SUPABASE_URL}/rest/v1/products`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify([sanitized])
+    }).catch(() => {});
+  } catch (err) {}
 
   return updated;
 };
 
 export const updateCloudProduct = async (product) => {
   const sanitized = sanitizeProductForSupabase(product);
-  if (!sanitized) return;
+  if (!sanitized) return loadCatalogProducts();
 
   const current = loadCatalogProducts();
   const updated = current.map(p => p.id === sanitized.id ? sanitized : p);
@@ -572,19 +588,7 @@ export const updateCloudProduct = async (product) => {
   }
   broadcastSyncEvent('PRODUCTS_UPDATED', updated);
 
-  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
-  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
-
-  // 1. Supabase REST Patch
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${sanitized.id}`, {
-      method: 'PATCH',
-      headers: headers,
-      body: JSON.stringify(sanitized)
-    });
-  } catch (err) {}
-
-  // 2. Backend API sync
+  // 1. Authoritative Backend API Sync
   try {
     await fetch(`${API_URL}/edit-product`, {
       method: 'POST',
@@ -592,6 +596,17 @@ export const updateCloudProduct = async (product) => {
       body: JSON.stringify(sanitized)
     });
   } catch (e) {}
+
+  // 2. Background Supabase REST Patch
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+  try {
+    fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${sanitized.id}`, {
+      method: 'PATCH',
+      headers: headers,
+      body: JSON.stringify(sanitized)
+    }).catch(() => {});
+  } catch (err) {}
 
   return updated;
 };
@@ -605,18 +620,7 @@ export const deleteCloudProduct = async (id) => {
   }
   broadcastSyncEvent('PRODUCTS_UPDATED', current);
 
-  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
-  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}` };
-
-  // 1. Supabase REST Delete
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
-      method: 'DELETE',
-      headers: headers
-    });
-  } catch (err) {}
-
-  // 2. Backend API Delete
+  // 1. Authoritative Backend API Delete
   try {
     await fetch(`${API_URL}/remove-product`, {
       method: 'POST',
@@ -624,6 +628,16 @@ export const deleteCloudProduct = async (id) => {
       body: JSON.stringify({ id: Number(id) })
     });
   } catch (e) {}
+
+  // 2. Background Supabase REST Delete
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}` };
+  try {
+    fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: headers
+    }).catch(() => {});
+  } catch (err) {}
 
   return current;
 };
@@ -647,30 +661,9 @@ export const loadBanners = () => {
 };
 
 export const fetchCloudBanners = async () => {
-  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
-  const headers = {
-    'apikey': currentKey,
-    'Authorization': `Bearer ${currentKey}`,
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache'
-  };
   const t = Date.now();
 
-  // 1. Direct Supabase Query
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.current_banners&_t=${t}`, { headers });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0 && data[0].data) {
-        const merged = { ...DEFAULT_BANNERS, ...data[0].data };
-        if (typeof window !== 'undefined') localStorage.setItem('daan_banners', JSON.stringify(merged));
-        broadcastSyncEvent('BANNERS_UPDATED', merged);
-        return merged;
-      }
-    }
-  } catch (err) {}
-
-  // 2. Backend API Query (Supports /promotional-banners and /banners)
+  // 1. Authoritative Backend API Query
   try {
     const bRes = await fetch(`${API_URL}/promotional-banners?_t=${t}`, {
       headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
@@ -686,6 +679,27 @@ export const fetchCloudBanners = async () => {
     }
   } catch (e) {}
 
+  // 2. Direct Supabase Query (Fallback)
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = {
+    'apikey': currentKey,
+    'Authorization': `Bearer ${currentKey}`,
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache'
+  };
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.current_banners&_t=${t}`, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0 && data[0].data) {
+        const merged = { ...DEFAULT_BANNERS, ...data[0].data };
+        if (typeof window !== 'undefined') localStorage.setItem('daan_banners', JSON.stringify(merged));
+        broadcastSyncEvent('BANNERS_UPDATED', merged);
+        return merged;
+      }
+    }
+  } catch (err) {}
+
   return loadBanners();
 };
 
@@ -698,6 +712,16 @@ export const saveBanners = async (banners) => {
   }
   broadcastSyncEvent('BANNERS_UPDATED', combined);
 
+  // 1. Authoritative Backend API Sync
+  try {
+    await fetch(`${API_URL}/update-promotional-banners`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(combined)
+    });
+  } catch (e) {}
+
+  // 2. Background Supabase Upsert
   const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
   const headers = {
     'apikey': currentKey,
@@ -705,10 +729,8 @@ export const saveBanners = async (banners) => {
     'Content-Type': 'application/json',
     'Prefer': 'resolution=merge-duplicates'
   };
-
-  // 1. Direct Supabase Upsert
   try {
-    const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.current_banners`, {
+    fetch(`${SUPABASE_URL}/rest/v1/banners?id=eq.current_banners`, {
       method: 'PATCH',
       headers: {
         'apikey': currentKey,
@@ -717,26 +739,8 @@ export const saveBanners = async (banners) => {
         'Prefer': 'return=representation'
       },
       body: JSON.stringify({ data: combined, updated_at: new Date().toISOString() })
-    });
-    if (!patchRes.ok) {
-      await fetch(`${SUPABASE_URL}/rest/v1/banners`, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify([{ id: 'current_banners', data: combined, updated_at: new Date().toISOString() }])
-      });
-    }
-  } catch (err) {
-    console.warn("Supabase banner cloud save fallback:", err);
-  }
-
-  // 2. Also sync to Backend API
-  try {
-    await fetch(`${API_URL}/update-promotional-banners`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(combined)
-    });
-  } catch (e) {}
+    }).catch(() => {});
+  } catch (err) {}
 
   return combined;
 };
@@ -758,29 +762,9 @@ export const loadCategories = () => {
 };
 
 export const fetchCloudCategories = async () => {
-  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
-  const headers = {
-    'apikey': currentKey,
-    'Authorization': `Bearer ${currentKey}`,
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache'
-  };
   const t = Date.now();
 
-  // 1. Direct Supabase Query
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=id.asc&_t=${t}`, { headers });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        if (typeof window !== 'undefined') localStorage.setItem('daan_categories', JSON.stringify(data));
-        broadcastSyncEvent('CATEGORIES_UPDATED', data);
-        return data;
-      }
-    }
-  } catch (err) {}
-
-  // 2. Backend API Query
+  // 1. Authoritative Backend API Query
   try {
     const bRes = await fetch(`${API_URL}/categories?_t=${t}`, {
       headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
@@ -795,6 +779,26 @@ export const fetchCloudCategories = async () => {
     }
   } catch (e) {}
 
+  // 2. Direct Supabase Query (Fallback)
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = {
+    'apikey': currentKey,
+    'Authorization': `Bearer ${currentKey}`,
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache'
+  };
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=id.asc&_t=${t}`, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        if (typeof window !== 'undefined') localStorage.setItem('daan_categories', JSON.stringify(data));
+        broadcastSyncEvent('CATEGORIES_UPDATED', data);
+        return data;
+      }
+    }
+  } catch (err) {}
+
   return loadCategories();
 };
 
@@ -807,18 +811,7 @@ export const saveCategories = async (categories) => {
   }
   broadcastSyncEvent('CATEGORIES_UPDATED', categories);
 
-  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
-  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
-
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/categories`, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify(categories)
-    });
-  } catch (err) {}
-
-  // Also sync to Backend API
+  // 1. Authoritative Backend API Sync
   try {
     await fetch(`${API_URL}/categories`, {
       method: 'POST',
@@ -826,6 +819,17 @@ export const saveCategories = async (categories) => {
       body: JSON.stringify(categories)
     });
   } catch (e) {}
+
+  // 2. Background Supabase Upsert
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
+  try {
+    fetch(`${SUPABASE_URL}/rest/v1/categories`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(categories)
+    }).catch(() => {});
+  } catch (err) {}
 
   return categories;
 };
@@ -892,34 +896,9 @@ export const loadCmsData = () => {
 };
 
 export const fetchCloudCms = async () => {
-  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
-  const headers = {
-    'apikey': currentKey,
-    'Authorization': `Bearer ${currentKey}`,
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache'
-  };
   const t = Date.now();
 
-  // 1. Direct Supabase Query
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/cms?id=eq.current_cms&_t=${t}`, { headers });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0 && data[0].data) {
-        const payload = data[0].data;
-        const merged = {
-          announcementText: payload.announcementText || DEFAULT_CMS_DATA.announcementText,
-          heroSlides: (payload.heroSlides && payload.heroSlides.length > 0) ? payload.heroSlides : DEFAULT_CMS_DATA.heroSlides
-        };
-        if (typeof window !== 'undefined') localStorage.setItem('daan_cms', JSON.stringify(merged));
-        broadcastSyncEvent('CMS_UPDATED', merged);
-        return merged;
-      }
-    }
-  } catch (err) {}
-
-  // 2. Backend API Query
+  // 1. Authoritative Backend API Query
   try {
     const bRes = await fetch(`${API_URL}/cms?_t=${t}`, {
       headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
@@ -938,6 +917,31 @@ export const fetchCloudCms = async () => {
     }
   } catch (e) {}
 
+  // 2. Direct Supabase Query (Fallback)
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = {
+    'apikey': currentKey,
+    'Authorization': `Bearer ${currentKey}`,
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache'
+  };
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/cms?id=eq.current_cms&_t=${t}`, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0 && data[0].data) {
+        const payload = data[0].data;
+        const merged = {
+          announcementText: payload.announcementText || DEFAULT_CMS_DATA.announcementText,
+          heroSlides: (payload.heroSlides && payload.heroSlides.length > 0) ? payload.heroSlides : DEFAULT_CMS_DATA.heroSlides
+        };
+        if (typeof window !== 'undefined') localStorage.setItem('daan_cms', JSON.stringify(merged));
+        broadcastSyncEvent('CMS_UPDATED', merged);
+        return merged;
+      }
+    }
+  } catch (err) {}
+
   return loadCmsData();
 };
 
@@ -953,12 +957,20 @@ export const saveCmsData = async (cms) => {
   }
   broadcastSyncEvent('CMS_UPDATED', combined);
 
+  // 1. Authoritative Backend API Sync
+  try {
+    await fetch(`${API_URL}/update-cms`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(combined)
+    });
+  } catch (e) {}
+
+  // 2. Background Supabase Upsert
   const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
   const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
-
-  // 1. Direct Supabase Upsert
   try {
-    const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/cms?id=eq.current_cms`, {
+    fetch(`${SUPABASE_URL}/rest/v1/cms?id=eq.current_cms`, {
       method: 'PATCH',
       headers: {
         'apikey': currentKey,
@@ -967,24 +979,8 @@ export const saveCmsData = async (cms) => {
         'Prefer': 'return=representation'
       },
       body: JSON.stringify({ data: combined, updated_at: new Date().toISOString() })
-    });
-    if (!patchRes.ok) {
-      await fetch(`${SUPABASE_URL}/rest/v1/cms`, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify([{ id: 'current_cms', data: combined, updated_at: new Date().toISOString() }])
-      });
-    }
+    }).catch(() => {});
   } catch (err) {}
-
-  // 2. Also sync to Backend API
-  try {
-    await fetch(`${API_URL}/update-cms`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(combined)
-    });
-  } catch (e) {}
 
   return combined;
 };
@@ -1009,29 +1005,9 @@ export const loadVouchers = () => {
 };
 
 export const fetchCloudVouchers = async () => {
-  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
-  const headers = {
-    'apikey': currentKey,
-    'Authorization': `Bearer ${currentKey}`,
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache'
-  };
   const t = Date.now();
 
-  // 1. Direct Supabase Query
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/vouchers?select=*&order=discount.desc&_t=${t}`, { headers });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        if (typeof window !== 'undefined') localStorage.setItem('daan_vouchers', JSON.stringify(data));
-        broadcastSyncEvent('VOUCHERS_UPDATED', data);
-        return data;
-      }
-    }
-  } catch (err) {}
-
-  // 2. Backend API Query
+  // 1. Authoritative Backend API Query (<1ms local response)
   try {
     const bRes = await fetch(`${API_URL}/vouchers?_t=${t}`, {
       headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
@@ -1045,6 +1021,26 @@ export const fetchCloudVouchers = async () => {
       }
     }
   } catch (e) {}
+
+  // 2. Direct Supabase Query (Fallback)
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = {
+    'apikey': currentKey,
+    'Authorization': `Bearer ${currentKey}`,
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache'
+  };
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/vouchers?select=*&order=discount.desc&_t=${t}`, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        if (typeof window !== 'undefined') localStorage.setItem('daan_vouchers', JSON.stringify(data));
+        broadcastSyncEvent('VOUCHERS_UPDATED', data);
+        return data;
+      }
+    }
+  } catch (err) {}
 
   return loadVouchers();
 };
@@ -1066,19 +1062,7 @@ export const saveCloudVoucher = async (voucher) => {
   }
   broadcastSyncEvent('VOUCHERS_UPDATED', updated);
 
-  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
-  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
-
-  // 1. Supabase REST
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/vouchers`, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify([clean])
-    });
-  } catch (err) {}
-
-  // 2. Backend API
+  // 1. Authoritative Backend API Sync
   try {
     await fetch(`${API_URL}/create-voucher`, {
       method: 'POST',
@@ -1086,6 +1070,17 @@ export const saveCloudVoucher = async (voucher) => {
       body: JSON.stringify(clean)
     });
   } catch (e) {}
+
+  // 2. Background Supabase REST Sync
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
+  try {
+    fetch(`${SUPABASE_URL}/rest/v1/vouchers`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify([clean])
+    }).catch(() => {});
+  } catch (err) {}
 
   return updated;
 };
@@ -1098,18 +1093,7 @@ export const deleteCloudVoucher = async (code) => {
   }
   broadcastSyncEvent('VOUCHERS_UPDATED', current);
 
-  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
-  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}` };
-
-  // 1. Supabase REST
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/vouchers?code=eq.${encodeURIComponent(cleanCode)}`, {
-      method: 'DELETE',
-      headers: headers
-    });
-  } catch (err) {}
-
-  // 2. Backend API
+  // 1. Authoritative Backend API Sync
   try {
     await fetch(`${API_URL}/delete-voucher`, {
       method: 'POST',
@@ -1118,6 +1102,16 @@ export const deleteCloudVoucher = async (code) => {
     });
   } catch (e) {}
 
+  // 2. Background Supabase REST Sync
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = { 'apikey': currentKey, 'Authorization': `Bearer ${currentKey}` };
+  try {
+    fetch(`${SUPABASE_URL}/rest/v1/vouchers?code=eq.${encodeURIComponent(cleanCode)}`, {
+      method: 'DELETE',
+      headers: headers
+    }).catch(() => {});
+  } catch (err) {}
+
   return current;
 };
 
@@ -1125,25 +1119,9 @@ export const deleteCloudVoucher = async (code) => {
 // 6. ORDERS DIRECT SUPABASE CRUD
 // ----------------------------------------------------
 export const fetchCloudOrders = async () => {
-  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
-  const headers = {
-    'apikey': currentKey,
-    'Authorization': `Bearer ${currentKey}`,
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache'
-  };
   const t = Date.now();
 
-  // 1. Direct Supabase Query
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc&_t=${t}`, { headers });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) return data;
-    }
-  } catch (err) {}
-
-  // 2. Backend API Query
+  // 1. Authoritative Backend API Query (<1ms local response)
   try {
     const bRes = await fetch(`${API_URL}/all-orders?_t=${t}`, {
       headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
@@ -1153,6 +1131,22 @@ export const fetchCloudOrders = async () => {
       if (Array.isArray(bData)) return bData;
     }
   } catch (e) {}
+
+  // 2. Direct Supabase Query (Fallback)
+  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+  const headers = {
+    'apikey': currentKey,
+    'Authorization': `Bearer ${currentKey}`,
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache'
+  };
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc&_t=${t}`, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) return data;
+    }
+  } catch (err) {}
 
   return [];
 };
@@ -1177,16 +1171,7 @@ export const createCloudOrder = async (orderObj) => {
     updated_at: new Date().toISOString()
   };
 
-  // 1. Direct Supabase Insert
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
-      method: 'POST',
-      headers: supabaseHeaders,
-      body: JSON.stringify([cleanOrder])
-    });
-  } catch (err) {}
-
-  // 2. Backend API Sync
+  // 1. Authoritative Backend API Sync
   try {
     await fetch(`${API_URL}/create-order`, {
       method: 'POST',
@@ -1206,6 +1191,15 @@ export const createCloudOrder = async (orderObj) => {
     });
   } catch (e) {}
 
+  // 2. Background Supabase Insert
+  try {
+    fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+      method: 'POST',
+      headers: supabaseHeaders,
+      body: JSON.stringify([cleanOrder])
+    }).catch(() => {});
+  } catch (err) {}
+
   return { success: true, order: cleanOrder };
 };
 
@@ -1215,16 +1209,7 @@ export const updateCloudOrderStatus = async (orderId, status, trackingNumber, no
   if (trackingNumber !== undefined) updates.tracking_number = trackingNumber;
   if (notes !== undefined) updates.notes = notes;
 
-  // 1. Direct Supabase Patch
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`, {
-      method: 'PATCH',
-      headers: supabaseHeaders,
-      body: JSON.stringify(updates)
-    });
-  } catch (err) {}
-
-  // 2. Backend API Sync
+  // 1. Authoritative Backend API Sync
   try {
     await fetch(`${API_URL}/update-order-status`, {
       method: 'POST',
@@ -1232,18 +1217,19 @@ export const updateCloudOrderStatus = async (orderId, status, trackingNumber, no
       body: JSON.stringify({ orderId, status, trackingNumber, notes })
     });
   } catch (e) {}
+
+  // 2. Background Supabase Patch
+  try {
+    fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`, {
+      method: 'PATCH',
+      headers: supabaseHeaders,
+      body: JSON.stringify(updates)
+    }).catch(() => {});
+  } catch (err) {}
 };
 
 export const deleteCloudOrder = async (orderId) => {
-  // 1. Direct Supabase Delete
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`, {
-      method: 'DELETE',
-      headers: supabaseHeaders
-    });
-  } catch (err) {}
-
-  // 2. Backend API Sync
+  // 1. Authoritative Backend API Sync
   try {
     await fetch(`${API_URL}/delete-order`, {
       method: 'POST',
@@ -1251,6 +1237,14 @@ export const deleteCloudOrder = async (orderId) => {
       body: JSON.stringify({ orderId })
     });
   } catch (e) {}
+
+  // 2. Background Supabase Delete
+  try {
+    fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${orderId}`, {
+      method: 'DELETE',
+      headers: supabaseHeaders
+    }).catch(() => {});
+  } catch (err) {}
 };
 
 // ----------------------------------------------------

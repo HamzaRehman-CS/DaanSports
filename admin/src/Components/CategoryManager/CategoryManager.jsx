@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import './CategoryManager.css';
+import { Edit3, Trash2, Plus, UploadCloud, RefreshCw } from 'lucide-react';
 import { API_URL } from '../../config';
 import { loadCategories, saveCategories, fetchCloudCategories, deleteCloudCategory, uploadCloudImage } from '../../defaultCatalog';
+import { Toast, useToast } from '../Toast/Toast';
 
 const CategoryManager = () => {
   const [categories, setCategories] = useState(() => loadCategories());
   const [loading, setLoading] = useState(false);
   const [editingCatId, setEditingCatId] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const { toast, showToast, hideToast } = useToast();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -50,9 +53,9 @@ const CategoryManager = () => {
       } else {
         setFormData(prev => ({ ...prev, banner: publicUrl }));
       }
-      alert(`📷 Category banner uploaded to Supabase Cloud!`);
+      showToast(`Category banner image uploaded successfully!`, 'success');
     } catch (err) {
-      alert(`Error uploading image: ${err.message}`);
+      showToast(`Error uploading image: ${err.message}`, 'error');
     } finally {
       setUploading(false);
     }
@@ -70,7 +73,7 @@ const CategoryManager = () => {
 
     const newCat = {
       id: maxId + 1,
-      name: formData.name,
+      name: formData.name.trim(),
       slug: formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       description: formData.description,
       subcategories: subcats,
@@ -86,13 +89,13 @@ const CategoryManager = () => {
       await fetch(`${API_URL}/add-category`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(newCat)
       });
     } catch (err) {
-      console.warn("Backend sync notice (saved locally):", err.message);
+      console.warn("Backend sync notice:", err.message);
     }
 
-    alert(`🎉 Category "${newCat.name}" created and synced live!`);
+    showToast(`🎉 Category "${newCat.name}" created and synced live!`, 'success');
   };
 
   const startEditCategory = (cat) => {
@@ -128,13 +131,13 @@ const CategoryManager = () => {
       await fetch(`${API_URL}/edit-category`, {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify(editFormData)
+        body: JSON.stringify(updatedCat)
       });
     } catch (err) {
-      console.warn("Backend sync notice (saved locally):", err.message);
+      console.warn("Backend sync notice:", err.message);
     }
 
-    alert(`✏️ Category "${updatedCat.name}" updated and synced live!`);
+    showToast(`✏️ Category "${updatedCat.name}" updated and synced live!`, 'success');
   };
 
   const handleDeleteCategory = async (id, name) => {
@@ -151,11 +154,13 @@ const CategoryManager = () => {
       });
     } catch (err) {}
 
-    alert(`🗑️ Category "${name}" deleted and synced live.`);
+    showToast(`🗑️ Category "${name}" deleted and synced live.`, 'success');
   };
 
   return (
     <div className="category-manager-b2b">
+      <Toast toast={toast} onClose={hideToast} />
+
       <div className="category-manager-header">
         <div>
           <h2>Category & Showcase Box Manager</h2>
@@ -168,7 +173,7 @@ const CategoryManager = () => {
 
       {/* Add New Category Form */}
       <div className="add-cat-card">
-        <h3>➕ Add New Category Box</h3>
+        <h3><Plus size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} /> Add New Category Box</h3>
         <form onSubmit={handleAddCategory} className="add-cat-form">
           <div className="form-row-2">
             <div>
@@ -192,7 +197,7 @@ const CategoryManager = () => {
                   onChange={(e) => setFormData({ ...formData, banner: e.target.value })}
                 />
                 <label className="file-upload-btn-custom">
-                  {uploading ? "Uploading..." : "📷 Upload"}
+                  {uploading ? "..." : <><UploadCloud size={14} /> Upload</>}
                   <input
                     type="file"
                     accept="image/*"
@@ -201,7 +206,6 @@ const CategoryManager = () => {
                   />
                 </label>
               </div>
-              {/* IMAGE DIMENSION GUIDELINE NOTICE */}
               <div className="image-spec-guide-badge">
                 📐 <strong>Recommended Dimensions:</strong> 600 × 750 px (4:5 Portrait Ratio) | Max 5MB | WebP, JPG, PNG
                 <span className="spec-subtip">💡 Tip: Use clean sportswear product or athlete shots on neutral/dark background.</span>
@@ -272,7 +276,7 @@ const CategoryManager = () => {
                           required
                         />
                         <label className="file-upload-btn-custom">
-                          {uploading ? "..." : "📷 Upload"}
+                          {uploading ? "..." : <><UploadCloud size={14} /> Upload</>}
                           <input
                             type="file"
                             accept="image/*"
@@ -282,7 +286,6 @@ const CategoryManager = () => {
                         </label>
                       </div>
 
-                      {/* IMAGE DIMENSION GUIDELINE NOTICE */}
                       <div className="image-spec-guide-badge">
                         📐 <strong>Recommended Dimensions:</strong> 600 × 750 px (4:5 Portrait Ratio) | Max 5MB | WebP, JPG, PNG
                         <span className="spec-subtip">💡 Tip: Use clean sportswear product or athlete shots on neutral/dark background.</span>
@@ -330,14 +333,16 @@ const CategoryManager = () => {
                         <button
                           onClick={() => startEditCategory(cat)}
                           className="edit-cat-btn"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                         >
-                          Edit Image & Details ✏️
+                          <Edit3 size={13} /> Edit
                         </button>
                         <button
                           onClick={() => handleDeleteCategory(cat.id, cat.name)}
                           className="del-cat-btn"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                         >
-                          Delete 🗑️
+                          <Trash2 size={13} /> Delete
                         </button>
                       </div>
                     </div>

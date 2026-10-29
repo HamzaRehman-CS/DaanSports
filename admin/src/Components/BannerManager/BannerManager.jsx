@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './BannerManager.css';
 import { API_URL } from '../../config';
 import { loadBanners, saveBanners, loadCategories, saveCategories, fetchCloudBanners, fetchCloudCategories, uploadCloudImage } from '../../defaultCatalog';
+import { Toast, useToast } from '../Toast/Toast';
 
 const defaultBannersState = loadBanners();
 
@@ -12,6 +13,7 @@ const BannerManager = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('bento');
   const [saveStatus, setSaveStatus] = useState('');
+  const { toast, showToast, hideToast } = useToast();
 
   const fetchBannersAndCategories = async () => {
     setLoading(true);
@@ -45,9 +47,9 @@ const BannerManager = () => {
       } else {
         updateBannerSection(sectionKey, 'bgImage', publicUrl);
       }
-      alert(`📷 Image uploaded to Supabase Storage & updated! Click "Save & Publish" to go live.`);
+      showToast(`Image uploaded & updated! Click "Save & Publish" to go live.`, 'success');
     } catch (err) {
-      alert(`Upload error: ${err.message}`);
+      showToast(`Upload notice: ${err.message}`, 'error');
     } finally {
       setUploadingSection(null);
     }
@@ -55,10 +57,10 @@ const BannerManager = () => {
 
   const handleSaveBanners = async (e) => {
     if (e) e.preventDefault();
-    setSaveStatus('Saving to Supabase Cloud Database...');
+    setSaveStatus('Saving to server...');
 
     try {
-      // 1. Save directly to Supabase Cloud & broadcast
+      // 1. Authoritative local save & cross-tab broadcast
       await saveBanners(banners);
 
       // 2. Sync to Backend API
@@ -70,11 +72,11 @@ const BannerManager = () => {
         });
       } catch (err) {}
 
-      setSaveStatus('✅ Saved & Synced Live to Supabase Cloud Database!');
-      alert("🎉 Promotional Banners & Posters Saved & Synced Live to Main Website!");
+      setSaveStatus('✅ Saved & Synced Live!');
+      showToast("🎉 Promotional Banners & Posters Saved & Synced Live to Main Website!", "success");
     } catch (err) {
       setSaveStatus('⚠️ Error: ' + err.message);
-      alert("Error saving banners: " + err.message);
+      showToast("Error saving banners: " + err.message, "error");
     }
 
     setTimeout(() => setSaveStatus(''), 4000);
@@ -126,6 +128,7 @@ const BannerManager = () => {
 
   return (
     <div className="banner-manager-b2b">
+      <Toast toast={toast} onClose={hideToast} />
       <div className="banner-manager-header">
         <div>
           <h2>Banner & Poster Studio</h2>

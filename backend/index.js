@@ -16,6 +16,14 @@ const neonClient = require("./neonClient");
 const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || process.env.DATABASE_URL || "mongodb://127.0.0.1:27017/e-commerce";
 const jwtSecret = process.env.JWT_SECRET || 'secret_ecom_2026_hardened';
 
+// CRASH-PROOF PROCESS GUARDS
+process.on('uncaughtException', (err) => {
+    console.error('🛡️ Process Guard caught uncaughtException:', err?.message || err);
+});
+process.on('unhandledRejection', (reason) => {
+    console.error('🛡️ Process Guard caught unhandledRejection:', reason?.message || reason);
+});
+
 // SECURITY HARDENING MIDDLEWARE
 app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" }
@@ -851,7 +859,7 @@ const deleteCategoryLive = async (catId) => {
     saveJsonCategories(currentList);
 
     if (neonClient && neonClient.sql) {
-        await neonClient.sql`DELETE FROM categories WHERE id = ${numId};`.catch(() => {});
+        await neonClient.deleteNeonCategory(numId);
     }
 
     if (mongoose.connection.readyState === 1) {
@@ -1236,41 +1244,50 @@ app.get('/new-collection', async (req, res) => {
     }
 });
 
-app.post('/add-product', async (req, res) => {
-    try {
-        const allProducts = await getAllProductsLive();
-        const maxId = allProducts.reduce((max, p) => (Number(p.id) > max ? Number(p.id) : max), 0);
-        const newId = req.body.id ? Number(req.body.id) : (maxId + 1);
+// ATOMIC CONCURRENCY LOCKS
+let addProductQueue = Promise.resolve();
+let addCategoryQueue = Promise.resolve();
 
-        const productObj = {
-            id: newId,
-            name: req.body.name || "Custom Apparel Design",
-            image: req.body.image || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
-            images: (req.body.images && req.body.images.length > 0) ? req.body.images : [req.body.image || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80"],
-            category: req.body.category || "Tracksuits",
-            new_price: Number(req.body.new_price) || 20.0,
-            old_price: req.body.old_price ? Number(req.body.old_price) : Number(req.body.new_price) * 1.3,
-            moq: Number(req.body.moq) || 50,
-            description: req.body.description || "",
-            material: req.body.material || "80% Combed Cotton / 20% Polyester",
-            gsm: req.body.gsm || "330 GSM",
-            stitching: req.body.stitching || "Double-Needle Flatlock Reinforced",
-            customization: req.body.customization || "Custom Printing & Labels Available",
-            leadTime: req.body.leadTime || "12 - 15 Business Days",
-            colors: Array.isArray(req.body.colors) ? req.body.colors : ["Black", "Navy Blue"],
-            sizes: Array.isArray(req.body.sizes) ? req.body.sizes : ["S", "M", "L", "XL", "2XL"],
-            stock: Number(req.body.stock) || 1000,
-            available: true,
-            date: new Date()
-        };
+app.post('/add-product', (req, res) => {
+    addProductQueue = addProductQueue.then(async () => {
+        try {
+            const allProducts = await getAllProductsLive();
+            const maxId = allProducts.reduce((max, p) => (Number(p.id) > max ? Number(p.id) : max), 0);
+            const existingWithId = req.body.id ? allProducts.find(p => Number(p.id) === Number(req.body.id)) : null;
+            const newId = (req.body.id && !existingWithId) ? Number(req.body.id) : (maxId + 1);
 
-        await saveProductLive(productObj);
-        console.log(`Product Added: ${productObj.name} (ID: ${productObj.id})`);
-        res.json({ success: true, name: productObj.name, product: productObj });
-    } catch (err) {
-        console.error("Add Product Error:", err);
-        res.status(500).json({ success: false, error: err.message });
-    }
+            const productObj = {
+                id: newId,
+                name: req.body.name || "Custom Apparel Design",
+                image: req.body.image || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
+                images: (req.body.images && req.body.images.length > 0) ? req.body.images : [req.body.image || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80"],
+                category: req.body.category || "Tracksuits",
+                new_price: Number(req.body.new_price) || 20.0,
+                old_price: req.body.old_price ? Number(req.body.old_price) : Number(req.body.new_price) * 1.3,
+                moq: Number(req.body.moq) || 50,
+                description: req.body.description || "",
+                material: req.body.material || "80% Combed Cotton / 20% Polyester",
+                gsm: req.body.gsm || "330 GSM",
+                stitching: req.body.stitching || "Double-Needle Flatlock Reinforced",
+                customization: req.body.customization || "Custom Printing & Labels Available",
+                leadTime: req.body.leadTime || "12 - 15 Business Days",
+                colors: Array.isArray(req.body.colors) ? req.body.colors : ["Black", "Navy Blue"],
+                sizes: Array.isArray(req.body.sizes) ? req.body.sizes : ["S", "M", "L", "XL", "2XL"],
+                stock: Number(req.body.stock) || 1000,
+                available: true,
+                date: new Date()
+            };
+
+            await saveProductLive(productObj);
+            console.log(`Product Added: ${productObj.name} (ID: ${productObj.id})`);
+            res.json({ success: true, name: productObj.name, product: productObj });
+        } catch (err) {
+            console.error("Add Product Error:", err);
+            res.status(500).json({ success: false, error: err.message });
+        }
+    }).catch(queueErr => {
+        console.error("Add Product Queue Error:", queueErr);
+    });
 });
 
 app.post('/edit-product', async (req, res) => {
@@ -1357,33 +1374,41 @@ app.post('/categories', async (req, res) => {
     }
 });
 
-app.post('/add-category', async (req, res) => {
-    try {
-        const { name, description, subcategories, banner } = req.body;
-        if (!name) return res.status(400).json({ success: false, error: "Category name required" });
+app.post('/add-category', (req, res) => {
+    addCategoryQueue = addCategoryQueue.then(async () => {
+        try {
+            const { name, description, subcategories, banner } = req.body;
+            if (!name) return res.status(400).json({ success: false, error: "Category name required" });
 
-        const cats = await getCategoriesLive();
-        const maxId = cats.reduce((max, c) => (c.id > max ? c.id : max), 0);
-        const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const cats = await getCategoriesLive();
+            const existingCat = cats.find(c => c.name.toLowerCase() === name.trim().toLowerCase());
+            if (existingCat) {
+                return res.json({ success: true, category: existingCat, message: "Category already exists" });
+            }
+            const maxId = cats.reduce((max, c) => (c.id > max ? c.id : max), 0);
+            const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-        const newCat = {
-            id: maxId + 1,
-            name: name.trim(),
-            slug: slug || `category-${maxId + 1}`,
-            description: description || `Wholesale ${name} apparel collection`,
-            subcategories: Array.isArray(subcategories) ? subcategories : (typeof subcategories === 'string' ? subcategories.split(',').map(s => s.trim()).filter(Boolean) : ["General"]),
-            banner: banner || "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=2070&auto=format&fit=crop",
-            date: new Date()
-        };
+            const newCat = {
+                id: maxId + 1,
+                name: name.trim(),
+                slug: slug || `category-${maxId + 1}`,
+                description: description || `Wholesale ${name} apparel collection`,
+                subcategories: Array.isArray(subcategories) ? subcategories : (typeof subcategories === 'string' ? subcategories.split(',').map(s => s.trim()).filter(Boolean) : ["General"]),
+                banner: banner || "https://images.unsplash.com/photo-1542652694-40abf526446e?q=80&w=2070&auto=format&fit=crop",
+                date: new Date()
+            };
 
-        const updatedCats = [...cats, newCat];
-        await saveCategoriesLive(updatedCats);
-        console.log(`Category Added: ${newCat.name}`);
-        res.json({ success: true, category: newCat });
-    } catch (err) {
-        console.error("Add Category Error:", err);
-        res.status(500).json({ success: false, error: err.message });
-    }
+            const updatedCats = [...cats, newCat];
+            await saveCategoriesLive(updatedCats);
+            console.log(`Category Added: ${newCat.name}`);
+            res.json({ success: true, category: newCat });
+        } catch (err) {
+            console.error("Add Category Error:", err);
+            res.status(500).json({ success: false, error: err.message });
+        }
+    }).catch(queueErr => {
+        console.error("Add Category Queue Error:", queueErr);
+    });
 });
 
 app.post('/edit-category', async (req, res) => {

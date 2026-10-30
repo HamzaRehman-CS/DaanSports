@@ -1,21 +1,19 @@
 [
   {
     "id": 1,
-    "name": "Djdjdjj",
-    "category": "T-Shirts",
+    "name": "Pro Tech Fleece Full-Zip Tracksuit",
+    "category": "Tracksuits",
     "image": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
     "images": [
       "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80"
     ],
-    "new_price": 565665,
-    "old_price": 65656,
+    "new_price": 24.5,
+    "old_price": 45,
     "moq": 50,
-    "description": "High-grade combed fleece fabric. Moisture-wicking, anti-pilling, reinforced stitching. Custom OEM/ODM logo printing and private labeling available.",
+    "description": "",
     "colors": [
       "Black",
-      "Navy Blue",
-      "Heather Gray",
-      "Crimson Red"
+      "Navy Blue"
     ],
     "sizes": [
       "S",
@@ -28,15 +26,53 @@
       "80% Combed Cotton / 20% Polyester"
     ],
     "customization": [
-      "3D Embroidery, Screen Print, Woven Damask Tags"
+      "Custom Printing & Labels Available"
     ],
     "available": true,
-    "created_at": "2026-10-30T06:04:35.484Z",
+    "created_at": "2026-10-30T07:53:21.565Z",
     "material": "80% Combed Cotton / 20% Polyester",
-    "gsm": "330 GSM Heavyweight",
-    "stitching": "Double-Needle Flatlock Seams",
+    "gsm": "330 GSM",
+    "stitching": "Double-Needle Flatlock Reinforced",
     "lead_time": "12 - 15 Business Days",
-    "stock": 5000,
+    "stock": 1000,
+    "leadTime": "12 - 15 Business Days"
+  },
+  {
+    "id": 2,
+    "name": "Heavyweight Oversized Streetwear Hoodie",
+    "category": "Sweatshirts",
+    "image": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80"
+    ],
+    "new_price": 18.9,
+    "old_price": 36,
+    "moq": 50,
+    "description": "",
+    "colors": [
+      "Black",
+      "Navy Blue"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "materials": [
+      "80% Combed Cotton / 20% Polyester"
+    ],
+    "customization": [
+      "Custom Printing & Labels Available"
+    ],
+    "available": true,
+    "created_at": "2026-10-30T07:53:29.675Z",
+    "material": "80% Combed Cotton / 20% Polyester",
+    "gsm": "330 GSM",
+    "stitching": "Double-Needle Flatlock Reinforced",
+    "lead_time": "12 - 15 Business Days",
+    "stock": 1000,
     "leadTime": "12 - 15 Business Days"
   }
 ]

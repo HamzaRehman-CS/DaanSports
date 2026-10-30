@@ -150,6 +150,13 @@ const saveNeonCategories = async (categoriesList) => {
   });
 };
 
+const deleteNeonCategory = async (id) => {
+  return safeQuery(async (db) => {
+    await db`DELETE FROM categories WHERE id = ${Number(id)};`;
+    return true;
+  });
+};
+
 // ---------------- BANNERS ----------------
 const getNeonBanners = async () => {
   return safeQuery(async (db) => {
@@ -380,6 +387,7 @@ module.exports = {
   deleteNeonProduct,
   getNeonCategories,
   saveNeonCategories,
+  deleteNeonCategory,
   getNeonBanners,
   saveNeonBanners,
   getNeonCms,

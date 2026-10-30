@@ -277,5 +277,69 @@
     ],
     "available": true,
     "created_at": "2026-10-29T15:01:43.607Z"
+  },
+  {
+    "id": 9,
+    "name": "Verification Item 8888",
+    "category": "Tracksuits",
+    "image": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f",
+    "images": [
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f"
+    ],
+    "new_price": 25,
+    "old_price": 50,
+    "moq": 50,
+    "description": "Test verification",
+    "colors": [
+      "Black",
+      "Navy Blue"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "materials": [
+      "80% Combed Cotton / 20% Polyester"
+    ],
+    "customization": [
+      "Custom Printing & Labels Available"
+    ],
+    "available": true,
+    "created_at": "2026-10-29T17:05:32.178Z"
+  },
+  {
+    "id": 10,
+    "name": "30-Second Stability Tracksuit Set",
+    "category": "Tracksuits",
+    "image": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80"
+    ],
+    "new_price": 28.5,
+    "old_price": 55,
+    "moq": 50,
+    "description": "Engineered for rigorous 30-second automated persistence testing.",
+    "colors": [
+      "Black",
+      "Navy Blue"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "materials": [
+      "80% Combed Cotton / 20% Polyester"
+    ],
+    "customization": [
+      "Custom Printing & Labels Available"
+    ],
+    "available": true,
+    "created_at": "2026-10-30T04:40:25.440Z"
   }
 ]

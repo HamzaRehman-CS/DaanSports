@@ -1254,8 +1254,8 @@ app.get('/new-collection', async (req, res) => {
 app.post('/add-product', async (req, res) => {
     try {
         const allProducts = await getAllProductsLive();
-        const maxId = allProducts.reduce((max, p) => (p.id > max ? p.id : max), 0);
-        const newId = maxId + 1;
+        const maxId = allProducts.reduce((max, p) => (Number(p.id) > max ? Number(p.id) : max), 0);
+        const newId = req.body.id ? Number(req.body.id) : (maxId + 1);
 
         const productObj = {
             id: newId,

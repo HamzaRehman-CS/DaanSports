@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { API_URL } from '../../config';
 import { loadCatalogProducts, fetchCloudProducts, fetchCloudOrders, fetchCloudCategories, fetchCloudVouchers } from '../../defaultCatalog';
 
 const Dashboard = () => {
+  const location = useLocation();
+  const base = location.pathname.startsWith('/admin') ? '/admin' : '';
   const [products, setProducts] = useState(() => loadCatalogProducts());
   const [orders, setOrders] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -89,7 +91,7 @@ const Dashboard = () => {
           <div className="dashboard-shortcuts-section">
             <h3>⚡ Quick Management Shortcuts</h3>
             <div className="shortcuts-grid">
-              <Link to="/orders" className="shortcut-card">
+              <Link to={`${base}/orders`} className="shortcut-card">
                 <span className="shortcut-icon">🚚</span>
                 <div>
                   <h4>Manage Orders ({pendingOrders} Pending)</h4>
@@ -97,7 +99,7 @@ const Dashboard = () => {
                 </div>
               </Link>
 
-              <Link to="/add-product" className="shortcut-card">
+              <Link to={`${base}/add-product`} className="shortcut-card">
                 <span className="shortcut-icon">➕</span>
                 <div>
                   <h4>Add New Product</h4>
@@ -105,7 +107,7 @@ const Dashboard = () => {
                 </div>
               </Link>
 
-              <Link to="/vouchers" className="shortcut-card">
+              <Link to={`${base}/vouchers`} className="shortcut-card">
                 <span className="shortcut-icon">🎫</span>
                 <div>
                   <h4>Promo Vouchers ({vouchers.length} Active)</h4>
@@ -113,7 +115,7 @@ const Dashboard = () => {
                 </div>
               </Link>
 
-              <Link to="/categories" className="shortcut-card">
+              <Link to={`${base}/categories`} className="shortcut-card">
                 <span className="shortcut-icon">🏷️</span>
                 <div>
                   <h4>Categories & Banners</h4>
@@ -127,7 +129,7 @@ const Dashboard = () => {
           <div className="dashboard-recent-orders">
             <div className="section-title flex-between">
               <h3>📦 Recent Customer Orders</h3>
-              <Link to="/orders" className="view-all-link">View All Orders ➔</Link>
+              <Link to={`${base}/orders`} className="view-all-link">View All Orders ➔</Link>
             </div>
 
             {orders.length === 0 ? (

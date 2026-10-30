@@ -1,8 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Component } from 'react';
 import Navbar from './Components/Navbar/Navbar';
 import Admin from './Pages/Admin/Admin';
 import AdminLogin from './Components/Auth/AdminLogin';
 import { API_URL } from './config';
+
+class AdminErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Admin Portal Error Caught:", error, errorInfo);
+  }
+
+  handleReset = () => {
+    localStorage.removeItem('daan_admin_token');
+    localStorage.removeItem('daan_admin_user');
+    window.location.href = '/admin';
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#0a0a0a',
+          color: '#ffffff',
+          padding: '24px',
+          textAlign: 'center',
+          fontFamily: 'Inter, system-ui, sans-serif'
+        }}>
+          <div style={{
+            background: '#18181b',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '36px',
+            maxWidth: '500px',
+            width: '100%'
+          }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '12px', color: '#f87171' }}>
+              Admin Portal Recovery
+            </h2>
+            <p style={{ fontSize: '13px', color: '#a1a1aa', marginBottom: '20px', lineHeight: 1.6 }}>
+              A rendering error occurred in the control panel. Click below to refresh your session and reconnect.
+            </p>
+            <button
+              onClick={this.handleReset}
+              style={{
+                background: '#dc2626',
+                color: '#ffffff',
+                border: 'none',
+                padding: '10px 24px',
+                borderRadius: '8px',
+                fontWeight: 700,
+                fontSize: '13px',
+                cursor: 'pointer'
+              }}
+            >
+              Reset Session & Reload
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const AdminApp = () => {
   const [adminUser, setAdminUser] = useState(() => {
@@ -15,6 +87,7 @@ const AdminApp = () => {
   });
 
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('daan_admin_token');
@@ -81,24 +154,28 @@ const AdminApp = () => {
   }
 
   if (!adminUser) {
-    return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <AdminErrorBoundary>
+        <AdminLogin onLoginSuccess={handleLoginSuccess} />
+      </AdminErrorBoundary>
+    );
   }
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
-    <div className="daan-admin-portal-root">
-      <Navbar 
-        user={adminUser} 
-        onLogout={handleLogout} 
-        onToggleSidebar={() => setSidebarOpen(prev => !prev)}
-        sidebarOpen={sidebarOpen}
-      />
-      <Admin 
-        sidebarOpen={sidebarOpen} 
-        onCloseSidebar={() => setSidebarOpen(false)} 
-      />
-    </div>
+    <AdminErrorBoundary>
+      <div className="daan-admin-portal-root">
+        <Navbar 
+          user={adminUser} 
+          onLogout={handleLogout} 
+          onToggleSidebar={() => setSidebarOpen(prev => !prev)}
+          sidebarOpen={sidebarOpen}
+        />
+        <Admin 
+          sidebarOpen={sidebarOpen} 
+          onCloseSidebar={() => setSidebarOpen(false)} 
+        />
+      </div>
+    </AdminErrorBoundary>
   );
 };
 

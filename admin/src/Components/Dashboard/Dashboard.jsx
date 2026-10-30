@@ -1,179 +1,126 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { API_URL } from '../../config';
-import { loadCatalogProducts } from '../../defaultCatalog';
-import { 
-  DollarSign, 
-  ShoppingBag, 
-  Package, 
-  Layers, 
-  Clock, 
-  Plus, 
-  Ticket, 
-  Image as ImageIcon, 
-  ArrowRight,
-  TrendingUp,
-  AlertCircle
-} from 'lucide-react';
+import { loadCatalogProducts, fetchCloudProducts, fetchCloudOrders, fetchCloudCategories, fetchCloudVouchers } from '../../defaultCatalog';
 
 const Dashboard = () => {
+  const location = useLocation();
+  const base = location.pathname.startsWith('/admin') ? '/admin' : '';
   const [products, setProducts] = useState(() => loadCatalogProducts());
   const [orders, setOrders] = useState([]);
   const [categories, setCategories] = useState([]);
   const [vouchers, setVouchers] = useState([]);
-  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchDashboardData = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/data`, {
-        headers: { 'Cache-Control': 'no-cache' }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          if (Array.isArray(data.products)) setProducts(data.products);
-          if (Array.isArray(data.orders)) setOrders(data.orders);
-          if (Array.isArray(data.categories)) setCategories(data.categories);
-          if (Array.isArray(data.vouchers)) setVouchers(data.vouchers);
-          if (data.stats) setStats(data.stats);
-        }
-      }
-    } catch (e) {
-      // Use fallback
-      const localProds = loadCatalogProducts();
-      if (Array.isArray(localProds)) setProducts(localProds);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchDashboardData();
-    const interval = setInterval(fetchDashboardData, 8000);
-    return () => clearInterval(interval);
+    Promise.all([
+      fetchCloudProducts().catch(() => loadCatalogProducts()),
+      fetchCloudOrders().catch(() => []),
+      fetchCloudCategories().catch(() => []),
+      fetchCloudVouchers().catch(() => [])
+    ]).then(([prods, ords, cats, vous]) => {
+      if (Array.isArray(prods)) setProducts(prods);
+      if (Array.isArray(ords)) setOrders(ords);
+      if (Array.isArray(cats)) setCategories(cats);
+      if (Array.isArray(vous)) setVouchers(vous);
+      setLoading(false);
+    });
   }, []);
 
-  const totalRevenue = stats?.totalRevenue ?? orders.reduce((sum, o) => sum + (Number(o.totalAmount || o.total) || 0), 0);
-  const pendingOrders = stats?.pendingOrders ?? orders.filter(o => (o.status || '').toLowerCase().includes('pending')).length;
+  const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+  const pendingOrders = orders.filter(o => (o.status || '').toLowerCase().includes('pending')).length;
+  const totalUnitsSold = orders.reduce((sum, o) => sum + (Number(o.totalUnits) || 0), 0);
 
   return (
     <div className="admin-dashboard-b2b">
       <div className="dashboard-header">
         <div>
-          <h2>Executive Business Analytics</h2>
-          <p>Real-time performance summary and control metrics for DAAN Sports wholesale store.</p>
+          <h2>📊 Executive Business Analytics</h2>
+          <p>Real-time performance summary for DAAN Sports B2B E-Commerce Platform.</p>
         </div>
         <div className="dashboard-status-badge">
-          <span className="pulse-circle"></span>
-          <span>Live Sync Active</span>
+          🟢 Live Sync Active
         </div>
       </div>
 
       {loading ? (
-        <div className="dashboard-loading">
-          <div className="dash-spinner"></div>
-          <p>Compiling live inventory and order metrics...</p>
-        </div>
+        <div className="dashboard-loading">Loading analytics metrics...</div>
       ) : (
         <>
           {/* Key Metric Cards */}
           <div className="dashboard-metrics-grid">
             <div className="metric-card gold border-glow">
-              <div className="metric-icon-wrap gold-wrap">
-                <DollarSign size={24} />
-              </div>
+              <div className="metric-icon">💰</div>
               <div className="metric-content">
-                <span className="metric-label">Total Wholesale Revenue</span>
+                <span className="metric-label">Total B2B Revenue</span>
                 <h3 className="metric-value">${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
                 <span className="metric-sub font-mono">From {orders.length} Wholesale Orders</span>
               </div>
             </div>
 
             <div className="metric-card blue">
-              <div className="metric-icon-wrap blue-wrap">
-                <ShoppingBag size={24} />
-              </div>
+              <div className="metric-icon">🚚</div>
               <div className="metric-content">
-                <span className="metric-label">Total Customer Orders</span>
+                <span className="metric-label">Total Orders</span>
                 <h3 className="metric-value">{orders.length}</h3>
-                <span className="metric-sub font-mono">{pendingOrders} Pending Fulfillment</span>
+                <span className="metric-sub font-mono">{pendingOrders} Pending Processing</span>
               </div>
             </div>
 
             <div className="metric-card green">
-              <div className="metric-icon-wrap green-wrap">
-                <Package size={24} />
-              </div>
+              <div className="metric-icon">📦</div>
               <div className="metric-content">
-                <span className="metric-label">Active Catalog Products</span>
+                <span className="metric-label">Active Catalog</span>
                 <h3 className="metric-value">{products.length}</h3>
                 <span className="metric-sub font-mono">Across {categories.length} Categories</span>
               </div>
             </div>
 
             <div className="metric-card purple">
-              <div className="metric-icon-wrap purple-wrap">
-                <Layers size={24} />
-              </div>
+              <div className="metric-icon">👕</div>
               <div className="metric-content">
-                <span className="metric-label">Active Categories</span>
-                <h3 className="metric-value">{categories.length}</h3>
-                <span className="metric-sub font-mono">{vouchers.length} Promo Codes Active</span>
+                <span className="metric-label">Total Volume Sold</span>
+                <h3 className="metric-value">{totalUnitsSold.toLocaleString()} Pcs</h3>
+                <span className="metric-sub font-mono">{vouchers.length} Active Vouchers</span>
               </div>
             </div>
           </div>
 
           {/* Quick Management Shortcuts */}
           <div className="dashboard-shortcuts-section">
-            <div className="shortcuts-title-row">
-              <TrendingUp size={18} className="text-blue-400" />
-              <h3>Direct Store Controls</h3>
-            </div>
+            <h3>⚡ Quick Management Shortcuts</h3>
             <div className="shortcuts-grid">
-              <Link to="/orders" className="shortcut-card">
-                <div className="shortcut-icon-circle blue-circle">
-                  <ShoppingBag size={20} />
-                </div>
-                <div className="shortcut-info">
+              <Link to={`${base}/orders`} className="shortcut-card">
+                <span className="shortcut-icon">🚚</span>
+                <div>
                   <h4>Manage Orders ({pendingOrders} Pending)</h4>
-                  <p>Review customer wholesale orders, update status, and track shipments.</p>
+                  <p>Update tracking numbers, review payment methods & order statuses.</p>
                 </div>
-                <ArrowRight size={18} className="shortcut-arrow" />
               </Link>
 
-              <Link to="/add-product" className="shortcut-card">
-                <div className="shortcut-icon-circle green-circle">
-                  <Plus size={20} />
-                </div>
-                <div className="shortcut-info">
+              <Link to={`${base}/add-product`} className="shortcut-card">
+                <span className="shortcut-icon">➕</span>
+                <div>
                   <h4>Add New Product</h4>
-                  <p>Publish custom sportswear, configure MOQ, GSM textile specs & images.</p>
+                  <p>Insert sportswear, set MOQ, GSM weight, images & wholesale pricing.</p>
                 </div>
-                <ArrowRight size={18} className="shortcut-arrow" />
               </Link>
 
-              <Link to="/banners" className="shortcut-card">
-                <div className="shortcut-icon-circle amber-circle">
-                  <ImageIcon size={20} />
-                </div>
-                <div className="shortcut-info">
-                  <h4>Promotional Posters & Bento</h4>
-                  <p>Update top bento grid tiles, promotional CTA banners & discounts.</p>
-                </div>
-                <ArrowRight size={18} className="shortcut-arrow" />
-              </Link>
-
-              <Link to="/vouchers" className="shortcut-card">
-                <div className="shortcut-icon-circle purple-circle">
-                  <Ticket size={20} />
-                </div>
-                <div className="shortcut-info">
+              <Link to={`${base}/vouchers`} className="shortcut-card">
+                <span className="shortcut-icon">🎫</span>
+                <div>
                   <h4>Promo Vouchers ({vouchers.length} Active)</h4>
-                  <p>Configure percentage & fixed discount voucher codes for buyers.</p>
+                  <p>Create discount codes or clear all vouchers for payment checkout.</p>
                 </div>
-                <ArrowRight size={18} className="shortcut-arrow" />
+              </Link>
+
+              <Link to={`${base}/categories`} className="shortcut-card">
+                <span className="shortcut-icon">🏷️</span>
+                <div>
+                  <h4>Categories & Banners</h4>
+                  <p>Add subcategories, dynamic stretched banners & collection descriptions.</p>
+                </div>
               </Link>
             </div>
           </div>
@@ -181,21 +128,12 @@ const Dashboard = () => {
           {/* Recent Orders Overview Table */}
           <div className="dashboard-recent-orders">
             <div className="section-title flex-between">
-              <div className="orders-header-title">
-                <Clock size={18} className="text-emerald-400" />
-                <h3>Recent Wholesale Orders</h3>
-              </div>
-              <Link to="/orders" className="view-all-link">
-                <span>View All Orders</span>
-                <ArrowRight size={14} />
-              </Link>
+              <h3>📦 Recent Customer Orders</h3>
+              <Link to={`${base}/orders`} className="view-all-link">View All Orders ➔</Link>
             </div>
 
             {orders.length === 0 ? (
-              <div className="empty-state-box">
-                <AlertCircle size={20} className="text-slate-400 mb-2" />
-                <p>No orders placed yet. Orders placed on the storefront will appear here live.</p>
-              </div>
+              <div className="empty-state-box">No orders placed yet. Orders will appear here automatically.</div>
             ) : (
               <div className="orders-mini-table">
                 <table>
@@ -217,12 +155,12 @@ const Dashboard = () => {
                           <strong>{o.customerName || "B2B Buyer"}</strong>
                           <span className="block-sub">{o.userEmail}</span>
                         </td>
-                        <td>{o.totalUnits || (o.items ? o.items.length : 1)} Pcs</td>
-                        <td className="font-bold">${Number(o.totalAmount || o.total || 0).toFixed(2)}</td>
+                        <td>{o.totalUnits} Pcs</td>
+                        <td className="font-bold">${Number(o.totalAmount).toFixed(2)}</td>
                         <td>{o.paymentMethod || "Wire Transfer"}</td>
                         <td>
-                          <span className={`status-tag ${String(o.status || 'Pending').toLowerCase().replace(/\s/g, '-')}`}>
-                            {o.status || "Pending"}
+                          <span className={`status-tag ${o.status?.toLowerCase().replace(/\s/g, '-')}`}>
+                            {o.status || "Pending Review"}
                           </span>
                         </td>
                       </tr>

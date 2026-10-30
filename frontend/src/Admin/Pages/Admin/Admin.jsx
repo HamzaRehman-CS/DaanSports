@@ -17,15 +17,35 @@ const Admin = ({ sidebarOpen, onCloseSidebar }) => {
       <Sidebar isOpen={sidebarOpen} onClose={onCloseSidebar} />
       <main className="admin-main-container">
         <Routes>
-          <Route path='/' element={<Dashboard/>}/>
-          <Route path='/dashboard' element={<Dashboard/>}/>
-          <Route path='/add-product' element={<AddProduct/>}/>
-          <Route path='/list-product' element={<ProductList/>}/>
-          <Route path='/categories' element={<CategoryManager/>}/>
-          <Route path='/banners' element={<BannerManager/>}/>
-          <Route path='/orders' element={<OrderManager/>}/>
-          <Route path='/vouchers' element={<VoucherManager/>}/>
-          <Route path='/cms' element={<SiteManager/>}/>
+          {/* Dashboard & Metrics */}
+          <Route path='/' element={<Dashboard />} />
+          <Route path='/dashboard' element={<Dashboard />} />
+          <Route path='/admin' element={<Dashboard />} />
+          <Route path='/admin/' element={<Dashboard />} />
+          <Route path='/admin/dashboard' element={<Dashboard />} />
+
+          {/* Wholesale Products */}
+          <Route path='/list-product' element={<ProductList />} />
+          <Route path='/admin/list-product' element={<ProductList />} />
+          <Route path='/add-product' element={<AddProduct />} />
+          <Route path='/admin/add-product' element={<AddProduct />} />
+
+          {/* Categories & Dynamic Banners */}
+          <Route path='/categories' element={<CategoryManager />} />
+          <Route path='/admin/categories' element={<CategoryManager />} />
+          <Route path='/banners' element={<BannerManager />} />
+          <Route path='/admin/banners' element={<BannerManager />} />
+
+          {/* Orders, Vouchers & CMS */}
+          <Route path='/orders' element={<OrderManager />} />
+          <Route path='/admin/orders' element={<OrderManager />} />
+          <Route path='/vouchers' element={<VoucherManager />} />
+          <Route path='/admin/vouchers' element={<VoucherManager />} />
+          <Route path='/cms' element={<SiteManager />} />
+          <Route path='/admin/cms' element={<SiteManager />} />
+
+          {/* Catch-all fallback to Dashboard */}
+          <Route path='*' element={<Dashboard />} />
         </Routes>
       </main>
     </div>

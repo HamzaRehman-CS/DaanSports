@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './ProductList.css';
 import cross_icon from '../../assets/cross_icon.png';
 import { API_URL } from '../../config';
-import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudProducts, fetchCloudCategories, updateCloudProduct, deleteCloudProduct, uploadCloudImage, subscribeToGlobalSync } from '../../defaultCatalog';
+import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudProducts, fetchCloudCategories, addCloudProduct, updateCloudProduct, deleteCloudProduct, uploadCloudImage, subscribeToGlobalSync } from '../../defaultCatalog';
 
 const ProductList = () => {
   const [allProducts, setAllProducts] = useState(() => loadCatalogProducts());
@@ -15,6 +15,12 @@ const ProductList = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [editFormData, setEditFormData] = useState({});
 
+  // Deleted product holding state for Undo
+  const [deletedProductRecord, setDeletedProductRecord] = useState(null);
+  const [undoCountdown, setUndoCountdown] = useState(0);
+  const undoTimerRef = useRef(null);
+  const deletedIdsRef = useRef(new Set());
+
   const fetchAllProducts = async () => {
     try {
       const [prods, cats] = await Promise.all([
@@ -22,14 +28,18 @@ const ProductList = () => {
         fetchCloudCategories()
       ]);
       if (Array.isArray(prods)) {
-        setAllProducts(prods);
+        const cleanProds = prods.filter(p => !deletedIdsRef.current.has(Number(p.id)));
+        setAllProducts(cleanProds);
       }
       if (Array.isArray(cats)) {
         setCategories(cats);
       }
     } catch (err) {
       const stored = loadCatalogProducts();
-      if (stored) setAllProducts(stored);
+      if (stored) {
+        const cleanStored = stored.filter(p => !deletedIdsRef.current.has(Number(p.id)));
+        setAllProducts(cleanStored);
+      }
     }
   };
 
@@ -38,7 +48,7 @@ const ProductList = () => {
 
     const unsubscribe = subscribeToGlobalSync((type, payload) => {
       if (type === 'PRODUCTS_UPDATED' && Array.isArray(payload)) {
-        setAllProducts(payload);
+        setAllProducts(payload.filter(p => !deletedIdsRef.current.has(Number(p.id))));
       } else if (type === 'CATEGORIES_UPDATED' && Array.isArray(payload)) {
         setCategories(payload);
       }
@@ -51,17 +61,64 @@ const ProductList = () => {
     return () => {
       unsubscribe();
       clearInterval(interval);
+      if (undoTimerRef.current) clearInterval(undoTimerRef.current);
       window.removeEventListener('focus', handleFocus);
     };
   }, []);
 
   const removeProduct = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to remove "${name}" from wholesale inventory?`)) {
-      return;
-    }
-    const updated = await deleteCloudProduct(id);
+    const productToDelete = allProducts.find(p => Number(p.id) === Number(id));
+    if (!productToDelete) return;
+
+    // Track ID so auto-polling never flickers it back onto the screen
+    deletedIdsRef.current.add(Number(id));
+
+    // Clear previous undo timer if any
+    if (undoTimerRef.current) clearInterval(undoTimerRef.current);
+
+    // Save for Undo with 15 second countdown
+    setDeletedProductRecord(productToDelete);
+    setUndoCountdown(15);
+
+    // Optimistically and authoritatively remove from local list & broadcast immediately
+    setAllProducts(prev => prev.filter(p => Number(p.id) !== Number(id)));
+
+    // Execute backend & Neon DB deletion immediately
+    deleteCloudProduct(id).catch(err => console.error("Cloud delete error:", err));
+
+    // Start 15s countdown for undo banner
+    undoTimerRef.current = setInterval(() => {
+      setUndoCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(undoTimerRef.current);
+          setDeletedProductRecord(null);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleUndoDelete = async () => {
+    if (!deletedProductRecord) return;
+    const restored = deletedProductRecord;
+
+    if (undoTimerRef.current) clearInterval(undoTimerRef.current);
+    setDeletedProductRecord(null);
+    setUndoCountdown(0);
+
+    // Un-track the deleted ID
+    deletedIdsRef.current.delete(Number(restored.id));
+
+    // Authoritatively re-save to Backend & Neon DB
+    const updated = await addCloudProduct(restored);
     setAllProducts(updated);
-    alert(`Product "${name}" removed successfully from Cloud Database!`);
+  };
+
+  const handleDismissUndo = () => {
+    if (undoTimerRef.current) clearInterval(undoTimerRef.current);
+    setDeletedProductRecord(null);
+    setUndoCountdown(0);
   };
 
   const openEditModal = (product) => {
@@ -423,6 +480,71 @@ const ProductList = () => {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Floating Undo Delete Banner */}
+      {deletedProductRecord && (
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          backgroundColor: '#09090b',
+          border: '1.5px solid #22c55e',
+          borderRadius: '12px',
+          padding: '14px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+          boxShadow: '0 12px 36px rgba(0,0,0,0.7)',
+          zIndex: 9999,
+          color: '#ffffff',
+          animation: 'fadeInUp 0.3s ease-out'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '20px' }}>🗑️</span>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 600 }}>
+                Product <em>"{deletedProductRecord.name}"</em> deleted.
+              </div>
+              <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                Permanent removal in {undoCountdown}s unless undone.
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={handleUndoDelete}
+            style={{
+              backgroundColor: '#16a34a',
+              color: '#ffffff',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 8px rgba(22, 163, 74, 0.4)'
+            }}
+          >
+            ↩️ Undo Delete
+          </button>
+          <button
+            onClick={handleDismissUndo}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#94a3b8',
+              fontSize: '16px',
+              cursor: 'pointer',
+              padding: '4px'
+            }}
+            title="Dismiss"
+          >
+            ✕
+          </button>
         </div>
       )}
 

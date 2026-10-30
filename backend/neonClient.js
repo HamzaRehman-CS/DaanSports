@@ -1,7 +1,8 @@
 require('dotenv').config();
 const { neon } = require('@neondatabase/serverless');
 
-const connectionString = process.env.DATABASE_URL || process.env.DATABASE_URL_UNPOOLED;
+const NEON_DEFAULT_URL = "postgresql://neondb_owner:npg_bRvjihf6nS0A@ep-little-morning-b3hfnuw7-pooler.c-4.ap-southeast-1.aws.neon.tech/neondb?sslmode=require";
+const connectionString = process.env.DATABASE_URL || process.env.DATABASE_URL_UNPOOLED || NEON_DEFAULT_URL;
 
 let sql = null;
 if (connectionString) {
@@ -38,6 +39,11 @@ const getNeonProducts = async () => {
       new_price: Number(r.new_price || 0),
       old_price: Number(r.old_price || 0),
       moq: Number(r.moq || 50),
+      stock: Number(r.stock || 1000),
+      material: r.material || '',
+      gsm: r.gsm || '',
+      stitching: r.stitching || '',
+      leadTime: r.lead_time || r.leadTime || '',
       colors: Array.isArray(r.colors) ? r.colors : (r.colors ? (typeof r.colors === 'string' && r.colors.startsWith('[') ? JSON.parse(r.colors) : [r.colors]) : []),
       sizes: Array.isArray(r.sizes) ? r.sizes : (r.sizes ? (typeof r.sizes === 'string' && r.sizes.startsWith('[') ? JSON.parse(r.sizes) : [r.sizes]) : []),
       images: Array.isArray(r.images) ? r.images : (r.images ? (typeof r.images === 'string' && r.images.startsWith('[') ? JSON.parse(r.images) : [r.images]) : [])
@@ -56,6 +62,11 @@ const saveNeonProduct = async (p) => {
     const old_price = Number(p.old_price || 0);
     const moq = Number(p.moq || 50);
     const description = String(p.description || '');
+    const material = String(p.material || '');
+    const gsm = String(p.gsm || '');
+    const stitching = String(p.stitching || '');
+    const lead_time = String(p.leadTime || p.lead_time || '');
+    const stock = Number(p.stock || 1000);
     const colors = JSON.stringify(Array.isArray(p.colors) ? p.colors : []);
     const sizes = JSON.stringify(Array.isArray(p.sizes) ? p.sizes : []);
     const materials = JSON.stringify(Array.isArray(p.materials) ? p.materials : (p.material ? [p.material] : []));
@@ -64,9 +75,9 @@ const saveNeonProduct = async (p) => {
 
     await db`
       INSERT INTO products (
-        id, name, category, image, images, new_price, old_price, moq, description, colors, sizes, materials, customization, available
+        id, name, category, image, images, new_price, old_price, moq, description, material, gsm, stitching, lead_time, stock, colors, sizes, materials, customization, available
       ) VALUES (
-        ${id}, ${name}, ${category}, ${image}, ${images}::jsonb, ${new_price}, ${old_price}, ${moq}, ${description}, ${colors}::jsonb, ${sizes}::jsonb, ${materials}::jsonb, ${customization}::jsonb, ${available}
+        ${id}, ${name}, ${category}, ${image}, ${images}::jsonb, ${new_price}, ${old_price}, ${moq}, ${description}, ${material}, ${gsm}, ${stitching}, ${lead_time}, ${stock}, ${colors}::jsonb, ${sizes}::jsonb, ${materials}::jsonb, ${customization}::jsonb, ${available}
       )
       ON CONFLICT (id) DO UPDATE SET
         name = EXCLUDED.name,
@@ -77,6 +88,11 @@ const saveNeonProduct = async (p) => {
         old_price = EXCLUDED.old_price,
         moq = EXCLUDED.moq,
         description = EXCLUDED.description,
+        material = EXCLUDED.material,
+        gsm = EXCLUDED.gsm,
+        stitching = EXCLUDED.stitching,
+        lead_time = EXCLUDED.lead_time,
+        stock = EXCLUDED.stock,
         colors = EXCLUDED.colors,
         sizes = EXCLUDED.sizes,
         materials = EXCLUDED.materials,

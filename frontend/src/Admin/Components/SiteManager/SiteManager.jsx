@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './SiteManager.css';
 import { API_URL } from '../../config';
 import { loadCms, saveCms, fetchCloudCms, uploadCloudImage } from '../../defaultCatalog';
+import { Toast, useToast } from '../Toast/Toast';
 
 const SiteManager = () => {
   const [cms, setCms] = useState(() => loadCms());
@@ -9,6 +10,7 @@ const SiteManager = () => {
   const [saving, setSaving] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState(null);
   const [saveMessage, setSaveMessage] = useState(null);
+  const { toast, showToast, hideToast } = useToast();
 
   const fetchCms = async () => {
     try {
@@ -42,10 +44,9 @@ const SiteManager = () => {
     try {
       const publicUrl = await uploadCloudImage(file);
       handleSlideChange(index, 'bgImage', publicUrl);
-      setSaveMessage(`📷 Slide ${index + 1} background image uploaded to Supabase Cloud! Remember to click "Save & Publish".`);
-      setTimeout(() => setSaveMessage(null), 4000);
+      showToast(`Slide ${index + 1} background updated! Click "Save & Publish" to go live.`, 'success');
     } catch (err) {
-      alert("Error uploading image: " + err.message);
+      showToast("Error uploading image: " + err.message, 'error');
     } finally {
       setUploadingIndex(null);
     }
@@ -68,16 +69,18 @@ const SiteManager = () => {
       bgImage: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=85&w=2000&auto=format&fit=crop"
     };
     setCms({ ...cms, heroSlides: [...(cms.heroSlides || []), newSlide] });
+    showToast("New hero slide added to layout", "info");
   };
 
   const handleDeleteSlide = (index) => {
     if (cms.heroSlides.length <= 1) {
-      alert("You must keep at least 1 hero banner slide.");
+      showToast("You must keep at least 1 hero banner slide.", "error");
       return;
     }
     if (!window.confirm(`Delete Slide #${index + 1}?`)) return;
     const updated = cms.heroSlides.filter((_, i) => i !== index);
     setCms({ ...cms, heroSlides: updated });
+    showToast(`Slide #${index + 1} deleted`, "info");
   };
 
   const handleMoveSlide = (index, direction) => {
@@ -94,7 +97,7 @@ const SiteManager = () => {
     setSaving(true);
     setSaveMessage(null);
 
-    // 1. Save directly to Supabase Cloud & broadcast to website immediately
+    // 1. Save directly to authoritative backend & broadcast to website immediately
     await saveCms(cms);
 
     // 2. Sync to Backend API
@@ -105,18 +108,16 @@ const SiteManager = () => {
         body: JSON.stringify(cms)
       });
     } catch (err) {
-      console.warn("Backend sync notice (saved locally & broadcast live):", err.message);
+      console.warn("Backend sync notice:", err.message);
     }
 
-    setSaveMessage("🎉 Storefront Hero Slider & Announcement Bar Updated & Synced Live!");
-    setTimeout(() => setSaveMessage(null), 5000);
+    showToast("🎉 Storefront Hero Slider & Announcement Bar Updated & Synced Live!", "success");
     setSaving(false);
   };
 
   return (
     <div className="site-manager-b2b">
-      
-      {/* Top Header */}
+      <Toast toast={toast} onClose={hideToast} />
       <div className="site-manager-header">
         <div>
           <h2>Website CMS & Hero Slider Manager</h2>

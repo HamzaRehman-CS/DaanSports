@@ -265,6 +265,7 @@ export const sanitizeProductForSupabase = (p) => {
   const imagesArr = Array.isArray(p.images) && p.images.length > 0 ? p.images : [primaryImg];
 
   return {
+    ...p,
     id: Number(p.id),
     name: String(p.name || 'Apparel Design'),
     category: String(p.category || 'Tracksuits'),
@@ -272,6 +273,12 @@ export const sanitizeProductForSupabase = (p) => {
     old_price: Number(p.old_price || (Number(p.new_price || 0) * 1.3)),
     moq: Number(p.moq || 50),
     description: String(p.description || ''),
+    material: String(p.material || ''),
+    gsm: String(p.gsm || ''),
+    stitching: String(p.stitching || ''),
+    customization: String(p.customization || ''),
+    leadTime: String(p.leadTime || ''),
+    stock: Number(p.stock || 1000),
     colors: colorsArr,
     sizes: sizesArr,
     image: primaryImg,

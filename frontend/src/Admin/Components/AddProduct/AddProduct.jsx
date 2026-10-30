@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './AddProduct.css';
 import upload_area from '../../assets/upload_area.svg';
 import { API_URL } from '../../config';
 import { loadCatalogProducts, saveCatalogProducts, loadCategories, saveCategories, fetchCloudCategories, addCloudProduct, uploadCloudImage } from '../../defaultCatalog';
 
 const AddProduct = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const base = location.pathname.startsWith('/admin') ? '/admin' : '';
+  const [submitting, setSubmitting] = useState(false);
+
   const [primaryImage, setPrimaryImage] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
   const [categories, setCategories] = useState(() => loadCategories());
@@ -52,11 +58,13 @@ const AddProduct = () => {
   };
 
   const Add_Product = async () => {
+    if (submitting) return;
     if (!productDetails.name || !productDetails.new_price) {
       alert("Please fill in the product title and bulk unit price.");
       return;
     }
 
+    setSubmitting(true);
     try {
       let primaryUrl = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80";
       
@@ -79,7 +87,7 @@ const AddProduct = () => {
 
       const newProductObj = {
         id: newId,
-        name: productDetails.name,
+        name: productDetails.name.trim(),
         category: productDetails.category,
         old_price: Number(productDetails.old_price) || Number(productDetails.new_price) * 1.3,
         new_price: Number(productDetails.new_price),
@@ -99,24 +107,17 @@ const AddProduct = () => {
         date: new Date().toISOString()
       };
 
-      // 1. Save locally and to Supabase Cloud Database
+      // Authoritative Backend save + broadcast across tabs
       await addCloudProduct(newProductObj);
 
-      // 2. Sync to Backend API if present
-      try {
-        await fetch(`${API_URL}/add-product`, {
-          method: 'POST',
-          headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-          body: JSON.stringify(newProductObj)
-        });
-      } catch (err) {}
-
-      alert("🎉 DAAN Sports Product Added Successfully & Synced to Cloud Database!");
-      window.location.replace('/list-product');
+      alert(`🎉 Product "${newProductObj.name}" added and synced live to Storefront & Cloud Database!`);
+      navigate(`${base}/list-product`);
 
     } catch (err) {
       console.error(err);
       alert("Error adding product: " + err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -303,8 +304,8 @@ const AddProduct = () => {
           </div>
         </div>
 
-        <button onClick={Add_Product} className='add-product-submit-btn'>
-          Publish Wholesale Product ➔
+        <button onClick={Add_Product} className='add-product-submit-btn' disabled={submitting}>
+          {submitting ? 'Publishing to Cloud Database...' : 'Publish Wholesale Product ➔'}
         </button>
       </div>
     </div>

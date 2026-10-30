@@ -289,17 +289,12 @@ export const sanitizeProductForSupabase = (p) => {
 };
 
 // ----------------------------------------------------
-// DIRECT HIGH-SPEED CLOUD IMAGE UPLOADER (SUPABASE CDN)
+// DIRECT HIGH-SPEED IMAGE FILE UPLOADER (LOCAL FILE STORAGE & CDN)
 // ----------------------------------------------------
 export const uploadCloudImage = async (file) => {
   if (!file) throw new Error('No image file selected for upload.');
 
-  const nameParts = (file.name || 'image.png').split('.');
-  const ext = nameParts.length > 1 ? nameParts.pop().toLowerCase().replace(/[^a-z0-9]/g, '') : 'png';
-  const cleanFilename = `upload_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext || 'png'}`;
-  const currentKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_KEY) || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
-
-  // 1. Priority 1: Backend Server Proxy (/upload) -> Uploads server-side to Supabase 'images' bucket
+  // 1. Priority 1: Backend Server (/upload)
   try {
     const form = new FormData();
     form.append('product', file);
@@ -310,9 +305,9 @@ export const uploadCloudImage = async (file) => {
     });
     if (res.ok) {
       const data = await res.json();
-      if (data && data.success && (data.image_url || data.url)) {
+      if (data && (data.success || data.image_url || data.url)) {
         const cdnUrl = data.image_url || data.url;
-        console.log('⚡ Image successfully uploaded via Backend Proxy:', cdnUrl);
+        console.log('⚡ Image successfully uploaded via Backend:', cdnUrl);
         return cdnUrl;
       }
     }
@@ -320,28 +315,33 @@ export const uploadCloudImage = async (file) => {
     console.warn('Backend proxy upload attempt notice:', backendErr.message);
   }
 
-  // 2. Priority 2: Direct browser REST upload to Supabase Storage bucket 'images'
+  // 2. Priority 2: Direct browser upload to high-speed free CDN (Catbox)
   try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/images/${cleanFilename}`, {
+    const form = new FormData();
+    form.append('reqtype', 'fileupload');
+    form.append('fileToUpload', file, file.name || 'image.png');
+    const cdnRes = await fetch('https://catbox.moe/user/api.php', {
       method: 'POST',
-      headers: {
-        'apikey': currentKey,
-        'Authorization': `Bearer ${currentKey}`,
-        'Content-Type': file.type || 'image/jpeg',
-        'x-upsert': 'true'
-      },
-      body: file
+      body: form
     });
-    if (res.ok) {
-      const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/images/${cleanFilename}`;
-      console.log('⚡ Image successfully uploaded via Direct Supabase REST:', publicUrl);
-      return publicUrl;
+    if (cdnRes.ok) {
+      const cdnUrl = (await cdnRes.text()).trim();
+      if (cdnUrl.startsWith('http')) {
+        console.log('⚡ Direct CDN upload success:', cdnUrl);
+        return cdnUrl;
+      }
     }
-  } catch (supaErr) {
-    console.warn('Supabase direct upload notice:', supaErr.message);
+  } catch (cdnErr) {
+    console.warn('Direct CDN upload notice:', cdnErr.message);
   }
 
-  throw new Error('Image upload failed. Please verify your network connection and try again.');
+  // 3. Priority 3: FileReader base64 Data URI fallback (never fails in any browser)
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('Failed to read image file.'));
+    reader.readAsDataURL(file);
+  });
 };
 
 // ----------------------------------------------------

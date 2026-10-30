@@ -1149,66 +1149,51 @@ const handleImageUpload = async (req, res) => {
         const filename = `upload_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext || 'png'}`;
         const mimeType = req.file.mimetype || 'image/jpeg';
 
-        // 1. Priority 1: Supabase Cloud Storage bucket 'images' via initialized client
-        if (supabase) {
-            try {
-                const { data, error } = await supabase.storage
-                    .from('images')
-                    .upload(filename, req.file.buffer, {
-                        contentType: mimeType,
-                        upsert: true
-                    });
-                
-                if (!error && data) {
-                    const { data: pubData } = supabase.storage.from('images').getPublicUrl(filename);
-                    if (pubData && pubData.publicUrl) {
-                        console.log(`⚡ Uploaded to Supabase Cloud Storage: ${pubData.publicUrl}`);
-                        return res.json({ success: 1, image_url: pubData.publicUrl, url: pubData.publicUrl });
-                    }
-                } else if (error) {
-                    console.warn("Supabase Storage Client upload note:", error.message);
-                }
-            } catch (supaErr) {
-                console.warn("Supabase Storage upload exception:", supaErr.message);
-            }
-        }
-
-        // 2. Priority 2: Direct REST upload to Supabase Storage with Service Role Key
-        const supaUrl = process.env.SUPABASE_URL || "https://ldohfbqsmjuqvtbnxmbk.supabase.co";
-        const supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || ['sb', 'secret', 'ODwdJhjt6lMG544cSXlZ7Q', 'gtLf4VWC'].join('_');
+        // 1. Localhost File Storage: Save physical file to upload/images
         try {
-            const restRes = await fetch(`${supaUrl}/storage/v1/object/images/${filename}`, {
-                method: 'POST',
-                headers: {
-                    'apikey': supaKey,
-                    'Authorization': `Bearer ${supaKey}`,
-                    'Content-Type': mimeType,
-                    'x-upsert': 'true'
-                },
-                body: req.file.buffer
-            });
-            if (restRes.ok) {
-                const cdnUrl = `${supaUrl}/storage/v1/object/public/images/${filename}`;
-                console.log(`⚡ Uploaded via Supabase REST: ${cdnUrl}`);
-                return res.json({ success: 1, image_url: cdnUrl, url: cdnUrl });
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
             }
-        } catch (restErr) {
-            console.warn("Supabase REST upload note:", restErr.message);
-        }
+            const localFilePath = path.join(uploadDir, filename);
+            fs.writeFileSync(localFilePath, req.file.buffer);
 
-        // 3. Priority 3: If running locally without Supabase network, save to local static directory
-        if (!process.env.VERCEL) {
-            try {
-                const localFilePath = path.join(uploadDir, filename);
-                fs.writeFileSync(localFilePath, req.file.buffer);
+            if (!process.env.VERCEL) {
                 const host = req.get('host') || `localhost:${port}`;
                 const protocol = req.protocol || 'http';
                 const localUrl = `${protocol}://${host}/images/${filename}`;
+                console.log(`⚡ Physical image file saved: ${localUrl}`);
                 return res.json({ success: 1, image_url: localUrl, url: localUrl });
-            } catch (diskErr) {}
+            }
+        } catch (localErr) {
+            console.warn("Local storage write warning:", localErr.message);
         }
 
-        return res.status(500).json({ success: 0, error: "Cloud storage upload failed." });
+        // 2. Cloud Serverless Storage: Upload to high-speed CDN (Catbox)
+        try {
+            const form = new FormData();
+            form.append('reqtype', 'fileupload');
+            const blob = new Blob([req.file.buffer], { type: mimeType });
+            form.append('fileToUpload', blob, filename);
+            const cloudRes = await fetch('https://catbox.moe/user/api.php', {
+                method: 'POST',
+                body: form
+            });
+            if (cloudRes.ok) {
+                const cdnUrl = (await cloudRes.text()).trim();
+                if (cdnUrl.startsWith('http')) {
+                    console.log(`⚡ Cloud image file uploaded to CDN: ${cdnUrl}`);
+                    return res.json({ success: 1, image_url: cdnUrl, url: cdnUrl });
+                }
+            }
+        } catch (cdnErr) {
+            console.warn("CDN upload notice:", cdnErr.message);
+        }
+
+        // 3. Fallback: Compact Data URI
+        const base64 = req.file.buffer.toString('base64');
+        const dataUrl = `data:${mimeType};base64,${base64}`;
+        return res.json({ success: 1, image_url: dataUrl, url: dataUrl });
+
     } catch (err) {
         console.error("Upload Route Error:", err);
         res.status(500).json({ success: 0, error: err.message });

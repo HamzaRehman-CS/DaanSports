@@ -430,16 +430,25 @@ const ProductList = () => {
               </div>
 
               <div>
-                <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>Product Image</label>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <label style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', color: '#a1a1aa' }}>Product Image (File or URL)</label>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '4px' }}>
+                  {editFormData.image && (
+                    <img
+                      src={editFormData.image}
+                      alt="Current"
+                      style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #334155' }}
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  )}
                   <input
                     type="text"
+                    placeholder="https://... or click upload"
                     value={editFormData.image}
                     onChange={(e) => setEditFormData({ ...editFormData, image: e.target.value })}
                     style={{ flex: 1, background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
                   />
                   <label style={{ background: '#27272a', color: '#fff', padding: '8px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                    📷 Upload
+                    📷 Upload File
                     <input
                       type="file"
                       accept="image/*"
@@ -449,7 +458,7 @@ const ProductList = () => {
                         try {
                           const publicUrl = await uploadCloudImage(e.target.files[0]);
                           setEditFormData(prev => ({ ...prev, image: publicUrl }));
-                          alert("📷 Product image uploaded to Supabase Storage!");
+                          alert("📷 Product image file uploaded successfully!");
                         } catch (err) {
                           alert("Upload error: " + err.message);
                         }
@@ -458,8 +467,7 @@ const ProductList = () => {
                   </label>
                 </div>
                 <div style={{ marginTop: '8px', fontSize: '12px', color: '#93c5fd', background: 'rgba(37,99,235,0.18)', border: '1px solid #3b82f6', padding: '8px 12px', borderRadius: '6px', lineHeight: '1.5' }}>
-                  📐 <strong>Recommended Dimensions:</strong> 800 × 800 px (1:1 Square) or 800 × 1000 px (4:5 Crop) | Max 5MB | WebP, JPG, PNG
-                  <div style={{ fontSize: '11px', color: '#60a5fa', marginTop: '2px', fontStyle: 'italic' }}>💡 Tip: High-resolution apparel photo with centered framing.</div>
+                  📐 <strong>File Format:</strong> Images are saved as files/URLs, consuming negligible database storage.
                 </div>
               </div>
 

@@ -11,7 +11,9 @@ const AddProduct = () => {
   const base = location.pathname.startsWith('/admin') ? '/admin' : '';
   const [submitting, setSubmitting] = useState(false);
 
+  const [imageUrl, setImageUrl] = useState("");
   const [primaryImage, setPrimaryImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [galleryImages, setGalleryImages] = useState([]);
   const [categories, setCategories] = useState(() => loadCategories());
   const [colorsInput, setColorsInput] = useState("Black, Navy Blue, Heather Gray, Crimson Red");
@@ -46,8 +48,18 @@ const AddProduct = () => {
 
   const primaryImageHandler = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setPrimaryImage(e.target.files[0]);
+      const file = e.target.files[0];
+      setPrimaryImage(file);
+      setImageUrl("");
+      setImagePreview(URL.createObjectURL(file));
     }
+  };
+
+  const imageUrlHandler = (e) => {
+    const val = e.target.value;
+    setImageUrl(val);
+    setPrimaryImage(null);
+    setImagePreview(val);
   };
 
   const galleryImagesHandler = (e) => {
@@ -66,14 +78,20 @@ const AddProduct = () => {
 
     setSubmitting(true);
     try {
-      let primaryUrl = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80";
-      
+      let finalImageUrl = imageUrl.trim();
+
       if (primaryImage) {
         try {
-          primaryUrl = await uploadCloudImage(primaryImage);
+          finalImageUrl = await uploadCloudImage(primaryImage);
         } catch (e) {
           console.warn("Primary image upload notice:", e);
         }
+      }
+
+      if (!finalImageUrl) {
+        alert("Please upload a product image file or paste an image URL.");
+        setSubmitting(false);
+        return;
       }
 
       const colorsArray = colorsInput
@@ -101,8 +119,8 @@ const AddProduct = () => {
         stock: Number(productDetails.stock) || 1000,
         colors: colorsArray.length > 0 ? colorsArray : ["Black", "Navy Blue"],
         sizes: ["S", "M", "L", "XL", "2XL"],
-        image: primaryUrl,
-        images: [primaryUrl],
+        image: finalImageUrl,
+        images: [finalImageUrl],
         available: true,
         date: new Date().toISOString()
       };
@@ -287,19 +305,61 @@ const AddProduct = () => {
 
         <div className="add-product-images-section">
           <div className="add-product-image-box">
-            <label className="image-label">Main Cover Image (Required) *</label>
-            <label htmlFor="primary-file-input" className="file-preview-box">
-              <img
-                src={primaryImage ? URL.createObjectURL(primaryImage) : upload_area}
-                className='thumbnail-img'
-                alt="Primary Preview"
-              />
-              <span>{primaryImage ? primaryImage.name : "Click to Upload Main Cover"}</span>
+            <label className="image-label" style={{ fontWeight: 700, fontSize: '14px', marginBottom: '8px', display: 'block' }}>
+              Product Cover Image (File Upload or Image URL) *
             </label>
-            <input onChange={primaryImageHandler} type="file" id='primary-file-input' hidden accept="image/*" />
-            <div className="image-spec-guide-badge">
-              📐 <strong>Recommended Dimensions:</strong> 800 × 800 px (1:1 Square) or 800 × 1000 px (4:5 Crop) | Max 5MB | WebP, JPG, PNG
-              <span className="spec-subtip">💡 Tip: Use high-resolution product photography on solid or neutral studio backgrounds.</span>
+
+            {/* Direct Image URL input */}
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                Option 1: Paste Image URL (e.g. Unsplash, supplier photo link, CDN)
+              </label>
+              <input
+                type="text"
+                placeholder="https://images.unsplash.com/... or any image web link"
+                value={imageUrl}
+                onChange={imageUrlHandler}
+                style={{
+                  width: '100%',
+                  background: '#09090b',
+                  border: '1.5px solid rgba(255,255,255,0.2)',
+                  color: '#fff',
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* File Upload & Live Preview Box */}
+            <div>
+              <label style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                Option 2: Or Choose Image File from Device
+              </label>
+              <label htmlFor="primary-file-input" className="file-preview-box" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px', padding: '14px', background: '#09090b', border: '1.5px dashed rgba(255,255,255,0.25)', borderRadius: '10px' }}>
+                <img
+                  src={imagePreview || upload_area}
+                  className='thumbnail-img'
+                  alt="Product Preview"
+                  style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #334155' }}
+                  onError={(e) => { e.target.src = upload_area; }}
+                />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ color: '#38bdf8', fontWeight: 600, fontSize: '13px' }}>
+                    {primaryImage ? `📁 ${primaryImage.name}` : (imageUrl ? "🔗 Image Loaded via URL" : "📷 Click here to select image file")}
+                  </span>
+                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                    Images are saved as lightweight files/URLs, consuming negligible database storage.
+                  </span>
+                </div>
+              </label>
+              <input onChange={primaryImageHandler} type="file" id='primary-file-input' hidden accept="image/*" />
+            </div>
+
+            <div className="image-spec-guide-badge" style={{ marginTop: '12px' }}>
+              📐 <strong>Recommended Dimensions:</strong> 800 × 800 px (1:1) or 800 × 1000 px | Max 10MB | WebP, JPG, PNG
             </div>
           </div>
         </div>
